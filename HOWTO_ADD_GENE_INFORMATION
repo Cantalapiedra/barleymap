@@ -8,12 +8,12 @@ Copyright (C)  2013-2014  Carlos P Cantalapiedra.
 # A) Add genes data to genes/ directory.
 
 # The file must have "_genes.tab" extension and follow the pattern:
-MAP_NAME_genes.tab
+MAP_ID_genes.tab
 
-# where MAP_NAME is the name used in HOWTO_ADD_MAPS
+# where MAP_ID is the name used in HOWTO_ADD_MAPS
 
 # The format of the file is tab separated, with the fields:
-Gene_ID HC/LC   MAP_NAME    chromosome  cM_position bp_position
+Gene_ID HC/LC   MAP_ID    chromosome  cM_position bp_position
 
 # HC/LC (High or Low Confidence) can be used if the gene confidence is known.
 # bp_position should be filled with "-" if the map has no bp_position
