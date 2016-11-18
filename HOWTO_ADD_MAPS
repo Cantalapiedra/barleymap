@@ -1,0 +1,55 @@
+HOWTO_ADD_MAPS is part of Barleymap.
+Copyright (C)  2013-2014  Carlos P Cantalapiedra.
+(terms of use can be found within the distributed LICENSE file).
+
+# Carlos P Cantalapiedra 20131227 (updated 20140318)
+# HOWTO_ADD_MAPS in Barleymap standalone application
+
+# 1) Create a directory with MAP_NAME under maps/ directory
+# Example:
+maps/newmap
+
+# 2) Add the map data to the new directory.
+# Data must have target identifier and map position in three or four
+# fields (tab separated) depending if the map has centimorgan and/or
+# basepairs information.
+# The format would be:
+# identifier    chromosome    (centimorgan_position)    (basepairs_position)
+#
+# The name of the file must follow the pattern (without extension):
+MAP_NAME.DATABASE_NAME
+
+# where MAP_NAME is the name used in step 1)
+# and DATABASE_NAME the one used in HOWTO_ADD_DATABASES
+
+# Examples of files for 2 maps, one of them with data for 2 databases:
+
+maps/newmap/newmap.newdb
+maps/anothermap/anothermap.newdb
+maps/anothermap/anothermap.anotherdb
+
+# 3) Add a line in conf/maps.conf, with six space-separated fields.
+#       The first field is the name that will be shown for that Map.
+#       The second field is the MAP_NAME used in step 1)
+#       The third field indicates if centimorgan position is available (cm_true)
+#           or not (cm_false) for this map.
+#       The fourth field indicates if basepairs position is available (bp_true)
+#           or not (bp_false) for this map
+#       The fifth field can have "genetic" or "physical" values. The "physical" value
+#           should only be applied for maps with "bp_true". In this case, if "genetic"
+#           the map position shown will be that of the target of the alignment.
+#           If "physical", the map position shown will be the sum of the target of the
+#           alignment plus the local position of the alignment.
+#       The sixth field has a DATABASE_NAME or a comma-separated list of DATABASE_NAMEs
+#           for which data is available for this map.
+
+#       Examples:
+
+My_New_Map newmap cm_false bp_true genetic newdb
+AnotherMap anothermap cm_true bp_false genetic newdb,anotherdb
+PhysicalMap physmap cm_true bp_true physical newdb,anotherdb,thirddb
+
+# 4) If correctly configured, the new maps should be listed under "MAPS" section in "Configured data"
+# when running bmaux_check_config auxiliar script.
+
+##

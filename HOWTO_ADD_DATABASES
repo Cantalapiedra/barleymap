@@ -1,0 +1,89 @@
+HOWTO_ADD_DATABASES is part of Barleymap.
+Copyright (C)  2013-2014  Carlos P Cantalapiedra.
+(terms of use can be found within the distributed LICENSE file).
+
+# Created 20131227 (updated 20140725)
+
+# This document describes how to configure new "databases",
+# either or both for Blast and GMAP, to be used by Barleymap.
+
+# Summary:
+# 1) Creating a Blast database
+# 2) Creating a GMAP database
+# 3) Configuring the database
+
+###############################
+
+# 1) Creating a Blast database
+
+# a) Make sure that the DB will be created under the directory specified in conf/paths.conf
+#       with the key blastn_dbs_path
+#
+#       Example:
+
+cat conf/paths.conf | grep "^blastn_dbs_path"; #output --> blastn_dbs_path barleymap/blastdbs/
+
+# b) Create blast database with makeblastdb from Blast suite
+#       where FASTA_FILE is the input file with sequences
+#       and DATABASE_NAME is desired DB name that will be used
+#       in Barleymap configuration.
+#       NOTE: DATABASE_NAME should have the same value
+#               for blast and gmap databases
+#               if the sequence resource is the same.
+
+cd barleymap/blastdbs/
+makeblastdb -in FASTA_FILE -out DATABASE_NAME -dbtype nucl
+
+#       Example:
+makeblastdb -in sequences.fa -out newdb -dbtype nucl
+
+###############################
+
+# 2) Creating a GMAP database
+
+# 2.1) Creating the database
+
+# a) Make sure that the DB will be created under the directory specified in conf/paths.conf
+#       with the key gmap_dbs_path
+#
+#       Example:
+
+cat conf/paths.conf | grep "^gmap_dbs_path"; #output --> gmap_dbs_path barleymap/gmapdbs/
+
+# b) Create GMAP database with gmap_build from GMAP suite
+#       where FASTA_FILE is the input file with sequences
+#       , DATABASE_NAME is the desired DB name that will be used
+#       in Barleymap configuration
+#       and DATABASE_DIR is the directory configured in gmap_dbs_path.
+#       NOTE: DATABASE_NAME should have the same value
+#               for blast and gmap databases
+#               if the sequence resource is the same.
+
+cd barleymap/gmapdbs/
+gmap_build -d DATABASE_NAME -D DATABASE_DIR FASTA_FILE
+
+#       Example:
+gmap_build -d newdb -D barleymap/gmapdbs/ sequences.fa
+
+################################
+
+# 3) Configuring the database
+
+# a) Add a line in conf/references.conf, with two fields separated by blank space,
+#       where the first field is the name that will be shown for that database
+#       and the second field is the DATABASE_NAME used when created with makeblastdb
+#       (that is, the database identifier)
+
+#       Example:
+My_New_Database newdb
+
+# b) If correctly configured, the new database should be listed under "DATABASES" section in "Configured data"
+# when running bmaux_check_config auxiliar script.
+
+##
+# IMPORTANT: a database can be used as reference for bmaux_align_external, and if configured under
+# conf/references.conf with bmaux_align_fasta. However, to obtain positional information from such
+# database, its sequences (contigs, transcripts, chromosomes, whatever) must have position information
+# associated in the form of a genetic map (see HOWTO_ADD_MAPS for further information and adding
+# positional information to Barleymap).
+##
