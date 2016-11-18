@@ -84,22 +84,18 @@ Copyright (C)  2013-2014  Carlos P Cantalapiedra.
 #   First, read INSTALL file.
 #
 #   After installing Barleymap you should be able to see a conf/ directory under
-#   the main barleymap directory (eg.: barleymap_popseq/conf/).
+#   the main barleymap directory (eg.: barleymap/conf/).
 #   In the conf/ directory, Barleymap has several configuration files.
-#   To be able to run Barleymap with the default datasets and maps
-#   you only need to edit the paths.conf file.
-#   Change the "app_path" value to the current barleymap directory (absolute path)
-#   For example: app_path /home/user_100/apps/barleymap_popseq/
 #
-#   To be able to use the alignment tools (see section "3) Tools") to align
-#   sequences to the sequence databases you will need to follow the steps
-#   described in HOWTO_ADD_DATABASES file.
-#   However, several sample databases are already included so that the user should:
-#   - Update paths.conf file (see above), "blastn_app_path" and "gmap_app_path",
-#     to point to the directory where blastn and gmap binaries reside.
-#   - Create the indexes with either Blast, GMAP or both.
-#     For further information, it can be useful to check the examples and
-#     scripts for the sample files in app_std/db_samples/.
+#   You should first create working files by coping the ".example" files
+#   to files without such suffix (eg.: barleymap/conf/paths.conf).
+#   
+#   Then, you should update "paths.conf" file with paths in your machine
+#   (especially those fields indicated with values in capitals). For example,
+#   change the "app_path" value to the current barleymap directory (absolute path)
+#   For example: app_path /home/current_user/apps/barleymap_popseq/
+#
+#   To configure the other ".conf" files, read section "6) Customization".
 #
 # 3) Tools
 #
