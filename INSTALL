@@ -1,0 +1,23 @@
+INSTALL is part of Barleymap.
+Copyright (C)  2013-2014  Carlos P Cantalapiedra.
+(terms of use can be found within the distributed LICENSE file).
+
+# Carlos P Cantalapiedra 20131227 (updated 20140318)
+# Barleymap standalone, INSTALL
+
+# You should have downloaded a .tar.gz file (eg.: barleymap_popseq.tar.gz)
+# Then you have uncompressed it into a directory, for example:
+
+mkdir apps;
+cd apps;
+tar -zxf barleymap_popseq.tar.gz # It will create a barleymap_popseq directory inside apps/
+
+# Barleymap is mostly written in Python
+# Thus, you must make the barleymap code available to the python path with
+# export PYTHONPATH=$PYTHONPATH:/$app_path/; for example:
+
+export PYTHONPATH=$PYTHONPATH:/apps/barleymap_popseq/
+
+# Then you should read "Configuration" on README file
+# to configure all the resources that barleymap needs
+# to work properly.
