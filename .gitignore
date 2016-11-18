@@ -13,9 +13,3 @@ genes/*
 
 maps/*
 !maps/.gitkeep
-
-src/db_samples/*
-!src/db_samples/.gitkeep
-!src/db_samples/README
-!src/db_samples/fasta_samples.tar.gz
-!src/db_samples/def_paths.conf
