@@ -5,18 +5,23 @@ Copyright (C)  2013-2014  Carlos P Cantalapiedra.
 # Carlos P Cantalapiedra 20131227 (updated 20140318)
 # Barleymap standalone, INSTALL
 
-# You should have downloaded a .tar.gz file (eg.: barleymap_popseq.tar.gz)
+# You should have downloaded a .tar.gz file (eg.: barleymap.tar.gz)
 # Then you have uncompressed it into a directory, for example:
 
 mkdir apps;
 cd apps;
-tar -zxf barleymap_popseq.tar.gz # It will create a barleymap_popseq directory inside apps/
+tar -zxf barleymap.tar.gz # It will create a barleymap directory inside apps/
 
 # Barleymap is mostly written in Python
 # Thus, you must make the barleymap code available to the python path with
 # export PYTHONPATH=$PYTHONPATH:/$app_path/; for example:
 
-export PYTHONPATH=$PYTHONPATH:/apps/barleymap_popseq/
+export PYTHONPATH=$PYTHONPATH:/apps/barleymap/
+
+# Note that to run barleymap you also need the barleymapcore libraries
+# which you should make visible also
+
+export PYTHONPATH=$PYTHONPATH:"barleymapcore_PATH"
 
 # Then you should read "Configuration" on README file
 # to configure all the resources that barleymap needs
