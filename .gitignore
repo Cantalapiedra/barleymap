@@ -10,3 +10,6 @@ datasets/*
 
 genes/*
 !genes/.gitkeep
+
+maps/*
+!maps/.gitkeep
