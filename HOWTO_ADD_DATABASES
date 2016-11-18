@@ -25,14 +25,14 @@ cat conf/paths.conf | grep "^blastn_dbs_path"; #output --> blastn_dbs_path barle
 
 # b) Create blast database with makeblastdb from Blast suite
 #       where FASTA_FILE is the input file with sequences
-#       and DATABASE_NAME is desired DB name that will be used
+#       and DATABASE_ID is desired DB name that will be used
 #       in Barleymap configuration.
-#       NOTE: DATABASE_NAME should have the same value
+#       NOTE: DATABASE_ID should have the same value
 #               for blast and gmap databases
 #               if the sequence resource is the same.
 
 cd barleymap/blastdbs/
-makeblastdb -in FASTA_FILE -out DATABASE_NAME -dbtype nucl
+makeblastdb -in FASTA_FILE -out DATABASE_ID -dbtype nucl
 
 #       Example:
 makeblastdb -in sequences.fa -out newdb -dbtype nucl
@@ -52,15 +52,15 @@ cat conf/paths.conf | grep "^gmap_dbs_path"; #output --> gmap_dbs_path barleymap
 
 # b) Create GMAP database with gmap_build from GMAP suite
 #       where FASTA_FILE is the input file with sequences
-#       , DATABASE_NAME is the desired DB name that will be used
+#       , DATABASE_ID is the desired DB name that will be used
 #       in Barleymap configuration
 #       and DATABASE_DIR is the directory configured in gmap_dbs_path.
-#       NOTE: DATABASE_NAME should have the same value
+#       NOTE: DATABASE_ID should have the same value
 #               for blast and gmap databases
 #               if the sequence resource is the same.
 
 cd barleymap/gmapdbs/
-gmap_build -d DATABASE_NAME -D DATABASE_DIR FASTA_FILE
+gmap_build -d DATABASE_ID -D DATABASE_DIR FASTA_FILE
 
 #       Example:
 gmap_build -d newdb -D barleymap/gmapdbs/ sequences.fa
@@ -69,10 +69,12 @@ gmap_build -d newdb -D barleymap/gmapdbs/ sequences.fa
 
 # 3) Configuring the database
 
-# a) Add a line in conf/references.conf, with two fields separated by blank space,
+# a) Add a line in conf/references.conf, with three fields separated by blank space,
 #       where the first field is the name that will be shown for that database
-#       and the second field is the DATABASE_NAME used when created with makeblastdb
+#       and the second field is the DATABASE_ID used when created with makeblastdb
 #       (that is, the database identifier)
+#	and the third field indicates whether the database is big ("big") or standard ("std").
+#	If the database is "big", gmapl will be run instead of gmap.
 
 #       Example:
 My_New_Database newdb

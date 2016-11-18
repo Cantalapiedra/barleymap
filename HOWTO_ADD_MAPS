@@ -17,10 +17,10 @@ maps/newmap
 # identifier    chromosome    (centimorgan_position)    (basepairs_position)
 #
 # The name of the file must follow the pattern (without extension):
-MAP_ID.DATABASE_NAME
+MAP_ID.DATABASE_ID
 
 # where MAP_ID is the name used in step 1)
-# and DATABASE_NAME the one used in HOWTO_ADD_DATABASES
+# and DATABASE_ID the one used in HOWTO_ADD_DATABASES
 
 # Examples of files for 2 maps, one of them with data for 2 databases:
 
@@ -40,7 +40,7 @@ maps/anothermap/anothermap.anotherdb
 #           the map position shown will be that of the target of the alignment.
 #           If "physical", the map position shown will be the sum of the target of the
 #           alignment plus the local position of the alignment.
-#       The sixth field has a DATABASE_NAME or a comma-separated list of DATABASE_NAMEs
+#       The sixth field has a DATABASE_ID or a comma-separated list of DATABASE_IDs
 #           for which data is available for this map.
 
 #       Examples:
