@@ -3,4 +3,4 @@ annot/*
 
 conf/*
 !conf/.gitkeep
-!conf/.example
+!conf/*.example
