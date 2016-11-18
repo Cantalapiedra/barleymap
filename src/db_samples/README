@@ -1,0 +1,18 @@
+# This README is part of Barleymap.
+# Copyright (C)  2013-2014  Carlos P Cantalapiedra.
+# (terms of use can be found within the distributed LICENSE file).
+
+## These are little samples (50 sequences) from bigger barley databases
+## so that the final user can use them to test the application.
+
+## You should first uncompress the fasta files:
+tar -zxf fasta_samples.tar.gz
+
+## Please execute the commands in blast_dbs.sh and gmap_dbs.sh
+## to create the test databases
+
+## You could use "def_paths.conf" instead of conf/paths.conf
+## to test these databases. Just do something to similar to:
+mv ../../conf/paths.conf ../../conf/paths.conf_old;
+cp def_paths.conf ../../conf/paths.conf;
+
