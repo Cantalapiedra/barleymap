@@ -1,2 +1,6 @@
 annot/*
 !annot/.gitkeep
+
+conf/*
+!conf/.gitkeep
+!conf/.example
