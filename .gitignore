@@ -13,3 +13,12 @@ genes/*
 
 maps/*
 !maps/.gitkeep
+
+tmp_files/*
+!tmp_files/.gitkeep
+
+ipk_fpc_wgs/*
+dist.sh
+dist_web.sh
+tests/*
+tmp_borrar/*
