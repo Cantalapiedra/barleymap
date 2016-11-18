@@ -7,3 +7,6 @@ conf/*
 
 datasets/*
 !datasets/.gitkeep
+
+genes/*
+!genes/.gitkeep
