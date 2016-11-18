@@ -4,6 +4,7 @@ annot/*
 conf/*
 !conf/.gitkeep
 !conf/*.example
+!conf/references*
 
 datasets/*
 !datasets/.gitkeep
