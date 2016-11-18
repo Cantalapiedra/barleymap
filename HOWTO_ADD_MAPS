@@ -5,7 +5,7 @@ Copyright (C)  2013-2014  Carlos P Cantalapiedra.
 # Carlos P Cantalapiedra 20131227 (updated 20140318)
 # HOWTO_ADD_MAPS in Barleymap standalone application
 
-# 1) Create a directory with MAP_NAME under maps/ directory
+# 1) Create a directory with MAP_ID under maps/ directory
 # Example:
 maps/newmap
 
@@ -17,9 +17,9 @@ maps/newmap
 # identifier    chromosome    (centimorgan_position)    (basepairs_position)
 #
 # The name of the file must follow the pattern (without extension):
-MAP_NAME.DATABASE_NAME
+MAP_ID.DATABASE_NAME
 
-# where MAP_NAME is the name used in step 1)
+# where MAP_ID is the name used in step 1)
 # and DATABASE_NAME the one used in HOWTO_ADD_DATABASES
 
 # Examples of files for 2 maps, one of them with data for 2 databases:
@@ -30,7 +30,7 @@ maps/anothermap/anothermap.anotherdb
 
 # 3) Add a line in conf/maps.conf, with six space-separated fields.
 #       The first field is the name that will be shown for that Map.
-#       The second field is the MAP_NAME used in step 1)
+#       The second field is the MAP_ID used in step 1)
 #       The third field indicates if centimorgan position is available (cm_true)
 #           or not (cm_false) for this map.
 #       The fourth field indicates if basepairs position is available (bp_true)
