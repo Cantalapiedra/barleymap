@@ -106,13 +106,6 @@ gmapl_app_path = config_path_dict["gmapl_app_path"]
 blastn_dbs_path = config_path_dict["blastn_dbs_path"]
 gmap_dbs_path = config_path_dict["gmap_dbs_path"]
 
-_print_paths(split_blast_path, blastn_app_path, gmap_app_path, gmapl_app_path, blastn_dbs_path, gmap_dbs_path)
-sys.stderr.write("\n")
-
-# Databases
-databases_conf_file = __app_path+"conf/references.conf"
-(databases_names, databases_ids) = load_data(databases_conf_file, users_list = options.databases_param, verbose = True) # data_utils.load_data
-
 # Query mode
 if options.query_mode:
     query_mode = options.query_mode
@@ -169,6 +162,17 @@ else:
 if options.verbose: verbose_param = True
 else: verbose_param = False
 
+### Print initial data
+###
+if verbose_param:
+    _print_paths(split_blast_path, blastn_app_path, gmap_app_path, gmapl_app_path, blastn_dbs_path, gmap_dbs_path)
+    sys.stderr.write("\n")
+
+# Databases
+databases_conf_file = __app_path+"conf/databases.conf"
+(databases_names, databases_ids) = load_data(databases_conf_file, users_list = options.databases_param,
+                                             verbose = verbose_param) # data_utils.load_data
+
 _print_parameters(query_fasta_path, databases_names, query_mode, \
                   threshold_id, threshold_cov, options.best_score, \
                   n_threads, hierarchical, options.align_info)
@@ -196,7 +200,8 @@ for db_entry in databases_ids:
         
         if align_info:
             sys.stdout.write("#"+"\t".join(["query_id", "subject_id", "identity", "query_coverage", \
-                                            "score", "strand", "local_position", "database", "algorithm"])+"\n")
+                                            "score", "strand", "start_position",
+                                            "end_position", "database", "algorithm"])+"\n")
             for result in db_results:
                 sys.stdout.write("\t".join([str(a) for a in result[:2]]))
                 sys.stdout.write("\t"+str("%0.2f" % float(result[2]))) # cm

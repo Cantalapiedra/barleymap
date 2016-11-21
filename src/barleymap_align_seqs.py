@@ -16,7 +16,7 @@ from optparse import OptionParser
 from output.OutputFacade import OutputFacade
 from barleymapcore.alignment.AlignmentFacade import AlignmentFacade
 from barleymapcore.alignment.Aligners import SELECTION_BEST_SCORE, SELECTION_NONE
-from barleymapcore.MapMarkers import MapMarkers
+from barleymapcore.maps.MapMarkers import MapMarkers
 from barleymapcore.utils.data_utils import read_paths, load_data
 
 DEFAULT_THRES_ID = 98.0
@@ -140,7 +140,7 @@ try:
     (datasets_names, datasets_ids) = load_data(datasets_conf_file, verbose = verbose_param) # data_utils.load_datasets
     
     # Databases
-    databases_conf_file = __app_path+"conf/references.conf"
+    databases_conf_file = __app_path+"conf/databases.conf"
     (databases_names, databases_ids) = load_data(databases_conf_file, users_list = options.databases_param, verbose = verbose_param) # data_utils.load_data
     
     # Genetic maps
