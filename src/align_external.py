@@ -194,8 +194,8 @@ for db_entry in databases_ids:
         
         if align_info:
             sys.stdout.write("#"+"\t".join(["query_id", "subject_id", "identity", "query_coverage", \
-                                            "score", "strand", "start_position",
-                                            "end_position", "database", "algorithm"])+"\n")
+                                            "score", "strand", "qstart", "qend", "sstart", "send",
+                                            "database", "algorithm"])+"\n")
             for result in db_results:
                 sys.stdout.write("\t".join([str(a) for a in result[:2]]))
                 sys.stdout.write("\t"+str("%0.2f" % float(result[2]))) # cm
