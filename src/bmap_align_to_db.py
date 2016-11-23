@@ -49,7 +49,8 @@ def _print_paths(split_blast_path, blastn_app_path, gmap_app_path, gmapl_app_pat
     return
 
 ## Argument parsing
-__usage = "usage: align_fasta.py [OPTIONS] [FASTA_FILE]\n\ntypical: align_fasta.py --hierarchical=yes "+\
+__usage = "usage: bmap_align_to_db.py [OPTIONS] [FASTA_FILE]\n\n"+\
+          "typical: bmap_align_to_db.py --hierarchical=yes "+\
           "--databases=seq_DB queries.fasta"
 
 optParser = OptionParser(__usage)
