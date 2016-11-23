@@ -15,7 +15,7 @@ from optparse import OptionParser
 
 from output.OutputFacade import OutputFacade
 from barleymapcore.datasets.DatasetsFacade import DatasetsFacade, SELECTION_NONE, SELECTION_BEST_SCORE
-from barleymapcore.MapMarkers import MapMarkers
+from barleymapcore.maps.MapMarkers import MapMarkers
 from barleymapcore.utils.data_utils import read_paths, load_data
 
 def _print_parameters(query_ids_path, dataset_name, db_name, genetic_map_name, \
