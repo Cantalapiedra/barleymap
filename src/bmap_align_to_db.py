@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# align_fasta.py is part of Barleymap.
-# Copyright (C)  2013-2014  Carlos P Cantalapiedra.
+# bmap_align_to_db.py is part of Barleymap.
+# Copyright (C)  2013-2014  Carlos P Cantalapiedra. (align_fasta.py)
+# Copyright (C) 2016 Carlos P Cantalapiedra
 # (terms of use can be found within the distributed LICENSE file).
 
 ###########################
@@ -21,9 +22,11 @@ from barleymapcore.alignment.Aligners import SELECTION_BEST_SCORE, SELECTION_NON
 DEFAULT_THRES_ID = 98.0
 DEFAULT_THRES_COV = 95.0
 
+DATABASES_CONF = "conf/databases.conf"
+
 def _print_parameters(fasta_path, db_name, query_type, \
                       threshold_id, threshold_cov, best_score, \
-                      n_threads, hierarchical, align_info):
+                      n_threads, hierarchical):
     sys.stderr.write("\nParameters:\n")
     sys.stderr.write("\tQuery fasta: "+fasta_path+"\n")
     sys.stderr.write("\tDB name: "+db_name+"\n")
@@ -32,7 +35,6 @@ def _print_parameters(fasta_path, db_name, query_type, \
     sys.stderr.write("\tN threads: "+str(n_threads)+"\n")
     sys.stderr.write("\tBest score filtering: "+str(best_score)+"\n")
     sys.stderr.write("\tHierarchical filtering: "+str(hierarchical)+"\n")
-    sys.stderr.write("\tShow full alignment info: "+str(align_info)+"\n")
     return
     
 def _print_paths(split_blast_path, blastn_app_path, gmap_app_path, gmapl_app_path, blastn_dbs_path, gmap_dbs_path):
@@ -57,9 +59,9 @@ optParser.add_option('--databases', action='store', dest='databases_param', type
 
 optParser.add_option('--query-mode', action='store', dest='query_mode', type='string', \
                      help='Alignment software to use (default auto). '+\
-                     'The "auto" option means first Blastn then GMAP. The "cdna" option means to use only GMAP. '+\
+                     'The "auto" option means first GMAP then Blastn. The "cdna" option means to use only GMAP. '+\
                      'The "genomic" option means to use only Blastn. The order and aligners can be explicitly '+\
-                     'specified by separating the names by "," (e.g.: cdna,genomic --> First GMAP, then Blastn).')
+                     'specified by separating the names by "," (e.g.: genomic,cdna --> First Blastn, then GMAP).')
 
 optParser.add_option('--thres-id', action='store', dest='thres_id', type='string', \
                      help='Minimum identity for valid alignments. Float between 0-100 (default '+str(DEFAULT_THRES_ID)+').')
@@ -77,8 +79,8 @@ optParser.add_option('--best-score', action='store', dest='best_score', type='st
 optParser.add_option('--hierarchical', action='store', dest='hierarchical', type='string', \
                      help='Whether use datasets recursively (yes) or independently (default no).')
 
-optParser.add_option('--align-info', action='store', dest='align_info', type='string', \
-                     help='Whether obtain query-target info (default no) or append alignment info (yes).')
+#optParser.add_option('--align-info', action='store', dest='align_info', type='string', \
+#                     help='Whether obtain query-target info (default no) or append alignment info (yes).')
 
 optParser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='More information printed.')
 
@@ -153,10 +155,10 @@ else:
     hierarchical_param = "no"
 
 # Extra alignment information
-if options.align_info and options.align_info == "yes":
-    align_info = True
-else:
-    align_info = False
+#if options.align_info and options.align_info == "yes":
+align_info = True
+#else:
+#    align_info = False
 
 # Verbosity    
 if options.verbose: verbose_param = True
@@ -169,13 +171,13 @@ if verbose_param:
     sys.stderr.write("\n")
 
 # Databases
-databases_conf_file = __app_path+"conf/databases.conf"
+databases_conf_file = __app_path+DATABASES_CONF
 (databases_names, databases_ids) = load_data(databases_conf_file, users_list = options.databases_param,
                                              verbose = verbose_param) # data_utils.load_data
 
 _print_parameters(query_fasta_path, databases_names, query_mode, \
                   threshold_id, threshold_cov, options.best_score, \
-                  n_threads, hierarchical, options.align_info)
+                  n_threads, hierarchical)
 
 ########### MAIN
 sys.stderr.write("\n")
@@ -198,19 +200,19 @@ for db_entry in databases_ids:
         db_results = results[db_entry]
         if len(databases_ids)>1 and not hierarchical: sys.stdout.write(">DB:"+str(db_entry)+"\n")
         
-        if align_info:
-            sys.stdout.write("#"+"\t".join(["query_id", "subject_id", "identity", "query_coverage", \
-                                            "score", "strand", "qstart", "qend", "sstart", "send",
-                                            "database", "algorithm"])+"\n")
-            for result in db_results:
-                sys.stdout.write("\t".join([str(a) for a in result[:2]]))
-                sys.stdout.write("\t"+str("%0.2f" % float(result[2]))) # cm
-                sys.stdout.write("\t"+str("%0.2f" % float(result[3]))+"\t") # bp
-                sys.stdout.write("\t".join([str(a) for a in result[4:]])+"\n")
-        else:
-            sys.stdout.write("#"+"\t".join(["query_id", "subject_id"])+"\n")
-            for result in db_results:
-                sys.stdout.write("\t".join([str(a) for a in result[:2]])+"\n")
+        #if align_info:
+        sys.stdout.write("#"+"\t".join(["query_id", "subject_id", "identity", "query_coverage", \
+                                        "score", "strand", "qstart", "qend", "sstart", "send",
+                                        "database", "algorithm"])+"\n")
+        for result in db_results:
+            sys.stdout.write("\t".join([str(a) for a in result[:2]]))
+            sys.stdout.write("\t"+str("%0.2f" % float(result[2]))) # cm
+            sys.stdout.write("\t"+str("%0.2f" % float(result[3]))+"\t") # bp
+            sys.stdout.write("\t".join([str(a) for a in result[4:]])+"\n")
+        #else:
+        #    sys.stdout.write("#"+"\t".join(["query_id", "subject_id"])+"\n")
+        #    for result in db_results:
+        #        sys.stdout.write("\t".join([str(a) for a in result[:2]])+"\n")
     else:
         sys.stderr.write("There are no results for DB: "+db_entry+"\n")
 
