@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# barleymap_find_markers.py is part of Barleymap.
+# bmap_find.py is part of Barleymap.
 # Copyright (C)  2013-2014  Carlos P Cantalapiedra.
+# Copyright (C) 2016 Carlos P Cantalapiedra
 # (terms of use can be found within the distributed LICENSE file).
 
 ############################################
@@ -18,21 +19,18 @@ from barleymapcore.datasets.DatasetsFacade import DatasetsFacade, SELECTION_NONE
 from barleymapcore.MapMarkers import MapMarkers
 from barleymapcore.utils.data_utils import read_paths, load_data
 
-def _print_parameters(query_ids_path, dataset_name, db_name, genetic_map_name, \
-                      sort_param, multiple_param, best_score, hierarchical, merge_maps, \
+def _print_parameters(query_ids_path, genetic_map_name, \
+                      sort_param, multiple_param, best_score, hierarchical, \
                       show_genes_param, show_markers_param, \
                       load_annot_param, genes_extend_param, genes_window, \
                       show_unmapped_param):
     sys.stderr.write("\nParameters:\n")
     sys.stderr.write("\tIDs query file: "+query_ids_path+"\n")
-    sys.stderr.write("\tDatasets list: "+dataset_name+"\n")
-    sys.stderr.write("\tDatabases list: "+db_name+"\n")
     sys.stderr.write("\tGenetic maps: "+genetic_map_name+"\n")
     sys.stderr.write("\tSort: "+sort_param+"\n")
     sys.stderr.write("\tShow multiples: "+str(multiple_param)+"\n")
     sys.stderr.write("\tBest score filtering: "+str(best_score)+"\n")
     sys.stderr.write("\tHierarchical filtering: "+str(hierarchical)+"\n")
-    sys.stderr.write("\tMerge maps: "+str(merge_maps)+"\n")
     sys.stderr.write("\tShow genes: "+str(show_genes_param)+"\n")
     sys.stderr.write("\tShow markers: "+str(show_markers_param)+"\n")
     sys.stderr.write("\tLoad annotation: "+str(load_annot_param)+"\n")
@@ -82,24 +80,6 @@ try:
     if verbose_param: sys.stderr.write("Command: "+" ".join(sys.argv)+"\n")
     
     ########## ARGUMENT DEFAULTS
-    ## Read conf file
-    app_abs_path = os.path.dirname(os.path.abspath(__file__))
-
-    config_path_dict = read_paths(app_abs_path+"/paths.conf") # data_utils.read_paths
-    __app_path = config_path_dict["app_path"]
-    
-    # Datasets
-    datasets_conf_file = config_path_dict["app_path"]+"conf/datasets.conf"
-    (datasets_names, datasets_ids) = load_data(datasets_conf_file, verbose = verbose_param) # data_utils.load_datasets
-    
-    # Databases
-    databases_conf_file = __app_path+"conf/references.conf"
-    (databases_names, databases_ids) = load_data(databases_conf_file, verbose = verbose_param) # data_utils.load_data
-    
-    # Genetic maps
-    maps_conf_file = __app_path+"conf/maps.conf"
-    (maps_names, maps_ids) = load_data(maps_conf_file, users_list = options.maps_param, verbose = verbose_param)
-    
     ## Sort
     if options.sort_param and options.sort_param == "bp":
         sort_param = "bp"
@@ -135,14 +115,6 @@ try:
     else:
         hierarchical = False
         hierarchical_param = "no"
-    
-    ## Merge maps
-    if options.merge_maps and options.merge_maps == "yes":
-        merge_maps = True
-        merge_maps_param = "yes"
-    else:
-        merge_maps = False
-        merge_maps_param = "no"
     
     ## Show genes
     if options.show_genes:
@@ -197,8 +169,30 @@ try:
         show_unmapped_param = "no"
         show_unmapped = False
     
-    if verbose_param: _print_parameters(query_ids_path, datasets_names, databases_names, maps_names, \
-                      sort_param, multiple_param_text, options.best_score, hierarchical_param, merge_maps, \
+    ## Read conf file
+    app_abs_path = os.path.dirname(os.path.abspath(__file__))
+
+    config_path_dict = read_paths(app_abs_path+"/paths.conf") # data_utils.read_paths
+    __app_path = config_path_dict["app_path"]
+    
+    # Datasets
+    datasets_conf_file = config_path_dict["app_path"]+"conf/datasets.conf"
+    datasets_config = DatasetsConfig(datasets_conf_file)
+    datasets_ids = datasets_config.get_datasets().keys()
+    #(datasets_names, datasets_ids) = load_data(datasets_conf_file, verbose = verbose_param) # data_utils.load_datasets
+    
+    # Databases
+    databases_conf_file = __app_path+"conf/references.conf"
+    databases_config = DatabasesConfig(databases_conf_file)
+    databases_ids = databases_config.get_databases().keys()
+    #(databases_names, databases_ids) = load_data(databases_conf_file, verbose = verbose_param) # data_utils.load_data
+    
+    # Genetic maps
+    maps_conf_file = __app_path+"conf/maps.conf"
+    (maps_names, maps_ids) = load_data(maps_conf_file, users_list = options.maps_param, verbose = verbose_param)
+    
+    if verbose_param: _print_parameters(query_ids_path, maps_names, \
+                      sort_param, multiple_param_text, options.best_score, hierarchical_param, \
                       show_genes_param, show_markers_param, \
                       load_annot_param, genes_extend_param, genes_window, \
                       show_unmapped_param)

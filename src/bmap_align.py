@@ -26,10 +26,12 @@ from output.OutputFacade import OutputFacade
 
 DEFAULT_THRES_ID = 98.0
 DEFAULT_THRES_COV = 95.0
+DEFAULT_QUERY_MODE = "auto"
+DEFAULT_N_THREADS = 1
 
 def _print_parameters(fasta_path, genetic_map_name, query_type, \
                       threshold_id, threshold_cov, n_threads, \
-                      sort_param, multiple_param, best_score, hierarchical, merge_maps, \
+                      sort_param, multiple_param, best_score, hierarchical, \
                       show_genes_param, show_markers_param, \
                       load_annot_param, genes_extend_param, genes_window, \
                       show_unmapped_param):
@@ -43,7 +45,6 @@ def _print_parameters(fasta_path, genetic_map_name, query_type, \
     sys.stderr.write("\tShow multiples: "+str(multiple_param)+"\n")
     sys.stderr.write("\tBest score filtering: "+str(best_score)+"\n")
     sys.stderr.write("\tHierarchical filtering: "+str(hierarchical)+"\n")
-    sys.stderr.write("\tMerge maps: "+str(merge_maps)+"\n")
     sys.stderr.write("\tShow genes: "+str(show_genes_param)+"\n")
     sys.stderr.write("\tShow markers: "+str(show_markers_param)+"\n")
     sys.stderr.write("\tLoad annotation: "+str(load_annot_param)+"\n")
@@ -93,9 +94,6 @@ try:
     optParser.add_option('--hierarchical', action='store', dest='hierarchical', type='string', \
                          help='Whether use datasets recursively (yes) or independently (default no).')
     
-    optParser.add_option('--merge', action='store', dest='merge_maps', type='string', \
-                         help='Whether merge results from the different Maps (yes) or not (no).')
-    
     optParser.add_option('--genes', action='store', dest='show_genes', type='string', \
                          help='Show genes on marker (marker), between markers (between) '+\
                          'or dont show (default no). If --genes is active, --markers option is ignored.')
@@ -134,7 +132,7 @@ try:
     if options.query_mode:
         query_mode = options.query_mode
     else:
-        query_mode = "auto"
+        query_mode = DEFAULT_QUERY_MODE
     
     ## Threshold Identity
     if options.thres_id:
@@ -152,7 +150,7 @@ try:
     if options.n_threads:
         n_threads = int(options.n_threads)
     else:
-        n_threads = 1
+        n_threads = DEFAULT_N_THREADS
         
     ## Sort
     if options.sort_param and options.sort_param == "bp":
@@ -189,14 +187,6 @@ try:
     else:
         hierarchical = False
         hierarchical_param = "no"
-    
-    ## Merge maps
-    if options.merge_maps and options.merge_maps == "yes":
-        merge_maps = True
-        merge_maps_param = "yes"
-    else:
-        merge_maps = False
-        merge_maps_param = "no"
     
     ## Show genes
     if options.show_genes:
@@ -268,17 +258,11 @@ try:
         maps_names = ",".join(maps_config.get_maps_names(maps_ids))
     #(maps_names, maps_ids) = load_data(maps_conf_file, users_list = options.maps_param, verbose = verbose_param)
     
-    # Databases
     
-    databases_conf_file = __app_path+"conf/databases.conf"
-    databases_config = DatabasesConfig(databases_conf_file)
-    #(databases_names, databases_ids) = load_data(databases_conf_file,
-    #                                             users_list = options.databases_param,
-    #                                             verbose = verbose_param) # data_utils.load_data
     
     if verbose_param: _print_parameters(query_fasta_path, databases_names, maps_names, query_mode, \
                       threshold_id, threshold_cov, n_threads, \
-                      sort_param, multiple_param_text, options.best_score, hierarchical_param, merge_maps, \
+                      sort_param, multiple_param_text, options.best_score, hierarchical_param, \
                       show_genes_param, show_markers_param, \
                       load_annot_param, genes_extend_param, genes_window, \
                       show_unmapped_param)
@@ -299,6 +283,10 @@ try:
     
     maps_path = __app_path+config_path_dict["maps_path"]
     
+    # Databases
+    databases_conf_file = __app_path+"conf/databases.conf"
+    databases_config = DatabasesConfig(databases_conf_file)
+    
     facade = AlignmentFacade(split_blast_path, blastn_app_path, gmap_app_path,
                              blastn_dbs_path, gmap_dbs_path, gmapl_app_path,
                              tmp_files_path, databases_config, verbose = verbose_param)
@@ -306,10 +294,11 @@ try:
     genetic_map_dicts = {}
     
     for map_id in maps_ids:
-        sys.stderr.write("Map "+map_id+"\n")
+        sys.stderr.write("********* Map "+map_id+"\n")
+        
         map_config = maps_config.get_map(map_id)
         databases_ids = maps_config.get_map_db_list(map_config)
-    
+        
         # Perform alignments
         results = facade.perform_alignment(query_fasta_path, databases_ids, hierarchical, query_mode,
                                            threshold_id, threshold_cov, n_threads, \
@@ -317,8 +306,8 @@ try:
         unmapped = facade.get_alignment_unmapped()  
         
         ############ MAPS
-        mapMarkers = MapMarkers(maps_path, maps_config, [map_id], verbose_param)
-        mapMarkers.create_genetic_maps(results, unmapped, databases_ids, sort_param, multiple_param, merge_maps)
+        mapMarkers = MapMarkers(maps_path, maps_config, maps_ids, verbose_param)
+        mapMarkers.create_genetic_maps(results, unmapped, databases_ids, sort_param, multiple_param)
         
         ############ OTHER MARKERS
         if show_markers and not show_genes:
@@ -333,7 +322,7 @@ try:
             
             mapMarkers.enrich_with_markers(genes_extend, genes_window, genes_window, sort_param, \
                                                           databases_ids, datasets_ids, datasets_conf_file, hierarchical,
-                                                            merge_maps, constrain_fine_mapping = False)
+                                                            constrain_fine_mapping = False)
         ########### GENES
         if show_genes:
             mapMarkers.enrich_with_genes(show_genes_param, load_annot,
@@ -342,7 +331,7 @@ try:
         
         genetic_map_dict = mapMarkers.get_genetic_maps()
         
-        genetic_map_dicts.update(genetic_map_dict)
+        genetic_map_dicts.update(genetic_map_dict) 
     
     ############################################################ OUTPUT
     
