@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# barleymap_align_seqs.py is part of Barleymap.
+# bmap_align.py is part of Barleymap.
 # Copyright (C)  2013-2014  Carlos P Cantalapiedra.
+# Copyright (C) 2016 Carlos P Cantalapiedra
 # (terms of use can be found within the distributed LICENSE file).
 
 ############################################
@@ -13,16 +14,20 @@
 import sys, os, traceback
 from optparse import OptionParser
 
-from output.OutputFacade import OutputFacade
+from barleymapcore.utils.data_utils import read_paths
+from barleymapcore.db.DatasetsConfig import DatasetsConfig
+from barleymapcore.db.MapsConfig import MapsConfig
+from barleymapcore.db.DatabasesConfig import DatabasesConfig
 from barleymapcore.alignment.AlignmentFacade import AlignmentFacade
 from barleymapcore.alignment.Aligners import SELECTION_BEST_SCORE, SELECTION_NONE
 from barleymapcore.maps.MapMarkers import MapMarkers
-from barleymapcore.utils.data_utils import read_paths, load_data
+
+from output.OutputFacade import OutputFacade
 
 DEFAULT_THRES_ID = 98.0
 DEFAULT_THRES_COV = 95.0
 
-def _print_parameters(fasta_path, db_name, genetic_map_name, query_type, \
+def _print_parameters(fasta_path, genetic_map_name, query_type, \
                       threshold_id, threshold_cov, n_threads, \
                       sort_param, multiple_param, best_score, hierarchical, merge_maps, \
                       show_genes_param, show_markers_param, \
@@ -30,7 +35,6 @@ def _print_parameters(fasta_path, db_name, genetic_map_name, query_type, \
                       show_unmapped_param):
     sys.stderr.write("\nParameters:\n")
     sys.stderr.write("\tQuery fasta: "+fasta_path+"\n")
-    sys.stderr.write("\tDatabases list: "+db_name+"\n")
     sys.stderr.write("\tGenetic maps: "+genetic_map_name+"\n")
     sys.stderr.write("\tQuery mode: "+query_type+"\n")
     sys.stderr.write("\tThresholds --> %id="+str(threshold_id)+" : %query_cov="+str(threshold_cov)+"\n")
@@ -53,13 +57,10 @@ def _print_parameters(fasta_path, db_name, genetic_map_name, query_type, \
 try:
     
     ## Argument parsing
-    __usage = "usage: barleymap_align_seqs.py [OPTIONS] [FASTA_FILE]\n\ntypical: barleymap_align_seqs.py --hierarchical=yes "+\
-          "--databases=seq_DB --maps=map queries.fasta"
+    __usage = "usage: bmap_align.py [OPTIONS] [FASTA_FILE]\n\ntypical: bmap_align.py --hierarchical=yes "+\
+          "--maps=map queries.fasta"
     
     optParser = OptionParser(__usage)
-    
-    optParser.add_option('--databases', action='store', dest='databases_param', type='string', \
-                         help='Comma delimited list of databases to align to (default all).')
     
     optParser.add_option('--maps', action='store', dest='maps_param', type='string', \
                          help='Comma delimited list of Maps to show (default all).')
@@ -129,24 +130,6 @@ try:
     if verbose_param: sys.stderr.write("Command: "+" ".join(sys.argv)+"\n")
     
     ########## ARGUMENT DEFAULTS
-    ## Read conf file
-    app_abs_path = os.path.dirname(os.path.abspath(__file__))
-
-    config_path_dict = read_paths(app_abs_path+"/paths.conf") # data_utils.read_paths
-    __app_path = config_path_dict["app_path"]
-    
-    # Datasets
-    datasets_conf_file = __app_path+"conf/datasets.conf"
-    (datasets_names, datasets_ids) = load_data(datasets_conf_file, verbose = verbose_param) # data_utils.load_datasets
-    
-    # Databases
-    databases_conf_file = __app_path+"conf/databases.conf"
-    (databases_names, databases_ids) = load_data(databases_conf_file, users_list = options.databases_param, verbose = verbose_param) # data_utils.load_data
-    
-    # Genetic maps
-    maps_conf_file = __app_path+"conf/maps.conf"
-    (maps_names, maps_ids) = load_data(maps_conf_file, users_list = options.maps_param, verbose = verbose_param)
-    
     ## Query mode
     if options.query_mode:
         query_mode = options.query_mode
@@ -268,6 +251,31 @@ try:
         show_unmapped_param = "no"
         show_unmapped = False
     
+    ## Read conf file
+    app_abs_path = os.path.dirname(os.path.abspath(__file__))
+
+    config_path_dict = read_paths(app_abs_path+"/paths.conf") # data_utils.read_paths
+    __app_path = config_path_dict["app_path"]
+    
+    # Genetic maps
+    maps_conf_file = __app_path+"conf/maps.conf"
+    maps_config = MapsConfig(maps_conf_file)
+    if options.maps_param:
+        maps_names = options.maps_param
+        maps_ids = maps_config.get_maps_ids(maps_names.strip().split(","))
+    else:
+        maps_ids = maps_config.get_maps().keys()
+        maps_names = ",".join(maps_config.get_maps_names(maps_ids))
+    #(maps_names, maps_ids) = load_data(maps_conf_file, users_list = options.maps_param, verbose = verbose_param)
+    
+    # Databases
+    
+    databases_conf_file = __app_path+"conf/databases.conf"
+    databases_config = DatabasesConfig(databases_conf_file)
+    #(databases_names, databases_ids) = load_data(databases_conf_file,
+    #                                             users_list = options.databases_param,
+    #                                             verbose = verbose_param) # data_utils.load_data
+    
     if verbose_param: _print_parameters(query_fasta_path, databases_names, maps_names, query_mode, \
                       threshold_id, threshold_cov, n_threads, \
                       sort_param, multiple_param_text, options.best_score, hierarchical_param, merge_maps, \
@@ -289,34 +297,60 @@ try:
     gmap_dbs_path = config_path_dict["gmap_dbs_path"]
     gmapl_app_path = config_path_dict["gmapl_app_path"]
     
+    maps_path = __app_path+config_path_dict["maps_path"]
+    
     facade = AlignmentFacade(split_blast_path, blastn_app_path, gmap_app_path,
                              blastn_dbs_path, gmap_dbs_path, gmapl_app_path,
-                             tmp_files_path, databases_conf_file, verbose = verbose_param)
-    # Perform alignments
-    results = facade.perform_alignment(query_fasta_path, databases_ids, hierarchical, query_mode,
-                                       threshold_id, threshold_cov, n_threads, \
-                                       selection, best_score_filter)
-    unmapped = facade.get_alignment_unmapped()
+                             tmp_files_path, databases_config, verbose = verbose_param)
     
-    ############ MAPS
-    mapMarkers = MapMarkers(config_path_dict, maps_ids, verbose_param)
-    mapMarkers.create_genetic_maps(results, unmapped, databases_ids, sort_param, multiple_param, merge_maps)
+    genetic_map_dicts = {}
     
-    ############ OTHER MARKERS
-    if show_markers and not show_genes:
-        markers_dict = mapMarkers.enrich_with_markers(genes_extend, genes_window, genes_window, sort_param, \
-                                                      databases_ids, datasets_ids, datasets_conf_file, hierarchical,
-                                                        merge_maps, constrain_fine_mapping = False)
-    ########### GENES
-    if show_genes:
-        mapMarkers.enrich_with_genes(show_genes_param, load_annot, genes_extend, genes_window, genes_window, sort_param, constrain_fine_mapping = False)
+    for map_id in maps_ids:
+        sys.stderr.write("Map "+map_id+"\n")
+        map_config = maps_config.get_map(map_id)
+        databases_ids = maps_config.get_map_db_list(map_config)
+    
+        # Perform alignments
+        results = facade.perform_alignment(query_fasta_path, databases_ids, hierarchical, query_mode,
+                                           threshold_id, threshold_cov, n_threads, \
+                                           selection, best_score_filter)
+        unmapped = facade.get_alignment_unmapped()  
+        
+        ############ MAPS
+        mapMarkers = MapMarkers(maps_path, maps_config, [map_id], verbose_param)
+        mapMarkers.create_genetic_maps(results, unmapped, databases_ids, sort_param, multiple_param, merge_maps)
+        
+        ############ OTHER MARKERS
+        if show_markers and not show_genes:
+            
+            # Datasets
+            datasets_conf_file = __app_path+"conf/datasets.conf"
+            datasets_config = DatasetsConfig(datasets_conf_file)
+            
+            datasets_ids = datasets_config.get_datasets().keys()
+            datasets_names = ",".join(datasets_config.get_datasets_names(datasets_ids))
+            #(datasets_names, datasets_ids) = load_data(datasets_conf_file, verbose = verbose_param) # data_utils.load_datasets
+            
+            mapMarkers.enrich_with_markers(genes_extend, genes_window, genes_window, sort_param, \
+                                                          databases_ids, datasets_ids, datasets_conf_file, hierarchical,
+                                                            merge_maps, constrain_fine_mapping = False)
+        ########### GENES
+        if show_genes:
+            mapMarkers.enrich_with_genes(show_genes_param, load_annot,
+                                         genes_extend, genes_window, genes_window,
+                                         sort_param, constrain_fine_mapping = False)
+        
+        genetic_map_dict = mapMarkers.get_genetic_maps()
+        
+        genetic_map_dicts.update(genetic_map_dict)
     
     ############################################################ OUTPUT
-    genetic_map_dict = mapMarkers.get_genetic_maps()
     
     outputPrinter = OutputFacade().get_plain_printer(sys.stdout, verbose = verbose_param)
     
-    outputPrinter.print_maps(outputPrinter, maps_ids, genetic_map_dict, show_genes, show_markers, show_unmapped, multiple_param_text, load_annot, show_headers = True)
+    outputPrinter.print_maps(outputPrinter, maps_ids, genetic_map_dicts,
+                             show_genes, show_markers, show_unmapped,
+                             multiple_param_text, load_annot, show_headers = True)
 
 except Exception as e:
     traceback.print_exc(file=sys.stderr)
