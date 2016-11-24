@@ -109,6 +109,8 @@ sys.stderr.write("Command: "+" ".join(sys.argv)+"\n")
 ## Read conf file
 app_abs_path = os.path.dirname(os.path.abspath(__file__))
 
+sys.stderr.write(app_abs_path+"\n")
+
 config_path_dict = read_paths(app_abs_path+"/paths.conf") # data_utils.read_paths
 __app_path = config_path_dict["app_path"]
 
