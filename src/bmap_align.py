@@ -29,6 +29,10 @@ DEFAULT_THRES_COV = 95.0
 DEFAULT_QUERY_MODE = "auto"
 DEFAULT_N_THREADS = 1
 
+DATABASES_CONF = "conf/databases.conf"
+MAPS_CONF = "conf/maps.conf"
+DATASETS_CONF = "conf/datasets.conf"
+
 def _print_parameters(fasta_path, genetic_map_name, query_type, \
                       threshold_id, threshold_cov, n_threads, \
                       sort_param, multiple_param, best_score, hierarchical, \
@@ -248,7 +252,7 @@ try:
     __app_path = config_path_dict["app_path"]
     
     # Genetic maps
-    maps_conf_file = __app_path+"conf/maps.conf"
+    maps_conf_file = __app_path+MAPS_CONF
     maps_config = MapsConfig(maps_conf_file)
     if options.maps_param:
         maps_names = options.maps_param
@@ -258,7 +262,7 @@ try:
         maps_names = ",".join(maps_config.get_maps_names(maps_ids))
     #(maps_names, maps_ids) = load_data(maps_conf_file, users_list = options.maps_param, verbose = verbose_param)
     
-    
+    maps_path = __app_path+config_path_dict["maps_path"]
     
     if verbose_param: _print_parameters(query_fasta_path, databases_names, maps_names, query_mode, \
                       threshold_id, threshold_cov, n_threads, \
@@ -281,10 +285,8 @@ try:
     gmap_dbs_path = config_path_dict["gmap_dbs_path"]
     gmapl_app_path = config_path_dict["gmapl_app_path"]
     
-    maps_path = __app_path+config_path_dict["maps_path"]
-    
     # Databases
-    databases_conf_file = __app_path+"conf/databases.conf"
+    databases_conf_file = __app_path+DATABASES_CONF
     databases_config = DatabasesConfig(databases_conf_file)
     
     facade = AlignmentFacade(split_blast_path, blastn_app_path, gmap_app_path,
@@ -306,14 +308,14 @@ try:
         unmapped = facade.get_alignment_unmapped()  
         
         ############ MAPS
-        mapMarkers = MapMarkers(maps_path, maps_config, maps_ids, verbose_param)
+        mapMarkers = MapMarkers(maps_path, maps_config, [map_id], verbose_param)
         mapMarkers.create_genetic_maps(results, unmapped, databases_ids, sort_param, multiple_param)
         
         ############ OTHER MARKERS
         if show_markers and not show_genes:
             
             # Datasets
-            datasets_conf_file = __app_path+"conf/datasets.conf"
+            datasets_conf_file = __app_path+DATASETS_CONF
             datasets_config = DatasetsConfig(datasets_conf_file)
             
             datasets_ids = datasets_config.get_datasets().keys()

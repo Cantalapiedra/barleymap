@@ -11,13 +11,21 @@
 # positions from marker IDs.
 ############################################
 
-import sys, os#, traceback
+import sys, os, traceback
 from optparse import OptionParser
 
-from output.OutputFacade import OutputFacade
+from barleymapcore.utils.data_utils import read_paths
+from barleymapcore.db.MapsConfig import MapsConfig
+from barleymapcore.db.DatasetsConfig import DatasetsConfig
+from barleymapcore.db.DatabasesConfig import DatabasesConfig
 from barleymapcore.datasets.DatasetsFacade import DatasetsFacade, SELECTION_NONE, SELECTION_BEST_SCORE
-from barleymapcore.MapMarkers import MapMarkers
-from barleymapcore.utils.data_utils import read_paths, load_data
+from barleymapcore.maps.MapMarkers import MapMarkers
+
+from output.OutputFacade import OutputFacade
+
+DATABASES_CONF = "conf/databases.conf"
+MAPS_CONF = "conf/maps.conf"
+DATASETS_CONF = "conf/datasets.conf"
 
 def _print_parameters(query_ids_path, genetic_map_name, \
                       sort_param, multiple_param, best_score, hierarchical, \
@@ -176,20 +184,29 @@ try:
     __app_path = config_path_dict["app_path"]
     
     # Datasets
-    datasets_conf_file = config_path_dict["app_path"]+"conf/datasets.conf"
+    datasets_conf_file = __app_path+DATASETS_CONF
     datasets_config = DatasetsConfig(datasets_conf_file)
     datasets_ids = datasets_config.get_datasets().keys()
     #(datasets_names, datasets_ids) = load_data(datasets_conf_file, verbose = verbose_param) # data_utils.load_datasets
     
     # Databases
-    databases_conf_file = __app_path+"conf/references.conf"
+    databases_conf_file = __app_path+DATABASES_CONF
     databases_config = DatabasesConfig(databases_conf_file)
     databases_ids = databases_config.get_databases().keys()
     #(databases_names, databases_ids) = load_data(databases_conf_file, verbose = verbose_param) # data_utils.load_data
     
     # Genetic maps
-    maps_conf_file = __app_path+"conf/maps.conf"
-    (maps_names, maps_ids) = load_data(maps_conf_file, users_list = options.maps_param, verbose = verbose_param)
+    maps_conf_file = __app_path+MAPS_CONF
+    maps_config = MapsConfig(maps_conf_file)
+    if options.maps_param:
+        maps_names = options.maps_param
+        maps_ids = maps_config.get_maps_ids(maps_names.strip().split(","))
+    else:
+        maps_ids = maps_config.get_maps().keys()
+        maps_names = ",".join(maps_config.get_maps_names(maps_ids))
+    #(maps_names, maps_ids) = load_data(maps_conf_file, users_list = options.maps_param, verbose = verbose_param)
+    
+    maps_path = __app_path+config_path_dict["maps_path"]
     
     if verbose_param: _print_parameters(query_ids_path, maps_names, \
                       sort_param, multiple_param_text, options.best_score, hierarchical_param, \
@@ -203,34 +220,48 @@ try:
     ############ ALIGNMENTS - DATASETS
     # Load configuration paths
     datasets_path = __app_path+config_path_dict["datasets_path"]
-    facade = DatasetsFacade(datasets_conf_file, datasets_path, verbose = verbose_param)
-    # Perform alignments
-    results = facade.retrieve_ids(query_ids_path, datasets_ids, databases_ids, hierarchical, \
-                                  selection, best_score_filter)
+    facade = DatasetsFacade(datasets_config, datasets_path, verbose = verbose_param)
     
-    unmapped = facade.get_alignment_unmapped()
+    genetic_map_dicts = {}
     
-    ############ MAPS
-    mapMarkers = MapMarkers(config_path_dict, maps_ids, verbose_param)
-    mapMarkers.create_genetic_maps(results, unmapped, databases_ids, sort_param, multiple_param, merge_maps)
-    
-    ############ OTHER MARKERS
-    if show_markers and not show_genes:
-        markers_dict = mapMarkers.enrich_with_markers(genes_extend, genes_window, genes_window, sort_param, \
-                                                      databases_ids, datasets_ids, datasets_conf_file, hierarchical, merge_maps, constrain_fine_mapping = False)
-    ########### GENES
-    if show_genes:
-        mapMarkers.enrich_with_genes(show_genes_param, load_annot, genes_extend, genes_window, genes_window, sort_param, constrain_fine_mapping = False)
-    
+    for map_id in maps_ids:
+        sys.stderr.write("********* Map "+map_id+"\n")
+        map_config = maps_config.get_map(map_id)
+        
+        # Perform alignments
+        results = facade.retrieve_ids_map(query_ids_path, datasets_ids, map_id, \
+                                            selection, best_score_filter)
+        
+        unmapped = facade.get_alignment_unmapped()
+        
+        ############ MAPS
+        mapMarkers = MapMarkers(maps_path, maps_config, [map_id], verbose_param)
+        databases_ids = maps_config.get_map_db_list(map_config)
+        mapMarkers.create_genetic_maps(results, unmapped, databases_ids, sort_param, multiple_param)
+        
+        ############ OTHER MARKERS
+        if show_markers and not show_genes:
+            markers_dict = mapMarkers.enrich_with_markers(genes_extend, genes_window, genes_window, sort_param, \
+                                                          databases_ids, datasets_ids, datasets_conf_file,
+                                                        hierarchical, constrain_fine_mapping = False)
+        ########### GENES
+        if show_genes:
+            mapMarkers.enrich_with_genes(show_genes_param, load_annot,
+                                         genes_extend, genes_window, genes_window, sort_param,
+                                         constrain_fine_mapping = False)
+        
+        genetic_map_dict = mapMarkers.get_genetic_maps()
+        
+        genetic_map_dicts.update(genetic_map_dict)
+        
     ############################################################ OUTPUT
-    genetic_map_dict = mapMarkers.get_genetic_maps()
     
     outputPrinter = OutputFacade().get_plain_printer(sys.stdout, verbose = verbose_param)
     
     outputPrinter.print_maps(outputPrinter, maps_ids, genetic_map_dict, show_genes, show_markers, show_unmapped, multiple_param_text, load_annot, show_headers = True)
 
 except Exception as e:
-    #traceback.print_exc(file=sys.stderr)
+    traceback.print_exc(file=sys.stderr)
     sys.stderr.write("\nERROR\n")
     sys.stderr.write(str(e)+"\n")
     sys.stderr.write('An error was detected. If you can not solve it please contact compbio@eead.csic.es ('+\
