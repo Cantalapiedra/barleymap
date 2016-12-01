@@ -17,7 +17,8 @@ from optparse import OptionParser
 from barleymapcore.alignment.AlignmentFacade import AlignmentFacade
 from barleymapcore.utils.data_utils import read_paths
 from barleymapcore.alignment.Aligners import SELECTION_BEST_SCORE, SELECTION_NONE
-from barleymapcore.db.DatabasesConfig import REF_TYPE_BIG, REF_TYPE_STD, DatabasesConfig
+from barleymapcore.db.DatabasesConfig import REF_TYPE_STD, DatabasesConfig
+from barleymapcore.db.MapsConfig import MapsConfig
 
 DEFAULT_THRES_ID = 98.0
 DEFAULT_THRES_COV = 95.0
@@ -26,10 +27,11 @@ DEFAULT_N_THREADS = 1
 DEFAULT_REF_TYPE = REF_TYPE_STD
 
 DATABASES_CONF = "conf/databases.conf"
+MAPS_CONF = "conf/maps.conf"
 
 def _print_parameters(fasta_path, maps, query_type, \
                       threshold_id, threshold_cov, best_score, \
-                      n_threads, hierarchical):
+                      n_threads):
     sys.stderr.write("\nParameters:\n")
     sys.stderr.write("\tQuery fasta: "+fasta_path+"\n")
     sys.stderr.write("\tMaps: "+maps+"\n")
@@ -37,7 +39,6 @@ def _print_parameters(fasta_path, maps, query_type, \
     sys.stderr.write("\tThresholds --> %id="+str(threshold_id)+" : %query_cov="+str(threshold_cov)+"\n")
     sys.stderr.write("\tN threads: "+str(n_threads)+"\n")
     sys.stderr.write("\tBest score filtering: "+str(best_score)+"\n")
-    sys.stderr.write("\tHierarchical filtering: "+str(hierarchical)+"\n")
     
     return
     
@@ -79,9 +80,6 @@ optParser.add_option('--threads', action='store', dest='n_threads', type='string
 optParser.add_option('--best-score', action='store', dest='best_score', type='string', \
                      help='Whether return secondary hits (no), best score hits for each database (db) '+\
                      'or overall best score hits (default yes).')
-
-optParser.add_option('--hierarchical', action='store', dest='hierarchical', type='string', \
-                     help='Whether use datasets recursively (yes) or independently (default no).')
 
 optParser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='More information printed.')
 
@@ -138,20 +136,6 @@ else:
         best_score_filter = True
 # selection is applied on alignment results to each database separately
 # best_score_filter is applied on all the results from all the databases
-    
-# Hierarchical
-if options.hierarchical and options.hierarchical == "yes":
-    hierarchical = True
-    hierarchical_param = "yes"
-else:
-    hierarchical = False
-    hierarchical_param = "no"
-    
-# ref_type
-if options.ref_type and options.ref_type == REF_TYPE_BIG:
-    ref_type_param = REF_TYPE_BIG
-else:
-    ref_type_param = DEFAULT_REF_TYPE
 
 # Extra alignment information
 #if options.align_info and options.align_info == "yes":
@@ -184,7 +168,7 @@ maps_path = __app_path+config_path_dict["maps_path"]
 
 _print_parameters(query_fasta_path, maps_names, query_mode, \
                   threshold_id, threshold_cov, options.best_score, \
-                  n_threads, hierarchical, ref_type_param)
+                  n_threads)
 
 ########### MAIN
 sys.stderr.write("\n")
@@ -201,11 +185,12 @@ facade = AlignmentFacade(split_blast_path, blastn_app_path, gmap_app_path,
 genetic_map_dicts = {}
 
 for map_id in maps_ids:
-    sys.stdout.write(">>Map "+map_id+"\n")
+    sys.stdout.write(">>Map:"+map_id+"\n")
     
     
     map_config = maps_config.get_map(map_id)
     databases_ids = maps_config.get_map_db_list(map_config)
+    hierarchical = maps_config.get_map_is_hierarchical(map_config)
     
     # Perform alignments
     results = facade.perform_alignment(query_fasta_path, databases_ids, hierarchical, query_mode,

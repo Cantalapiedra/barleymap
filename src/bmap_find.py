@@ -28,7 +28,7 @@ MAPS_CONF = "conf/maps.conf"
 DATASETS_CONF = "conf/datasets.conf"
 
 def _print_parameters(query_ids_path, genetic_map_name, \
-                      sort_param, multiple_param, best_score, hierarchical, \
+                      sort_param, multiple_param, best_score, \
                       show_genes_param, show_markers_param, \
                       load_annot_param, genes_extend_param, genes_window, \
                       show_unmapped_param):
@@ -38,7 +38,6 @@ def _print_parameters(query_ids_path, genetic_map_name, \
     sys.stderr.write("\tSort: "+sort_param+"\n")
     sys.stderr.write("\tShow multiples: "+str(multiple_param)+"\n")
     sys.stderr.write("\tBest score filtering: "+str(best_score)+"\n")
-    sys.stderr.write("\tHierarchical filtering: "+str(hierarchical)+"\n")
     sys.stderr.write("\tShow genes: "+str(show_genes_param)+"\n")
     sys.stderr.write("\tShow markers: "+str(show_markers_param)+"\n")
     sys.stderr.write("\tLoad annotation: "+str(load_annot_param)+"\n")
@@ -52,7 +51,7 @@ def _print_parameters(query_ids_path, genetic_map_name, \
 try:
     
     ## Argument parsing
-    __usage = "usage: barleymap_find_markers.py [OPTIONS] [IDs_FILE]"
+    __usage = "usage: bmap_find.py [OPTIONS] [IDs_FILE]"
     optParser = OptionParser(__usage)
     
     optParser.add_option('--maps', action='store', dest='maps_param', type='string', help='Comma delimited list of Maps to show.')
@@ -62,7 +61,6 @@ try:
     optParser.add_option('--best-score', action='store', dest='best_score', type='string', \
                      help='Whether return secondary hits (no), best score hits for each database (db) or overall best score hits (yes; default).')
     
-    optParser.add_option('--hierarchical', action='store', dest='hierarchical', type='string', help='Whether use datasets recursively (yes) or independently (no).')
     optParser.add_option('--merge', action='store', dest='merge_maps', type='string', help='Whether merge results from the different Maps (yes) or not (no).')
     optParser.add_option('--genes', action='store', dest='show_genes', type='string', help='Show genes on marker (marker), between markers (between) \
                          or dont show (no). If --genes is active, --markers option is ignored.')
@@ -115,14 +113,6 @@ try:
             best_score_filter = False
     # selection is applied on alignment results to each database separately
     # best_score_filter is applied on all the results from all the databases
-
-    ## Hierarchical
-    if options.hierarchical and options.hierarchical == "yes":
-        hierarchical = True
-        hierarchical_param = "yes"
-    else:
-        hierarchical = False
-        hierarchical_param = "no"
     
     ## Show genes
     if options.show_genes:
@@ -227,6 +217,7 @@ try:
     for map_id in maps_ids:
         sys.stderr.write("********* Map "+map_id+"\n")
         map_config = maps_config.get_map(map_id)
+        hierarchical = maps_config.get_map_is_hierarchical(map_config)
         
         # Perform alignments
         results = facade.retrieve_ids_map(query_ids_path, datasets_ids, map_id, \

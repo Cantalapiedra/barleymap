@@ -35,7 +35,7 @@ DATASETS_CONF = "conf/datasets.conf"
 
 def _print_parameters(fasta_path, genetic_map_name, query_type, \
                       threshold_id, threshold_cov, n_threads, \
-                      sort_param, multiple_param, best_score, hierarchical, \
+                      sort_param, multiple_param, best_score, \
                       show_genes_param, show_markers_param, \
                       load_annot_param, genes_extend_param, genes_window, \
                       show_unmapped_param):
@@ -48,7 +48,6 @@ def _print_parameters(fasta_path, genetic_map_name, query_type, \
     sys.stderr.write("\tSort: "+sort_param+"\n")
     sys.stderr.write("\tShow multiples: "+str(multiple_param)+"\n")
     sys.stderr.write("\tBest score filtering: "+str(best_score)+"\n")
-    sys.stderr.write("\tHierarchical filtering: "+str(hierarchical)+"\n")
     sys.stderr.write("\tShow genes: "+str(show_genes_param)+"\n")
     sys.stderr.write("\tShow markers: "+str(show_markers_param)+"\n")
     sys.stderr.write("\tLoad annotation: "+str(load_annot_param)+"\n")
@@ -62,8 +61,8 @@ def _print_parameters(fasta_path, genetic_map_name, query_type, \
 try:
     
     ## Argument parsing
-    __usage = "usage: bmap_align.py [OPTIONS] [FASTA_FILE]\n\ntypical: bmap_align.py --hierarchical=yes "+\
-          "--maps=map queries.fasta"
+    __usage = "usage: bmap_align.py [OPTIONS] [FASTA_FILE]\n\n"+\
+              "typical: bmap_align.py --maps=map queries.fasta"
     
     optParser = OptionParser(__usage)
     
@@ -94,9 +93,6 @@ try:
     optParser.add_option('--best-score', action='store', dest='best_score', type='string', \
                         help='Whether return secondary hits (no), best score hits for each database (db) '+\
                         'or overall best score hits (default yes).')
-    
-    optParser.add_option('--hierarchical', action='store', dest='hierarchical', type='string', \
-                         help='Whether use datasets recursively (yes) or independently (default no).')
     
     optParser.add_option('--genes', action='store', dest='show_genes', type='string', \
                          help='Show genes on marker (marker), between markers (between) '+\
@@ -183,14 +179,6 @@ try:
             best_score_filter = True
     # selection is applied on alignment results to each database separately
     # best_score_filter is applied on all the results from all the databases
-
-    ## Hierarchical
-    if options.hierarchical and options.hierarchical == "yes":
-        hierarchical = True
-        hierarchical_param = "yes"
-    else:
-        hierarchical = False
-        hierarchical_param = "no"
     
     ## Show genes
     if options.show_genes:
@@ -266,7 +254,7 @@ try:
     
     if verbose_param: _print_parameters(query_fasta_path, databases_names, maps_names, query_mode, \
                       threshold_id, threshold_cov, n_threads, \
-                      sort_param, multiple_param_text, options.best_score, hierarchical_param, \
+                      sort_param, multiple_param_text, options.best_score, \
                       show_genes_param, show_markers_param, \
                       load_annot_param, genes_extend_param, genes_window, \
                       show_unmapped_param)
@@ -300,6 +288,7 @@ try:
         
         map_config = maps_config.get_map(map_id)
         databases_ids = maps_config.get_map_db_list(map_config)
+        hierarchical = maps_config.get_map_is_hierarchical(map_config)
         
         # Perform alignments
         results = facade.perform_alignment(query_fasta_path, databases_ids, hierarchical, query_mode,
