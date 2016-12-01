@@ -61,7 +61,6 @@ try:
     optParser.add_option('--best-score', action='store', dest='best_score', type='string', \
                      help='Whether return secondary hits (no), best score hits for each database (db) or overall best score hits (yes; default).')
     
-    optParser.add_option('--merge', action='store', dest='merge_maps', type='string', help='Whether merge results from the different Maps (yes) or not (no).')
     optParser.add_option('--genes', action='store', dest='show_genes', type='string', help='Show genes on marker (marker), between markers (between) \
                          or dont show (no). If --genes is active, --markers option is ignored.')
     optParser.add_option('--markers', action='store', dest='show_markers', type='string', help='Show additional markers (yes) or not (no). Ignored if --genes active.')
@@ -199,7 +198,7 @@ try:
     maps_path = __app_path+config_path_dict["maps_path"]
     
     if verbose_param: _print_parameters(query_ids_path, maps_names, \
-                      sort_param, multiple_param_text, options.best_score, hierarchical_param, \
+                      sort_param, multiple_param_text, options.best_score, \
                       show_genes_param, show_markers_param, \
                       load_annot_param, genes_extend_param, genes_window, \
                       show_unmapped_param)
