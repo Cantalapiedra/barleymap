@@ -287,7 +287,7 @@ try:
     
     # Databases
     databases_conf_file = __app_path+DATABASES_CONF
-    databases_config = DatabasesConfig(databases_conf_file)
+    databases_config = DatabasesConfig(databases_conf_file, verbose_param)
     
     facade = AlignmentFacade(split_blast_path, blastn_app_path, gmap_app_path,
                              blastn_dbs_path, gmap_dbs_path, gmapl_app_path,

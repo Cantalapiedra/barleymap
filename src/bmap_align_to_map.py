@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# bmap_align_to_db.py is part of Barleymap.
-# Copyright (C)  2013-2014  Carlos P Cantalapiedra. (align_fasta.py)
+# bmap_align_to_map.py is part of Barleymap.
 # Copyright (C) 2016 Carlos P Cantalapiedra
 # (terms of use can be found within the distributed LICENSE file).
 
 ###########################
-## Script to align fasta to different references
-## and get a list of targets. The databases used
-## as references must have been previously configured.
+## Script to align fasta to the references associated to a map
+## (in the config file) and get the resulting alignments.
+## The databases used as references must have been previously configured.
 ###########################
 
 import sys, os
@@ -28,20 +27,17 @@ DEFAULT_REF_TYPE = REF_TYPE_STD
 
 DATABASES_CONF = "conf/databases.conf"
 
-def _print_parameters(fasta_path, dbs, query_type, \
+def _print_parameters(fasta_path, maps, query_type, \
                       threshold_id, threshold_cov, best_score, \
-                      n_threads, hierarchical, ref_type = None):
+                      n_threads, hierarchical):
     sys.stderr.write("\nParameters:\n")
     sys.stderr.write("\tQuery fasta: "+fasta_path+"\n")
-    sys.stderr.write("\tDBs: "+dbs+"\n")
+    sys.stderr.write("\tMaps: "+maps+"\n")
     sys.stderr.write("\tQuery type: "+query_type+"\n")
     sys.stderr.write("\tThresholds --> %id="+str(threshold_id)+" : %query_cov="+str(threshold_cov)+"\n")
     sys.stderr.write("\tN threads: "+str(n_threads)+"\n")
     sys.stderr.write("\tBest score filtering: "+str(best_score)+"\n")
     sys.stderr.write("\tHierarchical filtering: "+str(hierarchical)+"\n")
-    
-    if ref_type:
-        sys.stderr.write("\tReference type: "+str(ref_type)+"\n")
     
     return
     
@@ -57,16 +53,13 @@ def _print_paths(split_blast_path, blastn_app_path, gmap_app_path, gmapl_app_pat
     return
 
 ## Argument parsing
-__usage = "usage: bmap_align_to_db.py [OPTIONS] [FASTA_FILE]\n\n"+\
-          "typical: bmap_align_to_db.py --hierarchical=yes --databases=MorexGenome queries.fasta"
+__usage = "usage: bmap_align_to_map.py [OPTIONS] [FASTA_FILE]\n\n"+\
+          "typical: bmap_align_to_map.py --maps=MorexGenome "
 
 optParser = OptionParser(__usage)
 
-optParser.add_option('--databases', action='store', dest='databases_param', type='string', \
-                     help='Comma delimited list of database names to align to (default all).')
-
-optParser.add_option('--databases-ids', action='store', dest='databases_ids_param', type='string', \
-                     help='Comma delimited list of database IDs to align to (default all).')
+optParser.add_option('--maps', action='store', dest='maps_param', type='string', \
+                         help='Comma delimited list of Maps to show (default all).')
 
 optParser.add_option('--query-mode', action='store', dest='query_mode', type='string', \
                      help='Alignment software to use (default auto). '+\
@@ -89,9 +82,6 @@ optParser.add_option('--best-score', action='store', dest='best_score', type='st
 
 optParser.add_option('--hierarchical', action='store', dest='hierarchical', type='string', \
                      help='Whether use datasets recursively (yes) or independently (default no).')
-
-optParser.add_option('--ref-type', action='store', dest='ref_type', type='string', \
-                     help='Whether use GMAP (std) or GMAPL (big), when using --databases-ids only.')
 
 optParser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='More information printed.')
 
@@ -179,27 +169,20 @@ if verbose_param:
     _print_paths(split_blast_path, blastn_app_path, gmap_app_path, gmapl_app_path, blastn_dbs_path, gmap_dbs_path)
     sys.stderr.write("\n")
 
-# Databases
-databases_conf_file = __app_path+DATABASES_CONF
-databases_config = DatabasesConfig(databases_conf_file, verbose_param)
-
-if options.databases_param: # or "all databases in conf"
-    databases_names = options.databases_param
-    databases_ids = databases_config.get_databases_ids(databases_names.strip().split(","))
-    #(databases_names, databases_ids) = load_data(databases_conf_file, users_list = options.databases_param,
-    #                                         verbose = verbose_param) # data_utils.load_data
-    
-elif options.databases_ids_param:
-    databases_ids = options.databases_ids_param.strip().split(",")
-    databases_names = ",".join(databases_config.get_databases_names(databases_ids))
-    
-    #(databases_names, databases_ids) = load_ids(databases_conf_file, users_list = options.databases_ids_param,
-    #                                         verbose = verbose_param) # data_utils.load_data
+# Genetic maps
+maps_conf_file = __app_path+MAPS_CONF
+maps_config = MapsConfig(maps_conf_file)
+if options.maps_param:
+    maps_names = options.maps_param
+    maps_ids = maps_config.get_maps_ids(maps_names.strip().split(","))
 else:
-    databases_ids = databases_config.get_databases().keys()
-    databases_names = ",".join(databases_config.get_databases_names(databases_ids))
+    maps_ids = maps_config.get_maps().keys()
+    maps_names = ",".join(maps_config.get_maps_names(maps_ids))
+#(maps_names, maps_ids) = load_data(maps_conf_file, users_list = options.maps_param, verbose = verbose_param)
 
-_print_parameters(query_fasta_path, databases_names, query_mode, \
+maps_path = __app_path+config_path_dict["maps_path"]
+
+_print_parameters(query_fasta_path, maps_names, query_mode, \
                   threshold_id, threshold_cov, options.best_score, \
                   n_threads, hierarchical, ref_type_param)
 
@@ -207,39 +190,51 @@ _print_parameters(query_fasta_path, databases_names, query_mode, \
 sys.stderr.write("\n")
 sys.stderr.write("Start\n")
 
-# Load configuration paths
-facade = AlignmentFacade(split_blast_path, blastn_app_path, gmap_app_path, \
-                         blastn_dbs_path, gmap_dbs_path, gmapl_app_path, tmp_files_path,
-                        databases_config, verbose = verbose_param)
+# Databases
+databases_conf_file = __app_path+DATABASES_CONF
+databases_config = DatabasesConfig(databases_conf_file, verbose_param)
 
-# Perform alignments
-results = facade.perform_alignment(query_fasta_path, databases_ids, hierarchical, query_mode, \
-                                   threshold_id, threshold_cov, n_threads, \
-                                   selection, best_score_filter, ref_type_param)
+facade = AlignmentFacade(split_blast_path, blastn_app_path, gmap_app_path,
+                         blastn_dbs_path, gmap_dbs_path, gmapl_app_path,
+                         tmp_files_path, databases_config, verbose = verbose_param)
 
-########## Output
-sys.stderr.write("\n")
+genetic_map_dicts = {}
 
-for db_entry in databases_ids:
-    if db_entry in results and len(results[db_entry]):
-        db_results = results[db_entry]
-        if len(databases_ids)>1 and not hierarchical: sys.stdout.write(">DB:"+str(db_entry)+"\n")
-        
-        #if align_info:
-        sys.stdout.write("#"+"\t".join(["query_id", "subject_id", "identity", "query_coverage", \
-                                        "score", "strand", "qstart", "qend", "sstart", "send",
-                                        "database", "algorithm"])+"\n")
-        for result in db_results:
-            sys.stdout.write("\t".join([str(a) for a in result[:2]]))
-            sys.stdout.write("\t"+str("%0.2f" % float(result[2]))) # cm
-            sys.stdout.write("\t"+str("%0.2f" % float(result[3]))+"\t") # bp
-            sys.stdout.write("\t".join([str(a) for a in result[4:]])+"\n")
-        #else:
-        #    sys.stdout.write("#"+"\t".join(["query_id", "subject_id"])+"\n")
-        #    for result in db_results:
-        #        sys.stdout.write("\t".join([str(a) for a in result[:2]])+"\n")
-    else:
-        sys.stderr.write("There are no results for DB: "+db_entry+"\n")
+for map_id in maps_ids:
+    sys.stdout.write(">>Map "+map_id+"\n")
+    
+    
+    map_config = maps_config.get_map(map_id)
+    databases_ids = maps_config.get_map_db_list(map_config)
+    
+    # Perform alignments
+    results = facade.perform_alignment(query_fasta_path, databases_ids, hierarchical, query_mode,
+                                       threshold_id, threshold_cov, n_threads, \
+                                       selection, best_score_filter)
+    
+    ########## Output
+    sys.stderr.write("\n")
+    
+    for db_entry in databases_ids:
+        if db_entry in results and len(results[db_entry]):
+            db_results = results[db_entry]
+            if len(databases_ids)>1 and not hierarchical: sys.stdout.write(">DB:"+str(db_entry)+"\n")
+            
+            #if align_info:
+            sys.stdout.write("#"+"\t".join(["query_id", "subject_id", "identity", "query_coverage", \
+                                            "score", "strand", "qstart", "qend", "sstart", "send",
+                                            "database", "algorithm"])+"\n")
+            for result in db_results:
+                sys.stdout.write("\t".join([str(a) for a in result[:2]]))
+                sys.stdout.write("\t"+str("%0.2f" % float(result[2]))) # cm
+                sys.stdout.write("\t"+str("%0.2f" % float(result[3]))+"\t") # bp
+                sys.stdout.write("\t".join([str(a) for a in result[4:]])+"\n")
+            #else:
+            #    sys.stdout.write("#"+"\t".join(["query_id", "subject_id"])+"\n")
+            #    for result in db_results:
+            #        sys.stdout.write("\t".join([str(a) for a in result[:2]])+"\n")
+        else:
+            sys.stderr.write("There are no results for DB: "+db_entry+"\n")
 
 sys.stderr.write("Finished.\n")
 
