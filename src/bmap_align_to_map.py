@@ -185,8 +185,8 @@ facade = AlignmentFacade(split_blast_path, blastn_app_path, gmap_app_path,
 genetic_map_dicts = {}
 
 for map_id in maps_ids:
+    sys.stderr.write(">>Map:"+map_id+"\n")
     sys.stdout.write(">>Map:"+map_id+"\n")
-    
     
     map_config = maps_config.get_map(map_id)
     databases_ids = maps_config.get_map_db_list(map_config)
@@ -200,13 +200,20 @@ for map_id in maps_ids:
     ########## Output
     sys.stderr.write("\n")
     
+    num_databases = len(databases_ids)
+    
+    # If hierarchical, show a single header for all map databases
+    if hierarchical or num_databases==1:
+        sys.stdout.write("#"+"\t".join(["query_id", "subject_id", "identity", "query_coverage", \
+                                            "score", "strand", "qstart", "qend", "sstart", "send",
+                                            "database", "algorithm"])+"\n")
+    
     for db_entry in databases_ids:
         if db_entry in results and len(results[db_entry]):
             db_results = results[db_entry]
-            if len(databases_ids)>1 and not hierarchical: sys.stdout.write(">DB:"+str(db_entry)+"\n")
-            
-            #if align_info:
-            sys.stdout.write("#"+"\t".join(["query_id", "subject_id", "identity", "query_coverage", \
+            if not hierarchical and num_databases>1:
+                sys.stdout.write(">DB:"+str(db_entry)+"\n")
+                sys.stdout.write("#"+"\t".join(["query_id", "subject_id", "identity", "query_coverage", \
                                             "score", "strand", "qstart", "qend", "sstart", "send",
                                             "database", "algorithm"])+"\n")
             for result in db_results:
