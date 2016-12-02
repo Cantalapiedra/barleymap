@@ -16,18 +16,18 @@ from optparse import OptionParser
 
 from barleymapcore.alignment.AlignmentFacade import AlignmentFacade
 from barleymapcore.utils.data_utils import read_paths
-#from barleymapcore.alignment.Aligners import SELECTION_BEST_SCORE, SELECTION_NONE
-from barleymapcore.db.DatabasesConfig import REF_TYPE_STD, DatabasesConfig
+from barleymapcore.db.DatabasesConfig import DatabasesConfig
 from barleymapcore.db.MapsConfig import MapsConfig
-
-DEFAULT_THRES_ID = 98.0
-DEFAULT_THRES_COV = 95.0
-DEFAULT_QUERY_MODE = "auto"
-DEFAULT_N_THREADS = 1
-DEFAULT_REF_TYPE = REF_TYPE_STD
 
 DATABASES_CONF = "conf/databases.conf"
 MAPS_CONF = "conf/maps.conf"
+
+DEFAULT_QUERY_MODE = "gmap"
+DEFAULT_THRES_ID = 98.0
+DEFAULT_THRES_COV = 95.0
+DEFAULT_N_THREADS = 1
+DEFAULT_BEST_SCORE = True
+DEFAULT_BEST_SCORE_PARAM = "yes"
 
 def _print_parameters(fasta_path, maps, query_type, \
                       threshold_id, threshold_cov, best_score, \
@@ -35,9 +35,9 @@ def _print_parameters(fasta_path, maps, query_type, \
     sys.stderr.write("\nParameters:\n")
     sys.stderr.write("\tQuery fasta: "+fasta_path+"\n")
     sys.stderr.write("\tMaps: "+maps+"\n")
-    sys.stderr.write("\tQuery type: "+query_type+"\n")
+    sys.stderr.write("\tAligner: "+query_type+"\n")
     sys.stderr.write("\tThresholds --> %id="+str(threshold_id)+" : %query_cov="+str(threshold_cov)+"\n")
-    sys.stderr.write("\tN threads: "+str(n_threads)+"\n")
+    sys.stderr.write("\tThreads: "+str(n_threads)+"\n")
     sys.stderr.write("\tBest score filtering: "+str(best_score)+"\n")
     
     return
@@ -55,31 +55,35 @@ def _print_paths(split_blast_path, blastn_app_path, gmap_app_path, gmapl_app_pat
 
 ## Argument parsing
 __usage = "usage: bmap_align_to_map.py [OPTIONS] [FASTA_FILE]\n\n"+\
-          "typical: bmap_align_to_map.py --maps=MorexGenome "
+          "typical: bmap_align_to_map.py --maps=MorexGenome queries.fasta"
 
 optParser = OptionParser(__usage)
 
 optParser.add_option('--maps', action='store', dest='maps_param', type='string', \
                          help='Comma delimited list of Maps to show (default all).')
 
-optParser.add_option('--query-mode', action='store', dest='query_mode', type='string', \
-                     help='Alignment software to use (default auto). '+\
-                     'The "auto" option means first GMAP then Blastn. The "cdna" option means to use only GMAP. '+\
-                     'The "genomic" option means to use only Blastn. The order and aligners can be explicitly '+\
-                     'specified by separating the names by "," (e.g.: genomic,cdna --> First Blastn, then GMAP).')
+optParser.add_option('--aligner', action='store', dest='query_mode', type='string',
+                     help='Alignment software to use (default "'+DEFAULT_QUERY_MODE+'"). '+\
+                     'The "gmap" option means to use only GMAP. '+\
+                     'The "blastn" option means to use only Blastn. '+\
+                     'The order and aligners can be explicitly specified by separating the names by ","'+\
+                     ' (e.g.: blastn,gmap --> First Blastn, then GMAP).')
 
-optParser.add_option('--thres-id', action='store', dest='thres_id', type='string', \
-                     help='Minimum identity for valid alignments. Float between 0-100 (default '+str(DEFAULT_THRES_ID)+').')
+optParser.add_option('--thres-id', action='store', dest='thres_id', type='string',
+                     help='Minimum identity for valid alignments. '+\
+                     'Float between 0-100 (default '+str(DEFAULT_THRES_ID)+').')
 
-optParser.add_option('--thres-cov', action='store', dest='thres_cov', type='string', \
-                     help='Minimum coverage for valid alignments. Float between 0-100 (default '+str(DEFAULT_THRES_COV)+').')
+optParser.add_option('--thres-cov', action='store', dest='thres_cov', type='string',
+                     help='Minimum coverage for valid alignments. '+\
+                     'Float between 0-100 (default '+str(DEFAULT_THRES_COV)+').')
 
-optParser.add_option('--threads', action='store', dest='n_threads', type='string', \
-                     help='Number of threads to perform alignments (default 1).')
+optParser.add_option('--threads', action='store', dest='n_threads', type='string',
+                     help='Number of threads to perform alignments (default '+str(DEFAULT_N_THREADS)+').')
 
-optParser.add_option('--best-score', action='store', dest='best_score', type='string', \
-                     help='Whether return secondary hits (no), best score hits for each database (db) '+\
-                     'or overall best score hits (default yes).')
+optParser.add_option('--best-score', action='store', dest='best_score', type='string',
+                     help='Whether return secondary hits (no) '+\
+                     'or overall best score hits (yes) '+\
+                     '(default '+str(DEFAULT_BEST_SCORE_PARAM)+').')
 
 optParser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='More information printed.')
 
@@ -88,6 +92,7 @@ optParser.add_option('-v', '--verbose', action='store_true', dest='verbose', hel
 if not arguments or len(arguments)==0:
     optParser.exit(0, "You may wish to run '-help' option.\n")
 
+### INPUT FILE
 query_fasta_path = arguments[0] # THIS IS MANDATORY
 
 sys.stderr.write("Command: "+" ".join(sys.argv)+"\n")
@@ -123,25 +128,16 @@ else: threshold_cov = DEFAULT_THRES_COV
 if options.n_threads: n_threads = int(options.n_threads)
 else: n_threads = DEFAULT_N_THREADS
 
-## Selection: show secondary alignments
+## Show only alignments from database with best scores
 if options.best_score and options.best_score == "no":
-    #selection = SELECTION_NONE
     best_score_filter = False
-else:
-    ##if options.best_score == "db":
-    ##    selection = SELECTION_BEST_SCORE
-    ##    best_score_filter = False
-    ##else: # options.best_score == "yes":
-    ##    selection = SELECTION_NONE # or SELECTION_BEST_SCORE, the results should be the same
+    best_score_param = "no"
+elif options.best_score and options.best_score == "yes":
     best_score_filter = True
-# selection is applied on alignment results to each database separately
-# best_score_filter is applied on all the results from all the databases
-
-# Extra alignment information
-#if options.align_info and options.align_info == "yes":
-align_info = True
-#else:
-#    align_info = False
+    best_score_param = "yes"
+else:
+    best_score_filter = DEFAULT_BEST_SCORE
+    best_score_param = DEFAULT_BEST_SCORE_PARAM
 
 # Verbosity    
 if options.verbose: verbose_param = True
@@ -162,12 +158,11 @@ if options.maps_param:
 else:
     maps_ids = maps_config.get_maps().keys()
     maps_names = ",".join(maps_config.get_maps_names(maps_ids))
-#(maps_names, maps_ids) = load_data(maps_conf_file, users_list = options.maps_param, verbose = verbose_param)
 
 maps_path = __app_path+config_path_dict["maps_path"]
 
 _print_parameters(query_fasta_path, maps_names, query_mode, \
-                  threshold_id, threshold_cov, options.best_score, \
+                  threshold_id, threshold_cov, best_score_param, \
                   n_threads)
 
 ########### MAIN
@@ -210,21 +205,21 @@ for map_id in maps_ids:
     
     for db_entry in databases_ids:
         if db_entry in results and len(results[db_entry]):
-            db_results = results[db_entry]
-            if not hierarchical and num_databases>1:
+            
+            # header
+            if (not hierarchical) and num_databases>1:
                 sys.stdout.write(">DB:"+str(db_entry)+"\n")
                 sys.stdout.write("#"+"\t".join(["query_id", "subject_id", "identity", "query_coverage", \
                                             "score", "strand", "qstart", "qend", "sstart", "send",
                                             "database", "algorithm"])+"\n")
+            
+            # records
+            db_results = results[db_entry]
             for result in db_results:
                 sys.stdout.write("\t".join([str(a) for a in result[:2]]))
                 sys.stdout.write("\t"+str("%0.2f" % float(result[2]))) # cm
                 sys.stdout.write("\t"+str("%0.2f" % float(result[3]))+"\t") # bp
                 sys.stdout.write("\t".join([str(a) for a in result[4:]])+"\n")
-            #else:
-            #    sys.stdout.write("#"+"\t".join(["query_id", "subject_id"])+"\n")
-            #    for result in db_results:
-            #        sys.stdout.write("\t".join([str(a) for a in result[:2]])+"\n")
         else:
             sys.stderr.write("There are no results for DB: "+db_entry+"\n")
 

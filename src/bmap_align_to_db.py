@@ -17,16 +17,19 @@ from optparse import OptionParser
 
 from barleymapcore.alignment.AlignmentFacade import AlignmentFacade
 from barleymapcore.utils.data_utils import read_paths
-#from barleymapcore.alignment.Aligners import SELECTION_BEST_SCORE, SELECTION_NONE
 from barleymapcore.db.DatabasesConfig import REF_TYPE_BIG, REF_TYPE_STD, DatabasesConfig
 
+DATABASES_CONF = "conf/databases.conf"
+
+DEFAULT_QUERY_MODE = "gmap"
 DEFAULT_THRES_ID = 98.0
 DEFAULT_THRES_COV = 95.0
-DEFAULT_QUERY_MODE = "auto"
 DEFAULT_N_THREADS = 1
+DEFAULT_BEST_SCORE = True
+DEFAULT_BEST_SCORE_PARAM = "yes"
+DEFAULT_HIERARCHICAL = False
+DEFAULT_HIERARCHICAL_PARAM = "no"
 DEFAULT_REF_TYPE = REF_TYPE_STD
-
-DATABASES_CONF = "conf/databases.conf"
 
 def _print_parameters(fasta_path, dbs, query_type, \
                       threshold_id, threshold_cov, best_score, \
@@ -34,9 +37,9 @@ def _print_parameters(fasta_path, dbs, query_type, \
     sys.stderr.write("\nParameters:\n")
     sys.stderr.write("\tQuery fasta: "+fasta_path+"\n")
     sys.stderr.write("\tDBs: "+dbs+"\n")
-    sys.stderr.write("\tQuery type: "+query_type+"\n")
+    sys.stderr.write("\tAligner: "+query_type+"\n")
     sys.stderr.write("\tThresholds --> %id="+str(threshold_id)+" : %query_cov="+str(threshold_cov)+"\n")
-    sys.stderr.write("\tN threads: "+str(n_threads)+"\n")
+    sys.stderr.write("\tThreads: "+str(n_threads)+"\n")
     sys.stderr.write("\tBest score filtering: "+str(best_score)+"\n")
     sys.stderr.write("\tHierarchical filtering: "+str(hierarchical)+"\n")
     
@@ -58,39 +61,45 @@ def _print_paths(split_blast_path, blastn_app_path, gmap_app_path, gmapl_app_pat
 
 ## Argument parsing
 __usage = "usage: bmap_align_to_db.py [OPTIONS] [FASTA_FILE]\n\n"+\
-          "typical: bmap_align_to_db.py --hierarchical=yes --databases=MorexGenome queries.fasta"
+          "typical: bmap_align_to_db.py --databases=MorexGenome queries.fasta"
 
 optParser = OptionParser(__usage)
 
-optParser.add_option('--databases', action='store', dest='databases_param', type='string', \
+optParser.add_option('--databases', action='store', dest='databases_param', type='string',
                      help='Comma delimited list of database names to align to (default all).')
 
-optParser.add_option('--databases-ids', action='store', dest='databases_ids_param', type='string', \
+optParser.add_option('--databases-ids', action='store', dest='databases_ids_param', type='string',
                      help='Comma delimited list of database IDs to align to (default all).')
 
-optParser.add_option('--query-mode', action='store', dest='query_mode', type='string', \
-                     help='Alignment software to use (default auto). '+\
-                     'The "auto" option means first GMAP then Blastn. The "cdna" option means to use only GMAP. '+\
-                     'The "genomic" option means to use only Blastn. The order and aligners can be explicitly '+\
-                     'specified by separating the names by "," (e.g.: genomic,cdna --> First Blastn, then GMAP).')
+optParser.add_option('--ailgner', action='store', dest='query_mode', type='string',
+                     help='Alignment software to use (default "'+DEFAULT_QUERY_MODE+'"). '+\
+                     'The "gmap" option means to use only GMAP. '+\
+                     'The "blastn" option means to use only Blastn. '+\
+                     'The order and aligners can be explicitly specified by separating the names by ","'+\
+                     ' (e.g.: blastn,gmap --> First Blastn, then GMAP).')
 
-optParser.add_option('--thres-id', action='store', dest='thres_id', type='string', \
-                     help='Minimum identity for valid alignments. Float between 0-100 (default '+str(DEFAULT_THRES_ID)+').')
+optParser.add_option('--thres-id', action='store', dest='thres_id', type='string',
+                     help='Minimum identity for valid alignments. '+\
+                     'Float between 0-100 (default '+str(DEFAULT_THRES_ID)+').')
 
-optParser.add_option('--thres-cov', action='store', dest='thres_cov', type='string', \
-                     help='Minimum coverage for valid alignments. Float between 0-100 (default '+str(DEFAULT_THRES_COV)+').')
+optParser.add_option('--thres-cov', action='store', dest='thres_cov', type='string',
+                     help='Minimum coverage for valid alignments. '+\
+                     'Float between 0-100 (default '+str(DEFAULT_THRES_COV)+').')
 
-optParser.add_option('--threads', action='store', dest='n_threads', type='string', \
-                     help='Number of threads to perform alignments (default 1).')
+optParser.add_option('--threads', action='store', dest='n_threads', type='string',
+                     help='Number of threads to perform alignments (default '+str(DEFAULT_N_THREADS)+').')
 
-optParser.add_option('--best-score', action='store', dest='best_score', type='string', \
+optParser.add_option('--best-score', action='store', dest='best_score', type='string',
                      help='Whether return secondary hits (no) '+\
-                     'or overall best score hits (default yes).')
+                     'or overall best score hits (yes) '+\
+                     '(default '+str(DEFAULT_BEST_SCORE_PARAM)+').')
 
-optParser.add_option('--hierarchical', action='store', dest='hierarchical', type='string', \
-                     help='Whether use datasets recursively (yes) or independently (default no).')
+optParser.add_option('--hierarchical', action='store', dest='hierarchical', type='string',
+                     help='Whether use datasets recursively (yes) or '+\
+                     'independently (yes) '+\
+                     '(default '+str(DEFAULT_HIERARCHICAL_PARAM)+').')
 
-optParser.add_option('--ref-type', action='store', dest='ref_type', type='string', \
+optParser.add_option('--ref-type', action='store', dest='ref_type', type='string',
                      help='Whether use GMAP (std) or GMAPL (big), when using --databases-ids only.')
 
 optParser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='More information printed.')
@@ -100,6 +109,7 @@ optParser.add_option('-v', '--verbose', action='store_true', dest='verbose', hel
 if not arguments or len(arguments)==0:
     optParser.exit(0, "You may wish to run '-help' option.\n")
 
+### INPUT FILE
 query_fasta_path = arguments[0] # THIS IS MANDATORY
 
 sys.stderr.write("Command: "+" ".join(sys.argv)+"\n")
@@ -135,39 +145,33 @@ else: threshold_cov = DEFAULT_THRES_COV
 if options.n_threads: n_threads = int(options.n_threads)
 else: n_threads = DEFAULT_N_THREADS
 
-## Selection: show secondary alignments
+## Show only alignments from database with best scores
 if options.best_score and options.best_score == "no":
-    #selection = SELECTION_NONE
     best_score_filter = False
-else:
-    #if options.best_score == "db":
-    #    selection = SELECTION_BEST_SCORE
-    #    best_score_filter = False
-    #else: # options.best_score == "yes":
-    #    selection = SELECTION_NONE # or SELECTION_BEST_SCORE, the results should be the same
+    best_score_param = "no"
+elif options.best_score and options.best_score == "yes":
     best_score_filter = True
-# selection is applied on alignment results to each database separately
-# best_score_filter is applied on all the results from all the databases
+    best_score_param = "yes"
+else:
+    best_score_filter = DEFAULT_BEST_SCORE
+    best_score_param = DEFAULT_BEST_SCORE_PARAM
     
 # Hierarchical
 if options.hierarchical and options.hierarchical == "yes":
     hierarchical = True
     hierarchical_param = "yes"
-else:
+elif options.hierarchical and options.hierarchical == "no":
     hierarchical = False
     hierarchical_param = "no"
+else:
+    hierarchical = DEFAULT_HIERARCHICAL
+    hierarchical_param = DEFAULT_HIERARCHICAL_PARAM
     
 # ref_type
 if options.ref_type and options.ref_type == REF_TYPE_BIG:
     ref_type_param = REF_TYPE_BIG
 else:
     ref_type_param = DEFAULT_REF_TYPE
-
-# Extra alignment information
-#if options.align_info and options.align_info == "yes":
-align_info = True
-#else:
-#    align_info = False
 
 # Verbosity    
 if options.verbose: verbose_param = True
@@ -186,22 +190,17 @@ databases_config = DatabasesConfig(databases_conf_file, verbose_param)
 if options.databases_param: # or "all databases in conf"
     databases_names = options.databases_param
     databases_ids = databases_config.get_databases_ids(databases_names.strip().split(","))
-    #(databases_names, databases_ids) = load_data(databases_conf_file, users_list = options.databases_param,
-    #                                         verbose = verbose_param) # data_utils.load_data
     
 elif options.databases_ids_param:
     databases_ids = options.databases_ids_param.strip().split(",")
     databases_names = ",".join(databases_config.get_databases_names(databases_ids))
-    
-    #(databases_names, databases_ids) = load_ids(databases_conf_file, users_list = options.databases_ids_param,
-    #                                         verbose = verbose_param) # data_utils.load_data
 else:
     databases_ids = databases_config.get_databases().keys()
     databases_names = ",".join(databases_config.get_databases_names(databases_ids))
 
 _print_parameters(query_fasta_path, databases_names, query_mode, \
-                  threshold_id, threshold_cov, options.best_score, \
-                  n_threads, hierarchical, ref_type_param)
+                  threshold_id, threshold_cov, best_score_param, \
+                  n_threads, hierarchical_param, ref_type_param)
 
 ########### MAIN
 sys.stderr.write("\n")
@@ -220,24 +219,25 @@ results = facade.perform_alignment(query_fasta_path, databases_ids, hierarchical
 ########## Output
 sys.stderr.write("\n")
 
+num_databases = len(databases_ids)
+
 for db_entry in databases_ids:
     if db_entry in results and len(results[db_entry]):
-        db_results = results[db_entry]
-        if len(databases_ids)>1 and not hierarchical: sys.stdout.write(">DB:"+str(db_entry)+"\n")
         
-        #if align_info:
+        if (not hierarchical) and num_databases>1: sys.stdout.write(">DB:"+str(db_entry)+"\n")
+        
+        # header
         sys.stdout.write("#"+"\t".join(["query_id", "subject_id", "identity", "query_coverage", \
                                         "score", "strand", "qstart", "qend", "sstart", "send",
                                         "database", "algorithm"])+"\n")
+        
+        # records
+        db_results = results[db_entry]
         for result in db_results:
             sys.stdout.write("\t".join([str(a) for a in result[:2]]))
             sys.stdout.write("\t"+str("%0.2f" % float(result[2]))) # cm
             sys.stdout.write("\t"+str("%0.2f" % float(result[3]))+"\t") # bp
             sys.stdout.write("\t".join([str(a) for a in result[4:]])+"\n")
-        #else:
-        #    sys.stdout.write("#"+"\t".join(["query_id", "subject_id"])+"\n")
-        #    for result in db_results:
-        #        sys.stdout.write("\t".join([str(a) for a in result[:2]])+"\n")
     else:
         sys.stderr.write("There are no results for DB: "+db_entry+"\n")
 
