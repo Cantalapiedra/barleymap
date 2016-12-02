@@ -16,7 +16,7 @@ from optparse import OptionParser
 
 from barleymapcore.alignment.AlignmentFacade import AlignmentFacade
 from barleymapcore.utils.data_utils import read_paths
-from barleymapcore.alignment.Aligners import SELECTION_BEST_SCORE, SELECTION_NONE
+#from barleymapcore.alignment.Aligners import SELECTION_BEST_SCORE, SELECTION_NONE
 from barleymapcore.db.DatabasesConfig import REF_TYPE_STD, DatabasesConfig
 from barleymapcore.db.MapsConfig import MapsConfig
 
@@ -125,15 +125,15 @@ else: n_threads = DEFAULT_N_THREADS
 
 ## Selection: show secondary alignments
 if options.best_score and options.best_score == "no":
-    selection = SELECTION_NONE
+    #selection = SELECTION_NONE
     best_score_filter = False
 else:
-    if options.best_score == "db":
-        selection = SELECTION_BEST_SCORE
-        best_score_filter = False
-    else: # options.best_score == "yes":
-        selection = SELECTION_NONE # or SELECTION_BEST_SCORE, the results should be the same
-        best_score_filter = True
+    ##if options.best_score == "db":
+    ##    selection = SELECTION_BEST_SCORE
+    ##    best_score_filter = False
+    ##else: # options.best_score == "yes":
+    ##    selection = SELECTION_NONE # or SELECTION_BEST_SCORE, the results should be the same
+    best_score_filter = True
 # selection is applied on alignment results to each database separately
 # best_score_filter is applied on all the results from all the databases
 
@@ -195,7 +195,7 @@ for map_id in maps_ids:
     # Perform alignments
     results = facade.perform_alignment(query_fasta_path, databases_ids, hierarchical, query_mode,
                                        threshold_id, threshold_cov, n_threads, \
-                                       selection, best_score_filter)
+                                       best_score_filter)
     
     ########## Output
     sys.stderr.write("\n")
