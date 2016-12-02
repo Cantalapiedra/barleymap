@@ -59,7 +59,9 @@ try:
     optParser.add_option('--show-multiples', action='store', dest='multiple_param', type='string', help='Whether show (yes) or not (no) IDs with multiple positions.')
     
     optParser.add_option('--best-score', action='store', dest='best_score', type='string', \
-                     help='Whether return secondary hits (no), best score hits for each database (db) or overall best score hits (yes; default).')
+                     help='Whether return secondary hits (no), \
+                     best score hits for each database (db) or \
+                     overall best score hits (yes; default).')
     
     optParser.add_option('--genes', action='store', dest='show_genes', type='string', help='Show genes on marker (marker), between markers (between) \
                          or dont show (no). If --genes is active, --markers option is ignored.')

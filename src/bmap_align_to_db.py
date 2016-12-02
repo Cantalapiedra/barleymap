@@ -17,7 +17,7 @@ from optparse import OptionParser
 
 from barleymapcore.alignment.AlignmentFacade import AlignmentFacade
 from barleymapcore.utils.data_utils import read_paths
-from barleymapcore.alignment.Aligners import SELECTION_BEST_SCORE, SELECTION_NONE
+#from barleymapcore.alignment.Aligners import SELECTION_BEST_SCORE, SELECTION_NONE
 from barleymapcore.db.DatabasesConfig import REF_TYPE_BIG, REF_TYPE_STD, DatabasesConfig
 
 DEFAULT_THRES_ID = 98.0
@@ -84,7 +84,7 @@ optParser.add_option('--threads', action='store', dest='n_threads', type='string
                      help='Number of threads to perform alignments (default 1).')
 
 optParser.add_option('--best-score', action='store', dest='best_score', type='string', \
-                     help='Whether return secondary hits (no), best score hits for each database (db) '+\
+                     help='Whether return secondary hits (no) '+\
                      'or overall best score hits (default yes).')
 
 optParser.add_option('--hierarchical', action='store', dest='hierarchical', type='string', \
@@ -137,15 +137,15 @@ else: n_threads = DEFAULT_N_THREADS
 
 ## Selection: show secondary alignments
 if options.best_score and options.best_score == "no":
-    selection = SELECTION_NONE
+    #selection = SELECTION_NONE
     best_score_filter = False
 else:
-    if options.best_score == "db":
-        selection = SELECTION_BEST_SCORE
-        best_score_filter = False
-    else: # options.best_score == "yes":
-        selection = SELECTION_NONE # or SELECTION_BEST_SCORE, the results should be the same
-        best_score_filter = True
+    #if options.best_score == "db":
+    #    selection = SELECTION_BEST_SCORE
+    #    best_score_filter = False
+    #else: # options.best_score == "yes":
+    #    selection = SELECTION_NONE # or SELECTION_BEST_SCORE, the results should be the same
+    best_score_filter = True
 # selection is applied on alignment results to each database separately
 # best_score_filter is applied on all the results from all the databases
     
@@ -215,7 +215,7 @@ facade = AlignmentFacade(split_blast_path, blastn_app_path, gmap_app_path, \
 # Perform alignments
 results = facade.perform_alignment(query_fasta_path, databases_ids, hierarchical, query_mode, \
                                    threshold_id, threshold_cov, n_threads, \
-                                   selection, best_score_filter, ref_type_param)
+                                   best_score_filter, ref_type_param)
 
 ########## Output
 sys.stderr.write("\n")
