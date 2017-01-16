@@ -300,13 +300,16 @@ try:
         hierarchical = maps_config.get_map_is_hierarchical(map_config)
         
         # Perform alignments
-        results = facade.perform_alignment(query_fasta_path, databases_ids, hierarchical, query_mode,
+        facade.perform_alignment(query_fasta_path, databases_ids, hierarchical, query_mode,
                                            threshold_id, threshold_cov, n_threads, \
                                            best_score_filter)
+        
+        results = facade.get_alignment_results()
         unmapped = facade.get_alignment_unmapped()  
         
         ############ MAPS
         mapMarkers = MapMarkers(maps_path, maps_config, map_id, verbose_param)
+        
         mapMarkers.create_genetic_maps(results, unmapped, databases_ids, sort_param, multiple_param)
         
         ############ OTHER MARKERS

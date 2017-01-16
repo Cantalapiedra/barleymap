@@ -226,9 +226,11 @@ facade = AlignmentFacade(split_blast_path, blastn_app_path, gmap_app_path, hsbla
                         databases_config, verbose = verbose_param)
 
 # Perform alignments
-results = facade.perform_alignment(query_fasta_path, databases_ids, hierarchical, query_mode, \
+facade.perform_alignment(query_fasta_path, databases_ids, hierarchical, query_mode, \
                                    threshold_id, threshold_cov, n_threads, \
                                    best_score_filter, ref_type_param)
+
+results = facade.get_alignment_results()
 
 ########## Output
 sys.stderr.write("\n")
@@ -244,14 +246,25 @@ for db_entry in databases_ids:
         sys.stdout.write("#"+"\t".join(["query_id", "subject_id", "identity", "query_coverage", \
                                         "score", "strand", "qstart", "qend", "sstart", "send",
                                         "database", "algorithm"])+"\n")
-        
+    
         # records
         db_results = results[db_entry]
-        for result in db_results:
-            sys.stdout.write("\t".join([str(a) for a in result[:2]]))
-            sys.stdout.write("\t"+str("%0.2f" % float(result[2]))) # cm
-            sys.stdout.write("\t"+str("%0.2f" % float(result[3]))+"\t") # bp
-            sys.stdout.write("\t".join([str(a) for a in result[4:]])+"\n")
+        for alignment_result in db_results:
+            sys.stdout.write("\t".join([
+                alignment_result.get_query_id(),
+                alignment_result.get_subject_id(),
+                str("%0.2f" % float(alignment_result.get_align_ident())),
+                str("%0.2f" % float(alignment_result.get_query_cov())),
+                str(alignment_result.get_align_score()),
+                alignment_result.get_strand(),
+                str(alignment_result.get_local_position()),
+                str(alignment_result.get_end_position()),
+                str(alignment_result.get_qstart_pos()),
+                str(alignment_result.get_qend_pos()),
+                str(alignment_result.get_db_name()),
+                str(alignment_result.get_algorithm())
+            ]))
+            sys.stdout.write("\n")
     else:
         sys.stderr.write("There are no results for DB: "+db_entry+"\n")
 

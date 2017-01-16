@@ -252,22 +252,23 @@ try:
     for map_id in maps_ids:
         sys.stderr.write(">>Map "+map_id+"\n")
         map_config = maps_config.get_map(map_id)
-        hierarchical = maps_config.get_map_is_hierarchical(map_config)
         
-        # Perform alignments
-        results = facade.retrieve_ids_map(query_ids_path, datasets_ids, map_id, \
+        # Retrieve pre-computed alignments
+        facade.retrieve_ids_map(query_ids_path, datasets_ids, map_id, \
                                             best_score_filter)
         
+        facade.get_alignment_results()
         unmapped = facade.get_alignment_unmapped()
         
         ############ MAPS
         mapMarkers = MapMarkers(maps_path, maps_config, map_id, verbose_param)
-        databases_ids = maps_config.get_map_db_list(map_config)
         
+        databases_ids = maps_config.get_map_db_list(map_config)
         mapMarkers.create_genetic_maps(results, unmapped, databases_ids, sort_param, multiple_param)
         
         ############ OTHER MARKERS
         if show_markers and not show_genes:
+            hierarchical = maps_config.get_map_is_hierarchical(map_config)
             markers_dict = mapMarkers.enrich_with_markers(genes_extend, genes_window, genes_window, sort_param, \
                                                           databases_ids, datasets_ids, datasets_conf_file,
                                                         hierarchical, constrain_fine_mapping = False)
