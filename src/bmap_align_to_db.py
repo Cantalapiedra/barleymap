@@ -8,7 +8,7 @@
 
 ###########################
 ## Script to align fasta to different references
-## and get a list of targets. The databases used
+## and get a list of alignment results. The databases used
 ## as references must have been previously configured.
 ###########################
 
