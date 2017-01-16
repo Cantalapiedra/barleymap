@@ -48,15 +48,23 @@ def _print_parameters(fasta_path, dbs, query_type, \
     
     return
     
-def _print_paths(split_blast_path, blastn_app_path, gmap_app_path, gmapl_app_path, blastn_dbs_path, gmap_dbs_path):
+def _print_paths(split_blast_path, blastn_app_path, gmap_app_path, gmapl_app_path, hsblastn_app_path, \
+                 blastn_dbs_path, gmap_dbs_path, hsblastn_dbs_path):
+    
     sys.stderr.write("\nBlastn:\n")
     sys.stderr.write("\tapp path: "+blastn_app_path+"\n")
     sys.stderr.write("\tdbs path: "+blastn_dbs_path+"\n")
     sys.stderr.write("\tsplit_blast: "+split_blast_path+"\n")
+    
     sys.stderr.write("GMAP:\n")
     sys.stderr.write("\tapp path: "+gmap_app_path+"\n")
     sys.stderr.write("\tgmapl app path: "+gmapl_app_path+"\n")
     sys.stderr.write("\tdbs path: "+gmap_dbs_path+"\n")
+    
+    sys.stderr.write("HS-Blastn:\n")
+    sys.stderr.write("\tapp path: "+hsblastn_app_path+"\n")
+    sys.stderr.write("\tdbs path:"+hsblastn_dbs_path+"\n")
+    
     return
 
 ## Argument parsing
@@ -71,10 +79,11 @@ optParser.add_option('--databases', action='store', dest='databases_param', type
 optParser.add_option('--databases-ids', action='store', dest='databases_ids_param', type='string',
                      help='Comma delimited list of database IDs to align to (default all).')
 
-optParser.add_option('--ailgner', action='store', dest='query_mode', type='string',
+optParser.add_option('--aligner', action='store', dest='query_mode', type='string',
                      help='Alignment software to use (default "'+DEFAULT_QUERY_MODE+'"). '+\
                      'The "gmap" option means to use only GMAP. '+\
                      'The "blastn" option means to use only Blastn. '+\
+                     'The "hsblastn" option means to use only HS-Blastn. '+\
                      'The order and aligners can be explicitly specified by separating the names by ","'+\
                      ' (e.g.: blastn,gmap --> First Blastn, then GMAP).')
 
@@ -123,11 +132,15 @@ __app_path = config_path_dict["app_path"]
 
 split_blast_path = __app_path+config_path_dict["split_blast_path"]
 tmp_files_path = __app_path+config_path_dict["tmp_files_path"]
+
 blastn_app_path = config_path_dict["blastn_app_path"]
 gmap_app_path = config_path_dict["gmap_app_path"]
 gmapl_app_path = config_path_dict["gmapl_app_path"]
+hsblastn_app_path = config_path_dict["hsblastn_app_path"]
+
 blastn_dbs_path = config_path_dict["blastn_dbs_path"]
 gmap_dbs_path = config_path_dict["gmap_dbs_path"]
+hsblastn_dbs_path = config_path_dict["hsblastn_dbs_path"]
 
 # Query mode
 if options.query_mode: query_mode = options.query_mode
@@ -180,7 +193,8 @@ else: verbose_param = False
 ### Print initial data
 ###
 if verbose_param:
-    _print_paths(split_blast_path, blastn_app_path, gmap_app_path, gmapl_app_path, blastn_dbs_path, gmap_dbs_path)
+    _print_paths(split_blast_path, blastn_app_path, gmap_app_path, gmapl_app_path, hsblastn_app_path, \
+                 blastn_dbs_path, gmap_dbs_path, hsblastn_dbs_path)
     sys.stderr.write("\n")
 
 # Databases
@@ -207,8 +221,8 @@ sys.stderr.write("\n")
 sys.stderr.write("Start\n")
 
 # Load configuration paths
-facade = AlignmentFacade(split_blast_path, blastn_app_path, gmap_app_path, \
-                         blastn_dbs_path, gmap_dbs_path, gmapl_app_path, tmp_files_path,
+facade = AlignmentFacade(split_blast_path, blastn_app_path, gmap_app_path, hsblastn_app_path, \
+                         blastn_dbs_path, gmap_dbs_path, hsblastn_dbs_path, gmapl_app_path, tmp_files_path,
                         databases_config, verbose = verbose_param)
 
 # Perform alignments

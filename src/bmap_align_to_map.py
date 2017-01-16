@@ -41,16 +41,24 @@ def _print_parameters(fasta_path, maps, query_type, \
     sys.stderr.write("\tBest score filtering: "+str(best_score)+"\n")
     
     return
+
+def _print_paths(split_blast_path, blastn_app_path, gmap_app_path, gmapl_app_path, hsblastn_app_path, \
+                 blastn_dbs_path, gmap_dbs_path, hsblastn_dbs_path):
     
-def _print_paths(split_blast_path, blastn_app_path, gmap_app_path, gmapl_app_path, blastn_dbs_path, gmap_dbs_path):
     sys.stderr.write("\nBlastn:\n")
     sys.stderr.write("\tapp path: "+blastn_app_path+"\n")
     sys.stderr.write("\tdbs path: "+blastn_dbs_path+"\n")
     sys.stderr.write("\tsplit_blast: "+split_blast_path+"\n")
+    
     sys.stderr.write("GMAP:\n")
     sys.stderr.write("\tapp path: "+gmap_app_path+"\n")
     sys.stderr.write("\tgmapl app path: "+gmapl_app_path+"\n")
     sys.stderr.write("\tdbs path: "+gmap_dbs_path+"\n")
+    
+    sys.stderr.write("HS-Blastn:\n")
+    sys.stderr.write("\tapp path: "+hsblastn_app_path+"\n")
+    sys.stderr.write("\tdbs path:"+hsblastn_dbs_path+"\n")
+    
     return
 
 ## Argument parsing
@@ -66,6 +74,7 @@ optParser.add_option('--aligner', action='store', dest='query_mode', type='strin
                      help='Alignment software to use (default "'+DEFAULT_QUERY_MODE+'"). '+\
                      'The "gmap" option means to use only GMAP. '+\
                      'The "blastn" option means to use only Blastn. '+\
+                     'The "hsblastn" option means to use only HS-Blastn. '+\
                      'The order and aligners can be explicitly specified by separating the names by ","'+\
                      ' (e.g.: blastn,gmap --> First Blastn, then GMAP).')
 
@@ -106,11 +115,15 @@ __app_path = config_path_dict["app_path"]
 
 split_blast_path = __app_path+config_path_dict["split_blast_path"]
 tmp_files_path = __app_path+config_path_dict["tmp_files_path"]
+
 blastn_app_path = config_path_dict["blastn_app_path"]
 gmap_app_path = config_path_dict["gmap_app_path"]
 gmapl_app_path = config_path_dict["gmapl_app_path"]
+hsblastn_app_path = config_path_dict["hsblastn_app_path"]
+
 blastn_dbs_path = config_path_dict["blastn_dbs_path"]
 gmap_dbs_path = config_path_dict["gmap_dbs_path"]
+hsblastn_dbs_path = config_path_dict["hsblastn_dbs_path"]
 
 # Query mode
 if options.query_mode: query_mode = options.query_mode
@@ -146,7 +159,8 @@ else: verbose_param = False
 ### Print initial data
 ###
 if verbose_param:
-    _print_paths(split_blast_path, blastn_app_path, gmap_app_path, gmapl_app_path, blastn_dbs_path, gmap_dbs_path)
+    _print_paths(split_blast_path, blastn_app_path, gmap_app_path, gmapl_app_path, hsblastn_app_path, \
+                 blastn_dbs_path, gmap_dbs_path, hsblastn_dbs_path)
     sys.stderr.write("\n")
 
 # Genetic maps
@@ -156,7 +170,7 @@ if options.maps_param:
     maps_names = options.maps_param
     maps_ids = maps_config.get_maps_ids(maps_names.strip().split(","))
 else:
-    maps_ids = maps_config.get_maps().keys()
+    maps_ids = maps_config.get_maps_ids()
     maps_names = ",".join(maps_config.get_maps_names(maps_ids))
 
 maps_path = __app_path+config_path_dict["maps_path"]
@@ -173,14 +187,14 @@ sys.stderr.write("Start\n")
 databases_conf_file = __app_path+DATABASES_CONF
 databases_config = DatabasesConfig(databases_conf_file, verbose_param)
 
-facade = AlignmentFacade(split_blast_path, blastn_app_path, gmap_app_path,
-                         blastn_dbs_path, gmap_dbs_path, gmapl_app_path,
-                         tmp_files_path, databases_config, verbose = verbose_param)
+facade = AlignmentFacade(split_blast_path, blastn_app_path, gmap_app_path, hsblastn_app_path, \
+                         blastn_dbs_path, gmap_dbs_path, hsblastn_dbs_path, gmapl_app_path, tmp_files_path,
+                        databases_config, verbose = verbose_param)
 
 genetic_map_dicts = {}
 
 for map_id in maps_ids:
-    sys.stderr.write(">>Map:"+map_id+"\n")
+    sys.stderr.write("\nWorking with map:"+map_id+"\n")
     sys.stdout.write(">>Map:"+map_id+"\n")
     
     map_config = maps_config.get_map(map_id)
@@ -193,8 +207,6 @@ for map_id in maps_ids:
                                        best_score_filter)
     
     ########## Output
-    sys.stderr.write("\n")
-    
     num_databases = len(databases_ids)
     
     # If hierarchical, show a single header for all map databases
