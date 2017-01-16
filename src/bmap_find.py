@@ -73,8 +73,6 @@ try:
     
     optParser.add_option('--maps', action='store', dest='maps_param', type='string', help='Comma delimited list of Maps to show.')
     
-    
-    
     optParser.add_option('--best-score', action='store', dest='best_score', type='string',
                          help='Whether return secondary hits (no) '+\
                          'or overall best score hits (yes) '+\
@@ -257,7 +255,7 @@ try:
         facade.retrieve_ids_map(query_ids_path, datasets_ids, map_id, \
                                             best_score_filter)
         
-        facade.get_alignment_results()
+        results = facade.get_alignment_results()
         unmapped = facade.get_alignment_unmapped()
         
         ############ MAPS

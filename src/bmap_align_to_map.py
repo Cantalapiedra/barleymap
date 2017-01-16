@@ -235,10 +235,10 @@ for map_id in maps_ids:
                     str("%0.2f" % float(alignment_result.get_query_cov())),
                     str(alignment_result.get_align_score()),
                     alignment_result.get_strand(),
-                    str(alignment_result.get_local_position()),
-                    str(alignment_result.get_end_position()),
                     str(alignment_result.get_qstart_pos()),
                     str(alignment_result.get_qend_pos()),
+                    str(alignment_result.get_local_position()),
+                    str(alignment_result.get_end_position()),
                     str(alignment_result.get_db_name()),
                     str(alignment_result.get_algorithm())
                 ]))
