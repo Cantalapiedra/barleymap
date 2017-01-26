@@ -15,11 +15,13 @@ import sys, os, traceback
 from optparse import OptionParser
 
 from barleymapcore.utils.data_utils import read_paths
-from barleymapcore.db.DatasetsConfig import DatasetsConfig
 from barleymapcore.db.MapsConfig import MapsConfig
+from barleymapcore.db.DatasetsConfig import DatasetsConfig
 from barleymapcore.db.DatabasesConfig import DatabasesConfig
 from barleymapcore.alignment.AlignmentFacade import AlignmentFacade
+from barleymapcore.datasets.DatasetsFacade import DatasetsFacade
 from barleymapcore.maps.MapMarkers import MapMarkers
+from barleymapcore.m2p_exception import m2pException
 from output.OutputFacade import OutputFacade
 
 DATABASES_CONF = "conf/databases.conf"
@@ -32,7 +34,7 @@ DEFAULT_THRES_COV = 95.0
 DEFAULT_N_THREADS = 1
 DEFAULT_BEST_SCORE = True
 DEFAULT_BEST_SCORE_PARAM = "yes"
-DEFAULT_SORT_PARAM = "cm"
+DEFAULT_SORT_PARAM = "map default"
 DEFAULT_SHOW_MULTIPLES = True
 DEFAULT_SHOW_MULTIPLES_PARAM = "yes"
 DEFAULT_SHOW_GENES = False
@@ -43,7 +45,7 @@ DEFAULT_LOAD_ANNOT = False
 DEFAULT_LOAD_ANNOT_PARAM = "no"
 DEFAULT_EXTEND = False
 DEFAULT_EXTEND_PARAM = "no"
-DEFAULT_GENES_WINDOW = 5.0
+DEFAULT_EXTEND_WINDOW = 5.0
 DEFAULT_SHOW_UNMAPPED = False
 DEFAULT_SHOW_UNMAPPED_PARAM = "no"
 
@@ -51,7 +53,7 @@ def _print_parameters(fasta_path, genetic_map_name, query_type, \
                       threshold_id, threshold_cov, n_threads, \
                       sort_param, multiple_param, best_score, \
                       show_genes_param, show_markers_param, \
-                      load_annot_param, genes_extend_param, genes_window, \
+                      load_annot_param, extend_param, extend_window, \
                       show_unmapped_param):
     sys.stderr.write("\nParameters:\n")
     sys.stderr.write("\tQuery fasta: "+fasta_path+"\n")
@@ -65,8 +67,8 @@ def _print_parameters(fasta_path, genetic_map_name, query_type, \
     sys.stderr.write("\tShow genes: "+str(show_genes_param)+"\n")
     sys.stderr.write("\tShow markers: "+str(show_markers_param)+"\n")
     sys.stderr.write("\tLoad annotation: "+str(load_annot_param)+"\n")
-    sys.stderr.write("\tExtend genes search: "+str(genes_extend_param)+"\n")
-    sys.stderr.write("\tGenes window: "+str(genes_window)+"\n")
+    sys.stderr.write("\tExtend genes search: "+str(extend_param)+"\n")
+    sys.stderr.write("\tGenes window: "+str(extend_window)+"\n")
     sys.stderr.write("\tShow unmapped: "+str(show_unmapped_param)+"\n")
     
     return
@@ -107,7 +109,7 @@ try:
     
     optParser.add_option('--sort', action='store', dest='sort_param', type='string', \
                          help='Sort results by centimorgan (cm) or basepairs (bp) '+\
-                         '(default '+DEFAULT_SORT_PARAM+'')
+                         '(default: defined for each map in maps configuration.')
     
     optParser.add_option('--show-multiples', action='store', dest='multiple_param', type='string', \
                          help='Whether show (yes) or not (no) IDs with multiple positions.'+\
@@ -132,9 +134,9 @@ try:
                          help='Whether extend search for genes (yes) or not (no).'+\
                          '(default '+DEFAULT_EXTEND_PARAM+')')
     
-    optParser.add_option('--genes-window', action='store', dest='genes_window', type='string', \
+    optParser.add_option('--extend-window', action='store', dest='extend_window', type='string', \
                          help='Centimorgans or basepairs (depending on sort) to extend the search for genes.'+\
-                         '(default '+str(DEFAULT_GENES_WINDOW)+')')
+                         '(default '+str(DEFAULT_EXTEND_WINDOW)+')')
     
     optParser.add_option('--show-unmapped', action='store', dest='show_unmapped', type='string', \
                          help='Whether to output only maps (no), or unmapped results as well (yes).'+\
@@ -167,7 +169,7 @@ try:
     # Threshold coverage
     if options.thres_cov: threshold_cov = float(options.thres_cov)
     else: threshold_cov = DEFAULT_THRES_COV
-        
+    
     # Num threads
     if options.n_threads: n_threads = int(options.n_threads)
     else: n_threads = DEFAULT_N_THREADS
@@ -182,10 +184,12 @@ try:
     else:
         best_score_filter = DEFAULT_BEST_SCORE
         best_score_param = DEFAULT_BEST_SCORE_PARAM
-        
+    
     ## Sort
     if options.sort_param and options.sort_param == "bp":
         sort_param = "bp"
+    elif options.sort_param and options.sort_param == "cm":
+        sort_param = "cm"
     else:
         sort_param = DEFAULT_SORT_PARAM
     
@@ -223,17 +227,17 @@ try:
         
     ## Extend genes shown, on marker or in the edges when between markers
     if options.extend and options.extend == "yes":
-        genes_extend = True
-        genes_extend_param = "yes"
+        extend = True
+        extend_param = "yes"
     else:
-        genes_extend = DEFAULT_EXTEND
-        genes_extend_param = DEFAULT_EXTEND_PARAM
+        extend = DEFAULT_EXTEND
+        extend_param = DEFAULT_EXTEND_PARAM
     
     ## Genes window
-    if options.genes_window:
-        genes_window = float(options.genes_window)
+    if options.extend_window:
+        extend_window = float(options.extend_window)
     else:
-        genes_window = DEFAULT_GENES_WINDOW
+        extend_window = DEFAULT_EXTEND_WINDOW
     
     ## Show unmapped
     if options.show_unmapped and options.show_unmapped == "yes":
@@ -261,11 +265,11 @@ try:
     
     maps_path = __app_path+config_path_dict["maps_path"]
     
-    if verbose_param: _print_parameters(query_fasta_path, databases_names, maps_names, query_mode, \
+    if verbose_param: _print_parameters(query_fasta_path, maps_names, query_mode, \
                       threshold_id, threshold_cov, n_threads, \
                       sort_param, multiple_param_text, options.best_score, \
                       show_genes_param, show_markers_param, \
-                      load_annot_param, genes_extend_param, genes_window, \
+                      load_annot_param, extend_param, extend_window, \
                       show_unmapped_param)
     
     ############### MAIN
@@ -278,71 +282,86 @@ try:
     tmp_files_path = __app_path+config_path_dict["tmp_files_path"]
     blastn_app_path = config_path_dict["blastn_app_path"]
     gmap_app_path = config_path_dict["gmap_app_path"]
+    gmapl_app_path = config_path_dict["gmapl_app_path"]
+    hsblastn_app_path = config_path_dict["hsblastn_app_path"]
+    
     blastn_dbs_path = config_path_dict["blastn_dbs_path"]
     gmap_dbs_path = config_path_dict["gmap_dbs_path"]
-    gmapl_app_path = config_path_dict["gmapl_app_path"]
+    hsblastn_dbs_path = config_path_dict["hsblastn_dbs_path"]
     
     # Databases
     databases_conf_file = __app_path+DATABASES_CONF
     databases_config = DatabasesConfig(databases_conf_file, verbose_param)
     
-    facade = AlignmentFacade(split_blast_path, blastn_app_path, gmap_app_path,
-                             blastn_dbs_path, gmap_dbs_path, gmapl_app_path,
+    facade = AlignmentFacade(split_blast_path, blastn_app_path, gmap_app_path, hsblastn_app_path,
+                             blastn_dbs_path, gmap_dbs_path, hsblastn_dbs_path, gmapl_app_path,
                              tmp_files_path, databases_config, verbose = verbose_param)
     
-    genetic_map_dicts = {}
+    maps_dict = {}
     
     for map_id in maps_ids:
-        sys.stderr.write(">>Map "+map_id+"\n")
+        sys.stderr.write("bmap_align: Map "+map_id+"\n")
         
-        map_config = maps_config.get_map(map_id)
-        databases_ids = maps_config.get_map_db_list(map_config)
-        hierarchical = maps_config.get_map_is_hierarchical(map_config)
+        map_config = maps_config.get_map_config(map_id)
+        databases_ids = map_config.get_db_list()
+        hierarchical = map_config.is_hierarchical()
         
-        # Perform alignments
+        sort_by = map_config.check_sort_param(map_config, sort_param, DEFAULT_SORT_PARAM)
+        
+        ############ Perform alignments
+        # TODO: avoid aligning to the same DB as one of a previous map
+        # this "TODO" would need to handle correctly best_score and hierarchical
         facade.perform_alignment(query_fasta_path, databases_ids, hierarchical, query_mode,
                                            threshold_id, threshold_cov, n_threads, \
                                            best_score_filter)
         
         results = facade.get_alignment_results()
-        unmapped = facade.get_alignment_unmapped()  
+        unaligned = facade.get_alignment_unmapped()  
         
         ############ MAPS
-        mapMarkers = MapMarkers(maps_path, maps_config, map_id, verbose_param)
+        mapMarkers = MapMarkers(maps_path, map_config, verbose_param)
         
-        mapMarkers.create_genetic_maps(results, unmapped, databases_ids, sort_param, multiple_param)
+        mapMarkers.create_map(results, unaligned, sort_by, multiple_param)
         
         ############ OTHER MARKERS
         if show_markers and not show_genes:
             
-            # Datasets
+            # Datasets config
             datasets_conf_file = __app_path+DATASETS_CONF
             datasets_config = DatasetsConfig(datasets_conf_file)
             
-            datasets_ids = datasets_config.get_datasets().keys()
-            datasets_names = ",".join(datasets_config.get_datasets_names(datasets_ids))
+            # Load DatasetsFacade
+            datasets_path = __app_path+config_path_dict["datasets_path"]
+            datasets_facade = DatasetsFacade(datasets_config, datasets_path, verbose = verbose_param)
             
-            mapMarkers.enrich_with_markers(genes_extend, genes_window, genes_window, sort_param, \
-                                                          databases_ids, datasets_ids, datasets_conf_file, hierarchical,
-                                                            constrain_fine_mapping = False)
+            # Enrich with markers
+            mapMarkers.enrich_with_markers(datasets_facade, extend, extend_window,
+                                            constrain_fine_mapping = False)
+            
         ########### GENES
         if show_genes:
             mapMarkers.enrich_with_genes(show_genes_param, load_annot,
-                                         genes_extend, genes_window, genes_window,
-                                         sort_param, constrain_fine_mapping = False)
+                                         extend, extend_window,
+                                         sort_by, constrain_fine_mapping = False)
         
-        genetic_map_dict = mapMarkers.get_genetic_maps()
+        mapping_results = mapMarkers.get_mapping_results()
         
-        genetic_map_dicts.update(genetic_map_dict) 
+        if not map_id in maps_dict:
+            maps_dict[map_id] = mapping_results
+        else:
+            raise Exception("Duplicated map "+map_id+".")
     
     ############################################################ OUTPUT
     
     outputPrinter = OutputFacade().get_plain_printer(sys.stdout, verbose = verbose_param)
     
-    outputPrinter.print_maps(outputPrinter, maps_ids, genetic_map_dicts,
+    outputPrinter.print_maps(maps_dict,
                              show_genes, show_markers, show_unmapped,
                              multiple_param_text, load_annot, show_headers = True)
 
+except m2pException as m2pe:
+    sys.stderr.write("\nThere was an error.\n")
+    sys.stderr.write(m2pe.msg+"\n")
 except Exception as e:
     traceback.print_exc(file=sys.stderr)
     sys.stderr.write("\nERROR\n")
@@ -351,5 +370,29 @@ except Exception as e:
                                    'laboratory of computational biology at EEAD).\n')
 finally:
     pass
+
+def __check_sort_param(map_name, sort_param, map_default_sort_by, map_has_cm_pos, map_has_bp_pos):
+    sort_by = ""
+    
+    if sort_param == map_default_sort_by:
+        sort_by = sort_param
+    else:
+        # sort_param has priority
+        if sort_param == MapTypes.MAP_SORT_PARAM_CM and map_has_cm_pos:
+            sort_by = sort_param
+        elif sort_param == MapTypes.MAP_SORT_PARAM_BP and map_has_bp_pos:
+            sort_by = sort_param
+        # else, check map_default_sort_by
+        else:
+            if sort_param != DEFAULT_SORT_PARAM:
+                sys.stderr.write("WARNING: the sort parameter "+sort_param+" is not compatible with map "+map_name+". Using default map sort parameter...\n")
+            if map_default_sort_by == MapTypes.MAP_SORT_PARAM_CM and map_has_cm_pos:
+                sort_by = map_default_sort_by
+            elif map_default_sort_by == MapTypes.MAP_SORT_PARAM_BP and map_has_bp_pos:
+                sort_by = map_default_sort_by
+            else:
+                raise Exception("Map default sort configure as \""+map_default_sort_by+"\" assigned to a map which has not such kind of position.")
+    
+    return sort_by
 
 ## END

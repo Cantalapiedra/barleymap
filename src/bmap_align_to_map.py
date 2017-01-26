@@ -197,9 +197,9 @@ for map_id in maps_ids:
     sys.stderr.write("\nWorking with map:"+map_id+"\n")
     sys.stdout.write(">>Map:"+map_id+"\n")
     
-    map_config = maps_config.get_map(map_id)
-    databases_ids = maps_config.get_map_db_list(map_config)
-    hierarchical = maps_config.get_map_is_hierarchical(map_config)
+    map_config = maps_config.get_map_config(map_id)
+    databases_ids = map_config.get_db_list()
+    hierarchical = map_config.is_hierarchical()
     
     # Perform alignments
     results = facade.perform_alignment(query_fasta_path, databases_ids, hierarchical, query_mode,
