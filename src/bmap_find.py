@@ -256,16 +256,10 @@ try:
         
         sort_by = map_config.check_sort_param(map_config, sort_param, DEFAULT_SORT_PARAM)
         
-        ############ Retrieve pre-computed alignments
-        datasets_facade.retrieve_ids_map(query_ids_path, datasets_ids, map_id, best_score_filter)
-        
-        results = datasets_facade.get_alignment_results()
-        unaligned = datasets_facade.get_alignment_unmapped()
-        
         ############ MAPS
         mapMarkers = MapMarkers(maps_path, map_config, verbose_param)
         
-        mapMarkers.create_map(results, unaligned, sort_by, multiple_param)
+        mapMarkers.setup_map(query_ids_path, datasets_ids, datasets_facade, best_score_filter, sort_by, multiple_param)
         
         ############ OTHER MARKERS
         if show_markers and not show_genes:

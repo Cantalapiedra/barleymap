@@ -7,10 +7,9 @@
 
 import sys
 
-from barleymapcore.db.MapsConfig import MapsConfig
-from barleymapcore.maps.MapsBase import MapHeaders, MapPosition, MapTypes
-from barleymapcore.genes.GenesBase import GenesFields, AnnotFields
+from barleymapcore.maps.MapsBase import MapHeaders, MapTypes
 from barleymapcore.maps.MarkersBase import MarkersFields
+from barleymapcore.genes.GenesBase import GenesFields, AnnotFields
 
 MAPPED_TITLE = "Map"
 UNMAPPED_TITLE = "Alignments without map position"
@@ -36,7 +35,7 @@ class OutputFacade(object):
         
         for map_id in maps_dict:
             mapping_results = maps_dict[map_id]
-            map_config = mapping_results.get_map_config() #[MapTypes.MAP_CONFIG]
+            map_config = mapping_results.get_map_config()
             map_name = map_config.get_name()
             map_is_physical = map_config.as_physical()
             map_sort_by = mapping_results.get_sort_by()
@@ -49,7 +48,7 @@ class OutputFacade(object):
             if not (show_genes or show_markers):
                 ########## OUTPUT FOR ONLY MAP
                 
-                map_title = MAPPED_TITLE #MapTypes.RESULTS_DICT[MapTypes.MAP_MAPPED]
+                map_title = MAPPED_TITLE
                 self.print_genetic_map_header(map_name, show_unmapped, map_title)
                 
                 sorted_positions = mapping_results.get_mapped()
@@ -60,7 +59,7 @@ class OutputFacade(object):
             elif show_genes:
                 ########## OUTPUT FOR MAP WITH GENES IF REQUESTED
                 
-                map_title = MAP_WITH_GENES_TITLE #MapTypes.RESULTS_DICT[MapTypes.MAP_WITH_GENES]
+                map_title = MAP_WITH_GENES_TITLE
                 self.print_genetic_map_header(map_name, show_unmapped, map_title)
                 
                 genes_enriched_positions = mapping_results.get_map_with_genes()
@@ -71,7 +70,7 @@ class OutputFacade(object):
             elif show_markers:
                 ########### OUTPUT FOR MAP WITH MARKERS
                 
-                map_title = MAP_WITH_MARKERS_TITLE #MapTypes.RESULTS_DICT[MapTypes.MAP_WITH_MARKERS]
+                map_title = MAP_WITH_MARKERS_TITLE
                 self.print_genetic_map_header(map_name, show_unmapped, map_title)
                 
                 marker_enriched_positions = mapping_results.get_map_with_markers()
@@ -86,13 +85,14 @@ class OutputFacade(object):
                 # never lack map position
                 if not map_is_physical:
                     ############ UNMAPPED
-                    map_title = UNMAPPED_TITLE #MapTypes.RESULTS_DICT[MapTypes.MAP_UNMAPPED]
+                    map_title = UNMAPPED_TITLE
                     unmapped_records = mapping_results.get_unmapped()
                     
-                    self.output_unmapped(map_title, unmapped_records, show_headers)
+                    if unmapped_records != None: # those obtained from mapping results have no unmapped records
+                        self.output_unmapped(map_title, unmapped_records, show_headers)
                 
                 ########### UNALIGNED
-                map_title = UNALIGNED_TITLE #MapTypes.RESULTS_DICT[MapTypes.MAP_UNALIGNED]
+                map_title = UNALIGNED_TITLE
                 unaligned_records = mapping_results.get_unaligned()
                 
                 self.output_unaligned(map_title, unaligned_records, show_headers)
