@@ -146,7 +146,9 @@ try:
                     
                     map_config = maps_config.get_map_config(map_id)
                     map_db_list = map_config.get_db_list()
+                    
                     common_dbs = filter(lambda x: x in dataset_db_list, map_db_list)
+                    # refactor to: set(map_db_lis).intersection(dataset_db_list)
                     
                     if len(common_dbs)>0:
                         
