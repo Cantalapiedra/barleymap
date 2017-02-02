@@ -238,35 +238,38 @@ sys.stderr.write("\n")
 num_databases = len(databases_ids)
 
 for db_entry in databases_ids:
-    if db_entry in results and len(results[db_entry]):
-        
-        if (not hierarchical) and num_databases>1: sys.stdout.write(">DB:"+str(db_entry)+"\n")
-        
-        # header
-        sys.stdout.write("#"+"\t".join(["query_id", "subject_id", "identity", "query_coverage", \
-                                        "score", "strand", "qstart", "qend", "sstart", "send",
-                                        "database", "algorithm"])+"\n")
+    #if db_entry in results and len(results[db_entry]):
     
-        # records
-        db_results = results[db_entry]
-        for alignment_result in db_results:
-            sys.stdout.write("\t".join([
-                alignment_result.get_query_id(),
-                alignment_result.get_subject_id(),
-                str("%0.2f" % float(alignment_result.get_align_ident())),
-                str("%0.2f" % float(alignment_result.get_query_cov())),
-                str(alignment_result.get_align_score()),
-                alignment_result.get_strand(),
-                str(alignment_result.get_qstart_pos()),
-                str(alignment_result.get_qend_pos()),
-                str(alignment_result.get_local_position()),
-                str(alignment_result.get_end_position()),
-                str(alignment_result.get_db_name()),
-                str(alignment_result.get_algorithm())
-            ]))
-            sys.stdout.write("\n")
-    else:
-        sys.stderr.write("There are no results for DB: "+db_entry+"\n")
+    if (not hierarchical) and num_databases>1: sys.stdout.write(">DB:"+str(db_entry)+"\n")
+    
+    # header
+    sys.stdout.write("#"+"\t".join(["query_id", "subject_id", "identity", "query_coverage", \
+                                    "score", "strand", "qstart", "qend", "sstart", "send",
+                                    "database", "algorithm"])+"\n")
+
+    # records
+    #db_results = results[db_entry]
+    for alignment_result in results: #db_results:
+        
+        if alignment_result.get_db_name() != db_entry: continue
+        
+        sys.stdout.write("\t".join([
+            alignment_result.get_query_id(),
+            alignment_result.get_subject_id(),
+            str("%0.2f" % float(alignment_result.get_align_ident())),
+            str("%0.2f" % float(alignment_result.get_query_cov())),
+            str(alignment_result.get_align_score()),
+            alignment_result.get_strand(),
+            str(alignment_result.get_qstart_pos()),
+            str(alignment_result.get_qend_pos()),
+            str(alignment_result.get_local_position()),
+            str(alignment_result.get_end_position()),
+            str(alignment_result.get_db_name()),
+            str(alignment_result.get_algorithm())
+        ]))
+        sys.stdout.write("\n")
+    #else:
+    #    sys.stderr.write("There are no results for DB: "+db_entry+"\n")
 
 sys.stderr.write("Finished.\n")
 

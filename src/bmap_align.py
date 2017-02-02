@@ -353,7 +353,7 @@ try:
     
     ############################################################ OUTPUT
     
-    outputPrinter = OutputFacade().get_plain_printer(sys.stdout, verbose = verbose_param)
+    outputPrinter = OutputFacade().get_plain_printer(sys.stdout, verbose = verbose_param, beauty_nums = False)
     
     outputPrinter.print_maps(maps_dict,
                              show_genes, show_markers, show_unmapped,

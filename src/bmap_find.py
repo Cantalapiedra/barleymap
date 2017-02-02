@@ -263,14 +263,14 @@ try:
         
         ############ OTHER MARKERS
         if show_markers and not show_genes:
-            mapMarkers.enrich_with_markers(datasets_facade, extend, extend_window, \
-                                                          constrain_fine_mapping = False)
+            mapMarkers.enrich_with_markers(datasets_facade, extend, extend_window,
+                                            constrain_fine_mapping = False)
             
         ########### GENES
         if show_genes:
             mapMarkers.enrich_with_genes(show_genes_param, load_annot,
-                                         extend, extend_window, extend_window, sort_by,
-                                         constrain_fine_mapping = False)
+                                         extend, extend_window, extend_window,
+                                         sort_by, constrain_fine_mapping = False)
         
         mapping_results = mapMarkers.get_mapping_results()
         

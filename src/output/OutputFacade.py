@@ -7,8 +7,7 @@
 
 import sys
 
-from barleymapcore.maps.MapsBase import MapHeaders, MapTypes
-from barleymapcore.maps.MarkersBase import MarkersFields
+from barleymapcore.maps.MapsBase import MapTypes
 from barleymapcore.genes.GenesBase import GenesFields, AnnotFields
 
 MAPPED_TITLE = "Map"
@@ -17,17 +16,46 @@ UNALIGNED_TITLE = "Unaligned markers"
 MAP_WITH_GENES_TITLE = "Map with genes"
 MAP_WITH_MARKERS_TITLE = "Map with markers"
 
+class MapHeaders(object):
+    
+    MARKER_NAME_POS = 0
+    MARKER_CHR_POS = 1
+    MARKER_CM_POS = 2
+    MARKER_BP_POS = 3
+    MULTIPLE_POS = 4
+    OTHER_ALIGNMENTS_POS = 5
+    MAP_NAME = 6
+    
+    OUTPUT_HEADERS = ["Marker", "chr", "cM", "base_pairs", "multiple_positions", "other_alignments", "Map"]
+    GENES_HEADERS = ["Gene", "HC/LC", "Map", "chr", "cM", "bp"]
+    ANNOT_HEADERS = ["Description", "InterPro", "Signatures", "PFAM server", "GO terms"]
+    MARKERS_HEADERS = ["Marker", "Dataset", "chr", "cM", "bp"]
+
+class MarkersFields(object):
+    
+    MARKER_ID_POS = 0
+    MARKER_DATASET_POS = 1
+    MARKER_CHR_POS = 2
+    MARKER_CM_POS = 3
+    MARKER_BP_POS = 4
+    MARKER_GENES_POS = 5
+    MARKER_GENES_CONFIGURED_POS = 6
+    
+    MARKERS_FIELDS = 7
+
 class OutputFacade(object):
     
     _output_desc = None
     _verbose = False
+    _beauty_nums = False
     
     def __init__(self):        
         return
     
-    def get_plain_printer(self, output_desc, verbose = False):
+    def get_plain_printer(self, output_desc, verbose = False, beauty_nums = False):
         self._output_desc = output_desc
         self._verbose = verbose
+        self._beauty_nums = beauty_nums
         
         return self
     
@@ -119,23 +147,32 @@ class OutputFacade(object):
         ## cM
         if map_has_cm_pos:
             cm = pos.get_cm_pos() #[MapFields.MARKER_CM_POS]
-            if cm != "-": current_row.append(str("%0.2f" % float(cm)))
-            else: current_row.append(cm)
+            if cm != "-":
+                if self._beauty_nums:
+                    current_row.append(str("%0.2f" % float(cm)))
+                else:
+                    current_row.append(cm)
+            else:
+                current_row.append(cm)
         
         ## bp
         if map_has_bp_pos:
             bp = pos.get_bp_pos() #[MapFields.MARKER_BP_POS]
             current_row.append(str(bp))
         
-        ## Multiple
-        if multiple_param == "yes":
-            mult = pos.has_multiple_pos() #[MapFields.MULTIPLE_POS]
-            if mult: current_row.append("Yes")
+        if pos.is_empty():
+            current_row.append("-") # multiple positions
+            current_row.append("-") # other alignments
+        else:
+            ## Multiple
+            if multiple_param == "yes":
+                mult = pos.has_multiple_pos() #[MapFields.MULTIPLE_POS]
+                if mult: current_row.append("Yes")
+                else: current_row.append("No")
+                
+            ## Other alignments
+            if pos.has_other_alignments(): current_row.append("Yes")
             else: current_row.append("No")
-        
-        ## Other alignments
-        if pos.has_other_alignments(): current_row.append("Yes")
-        else: current_row.append("No")
         
         return
     
@@ -171,7 +208,7 @@ class OutputFacade(object):
             current_row = []
             self.__output_base_pos(current_row, pos, map_has_cm_pos, map_has_bp_pos, multiple_param)
             
-            self._output_desc.write("\t".join(current_row)+"\n")
+            self._output_desc.write("\t".join([str(x) for x in current_row])+"\n")
         
         sys.stderr.write("\tgenetic maps printed.\n")
         
@@ -213,7 +250,10 @@ class OutputFacade(object):
             
             gene_cm = gene[GenesFields.GENES_CM_POS]
             if gene_cm != "-":
-                cm_pos = str("%0.2f" % float(gene_cm))
+                if self._beauty_nums:
+                    cm_pos = str("%0.2f" % float(gene_cm))
+                else:
+                    cm_pos = gene_cm
             else:
                 cm_pos = gene_cm
             
@@ -239,7 +279,7 @@ class OutputFacade(object):
                 #output_buffer.append("<td>"+x[7]+"</td>") # PFAM source
                 current_row.append(annot[AnnotFields.GENES_ANNOT_GO]) # GO terms
             
-            self._output_desc.write("\t".join(current_row)+"\n")
+            self._output_desc.write("\t".join([str(x) for x in current_row])+"\n")
             
         sys.stderr.write("\tmap with genes printed.\n")
         
@@ -281,7 +321,10 @@ class OutputFacade(object):
                 if map_sort_by == MapTypes.MAP_SORT_PARAM_CM:
                     marker_cm = marker.get_pos() #marker[MarkersFields.MARKER_CM_POS]
                     if marker_cm != "-":
-                        cm_pos = str("%0.2f" % float(marker_cm))
+                        if self._beauty_nums:
+                            cm_pos = str("%0.2f" % float(marker_cm))
+                        else:
+                            cm_pos = marker_cm
                     else:
                         cm_pos = marker_cm
                     marker_data.append(cm_pos)
@@ -293,7 +336,10 @@ class OutputFacade(object):
             elif map_has_cm_pos:
                 marker_cm = marker.get_pos() #marker[MarkersFields.MARKER_CM_POS]
                 if marker_cm != "-":
-                    cm_pos = str("%0.2f" % float(marker_cm))
+                    if self._beauty_nums:
+                        cm_pos = str("%0.2f" % float(marker_cm))
+                    else:
+                        cm_pos = marker_cm
                 else:
                     cm_pos = marker_cm
                 marker_data.append(cm_pos)
@@ -313,7 +359,7 @@ class OutputFacade(object):
             
             current_row.extend(marker_data)
             
-            self._output_desc.write("\t".join(current_row)+"\n")
+            self._output_desc.write("\t".join([str(x) for x in current_row])+"\n")
             
         sys.stderr.write("OutputFacade: map with markers printed.\n")
         

@@ -18,10 +18,47 @@ from barleymapcore.db.DatasetsConfig import DatasetsConfig
 from barleymapcore.db.ConfigBase import ConfigBase
 from barleymapcore.db.PathsConfig import PathsConfig
 from barleymapcore.db.MapsConfig import MapsConfig
+from barleymapcore.maps.MapMarkers import MapMarkers
+from output.OutputFacade import OutputFacade
+from barleymapcore.utils.parse_gtf_file import parse_gtf_file
+from barleymapcore.utils.data_utils import read_paths
 
 _SCRIPT = os.path.basename(__file__)
 
 DEFAULT_N_THREADS = 1
+
+def __gtf_to_map_file(features, maps_path, map_config, map_output_path):
+    
+    mapMarkers = MapMarkers(maps_path, map_config, verbose = True)
+    
+    unaligned = [] # Better this than None
+    mapMarkers.create_map(features, unaligned, map_config.get_default_sort_by(), multiple_param = False)
+    
+    mapping_results = mapMarkers.get_mapping_results()
+    
+    sys.stderr.write("Mapped results "+str(len(mapping_results.get_mapped()))+"\n")
+    
+    map_output = open(map_output_path, 'w')
+    try:
+        outputPrinter = OutputFacade().get_plain_printer(map_output)
+        
+        maps_dict = {map_config.get_id():mapping_results}
+        show_genes = False
+        show_markers = False
+        show_unmapped = False
+        multiple_param_text = "yes"
+        load_annot = False
+        show_headers = True
+        
+        outputPrinter.print_maps(maps_dict,
+                                 show_genes, show_markers, show_unmapped,
+                                 multiple_param_text, load_annot, show_headers)  
+    except Exception as e:
+        raise e
+    finally:
+        map_output.close()
+    
+    return
 
 def __write_command(map_name, file_path, output_path, threads):
     cmd = "bmap_align"
@@ -47,6 +84,10 @@ def __run_command(cmd):
     if retValue != 0: raise m2pException(_SCRIPT+": return != 0. "+cmd+"\n")
     
     sys.stderr.write(_SCRIPT+": return value "+str(retValue)+"\n")
+    
+    return
+
+##########################
 
 try:
     ## Argument parsing
@@ -85,6 +126,7 @@ try:
     datasets = datasets_config.get_datasets()
     
     datasets_dict = {}
+    
     for dataset_id in datasets: #enumerate(datasets_names.split(",")):
         
         dataset_config = datasets_config.get_dataset_config(dataset_id)
@@ -93,6 +135,7 @@ try:
         dataset_file_path = dataset_config.get_file_path()
         dataset_file_type = dataset_config.get_file_type()
         dataset_db_list = dataset_config.get_db_list()
+        dataset_synonyms = dataset_config.get_synonyms()
         
         sys.stdout.write("\n")
         sys.stdout.write(_SCRIPT+": dataset: "+dataset_name+"\n")
@@ -105,11 +148,9 @@ try:
         
         # If the path already exists, do not overwrite
         if os.path.exists(dataset_path):
-            sys.stdout.write("Path "+dataset_path+" for dataset "+dataset_name+" already exists.\n\
-                             Please, remove before re-building the dataset data.\n")
+            sys.stdout.write("\t\tPath "+dataset_path+" for dataset "+dataset_name+" already exists.\n"+\
+                             "\t\tPlease, remove before re-building the dataset data.\n")
             continue # next dataset
-        else:
-            sys.stderr.write("\tA new directory "+dataset_path+" will be created.\n")
         
         ########### CREATE MAPPINGS
         ###########
@@ -118,6 +159,7 @@ try:
         if dataset_file_type == DatasetsConfig.FILE_TYPE_FNA:
             
             ### Create the new directory
+            sys.stderr.write("\tA new directory "+dataset_path+" will be created.\n")
             os.mkdir(dataset_path)
             
             maps_conf_file = __app_path+ConfigBase.MAPS_CONF
@@ -167,7 +209,47 @@ try:
         ### 2) GTF FILES
         ###
         elif dataset_file_type == DatasetsConfig.FILE_TYPE_GTF:
-            sys.stdout.write("WARNING: GTF datasets procedure is not implemented yet.\n")
+            
+            ### Create the new directory
+            sys.stderr.write("\tA new directory "+dataset_path+" will be created.\n")
+            os.mkdir(dataset_path)
+            
+            maps_conf_file = __app_path+ConfigBase.MAPS_CONF
+            maps_config = MapsConfig(maps_conf_file, verbose = False)
+            
+            # align to all the maps
+            if (len(dataset_db_list)==1) and (dataset_db_list[0] == DatasetsConfig.DATABASES_ANY):
+                
+                raise m2pException("GTF files have to be associated to a single database in datasets configuration.")
+                
+            # align to maps which are associated to databases also associated to this dataset
+            else:
+                
+                features = parse_gtf_file(dataset_file_path, dataset_db_list, dataset_type, dataset_file_type) # barleymapcore.utils
+                
+                config_path_dict = read_paths(app_abs_path+"/paths.conf") # data_utils.read_paths
+                __app_path = config_path_dict["app_path"]
+                maps_path = __app_path+config_path_dict["maps_path"]
+                
+                for map_id in maps_config.get_maps():
+                    
+                    map_config = maps_config.get_map_config(map_id)
+                    map_db_list = map_config.get_db_list()
+                    
+                    common_dbs = filter(lambda x: x in dataset_db_list, map_db_list)
+                    # refactor to: set(map_db_lis).intersection(dataset_db_list)
+                    
+                    if len(common_dbs)>0:
+                        
+                        map_name = map_config.get_name()
+                        dataset_mapping_path = dataset_path+dataset_id+"."+map_id
+                        
+                        sys.stderr.write("\tMap: "+map_name+"\n")
+                        sys.stderr.write("\t\toutput file "+dataset_mapping_path+"\n")
+                        
+                        __gtf_to_map_file(features, maps_path, map_config, dataset_mapping_path)
+            
+            sys.stdout.write(_SCRIPT+": dataset "+dataset_name+" created.\n")
         
         ### 3) Other
         else:
