@@ -268,9 +268,12 @@ try:
             
         ########### GENES
         if show_genes:
-            mapMarkers.enrich_with_genes(show_genes_param, load_annot,
-                                         extend, extend_window, extend_window,
-                                         sort_by, constrain_fine_mapping = False)
+            mapMarkers.enrich_with_genes(datasets_facade, extend, extend_window,
+                                         load_annot, constrain_fine_mapping = False)
+            
+            #mapMarkers.enrich_with_genes(show_genes_param, load_annot,
+            #                             extend, extend_window, extend_window,
+            #                             sort_by, constrain_fine_mapping = False)
         
         mapping_results = mapMarkers.get_mapping_results()
         

@@ -8,7 +8,6 @@
 import sys
 
 from barleymapcore.maps.MapsBase import MapTypes
-from barleymapcore.genes.GenesBase import GenesFields, AnnotFields
 
 MAPPED_TITLE = "Map"
 UNMAPPED_TITLE = "Alignments without map position"
@@ -27,9 +26,9 @@ class MapHeaders(object):
     MAP_NAME = 6
     
     OUTPUT_HEADERS = ["Marker", "chr", "cM", "base_pairs", "multiple_positions", "other_alignments", "Map"]
-    GENES_HEADERS = ["Gene", "HC/LC", "Map", "chr", "cM", "bp"]
+    FEATURE_HEADERS = ["Feature", "Feature_type", "Dataset", "chr", "cM", "bp"]
+    
     ANNOT_HEADERS = ["Description", "InterPro", "Signatures", "PFAM server", "GO terms"]
-    MARKERS_HEADERS = ["Marker", "Dataset", "chr", "cM", "bp"]
 
 class MarkersFields(object):
     
@@ -42,6 +41,27 @@ class MarkersFields(object):
     MARKER_GENES_CONFIGURED_POS = 6
     
     MARKERS_FIELDS = 7
+
+class GenesFields(object):
+    
+    GENES_ID_POS = 0
+    GENES_TYPE_POS = 1
+    GENES_MAP_POS = 2
+    GENES_CHR_POS = 3
+    GENES_CM_POS = 4
+    GENES_BP_POS = 5
+    
+    GENES_FIELDS = 6
+
+class AnnotFields(object):
+    
+    GENES_ANNOT_DESC = 0
+    GENES_ANNOT_INTERPRO = 1
+    GENES_ANNOT_PFAM = 2
+    GENES_ANNOT_SERVER = 3
+    GENES_ANNOT_GO = 4
+    
+    GENES_ANNOT_FIELDS = 5
 
 class OutputFacade(object):
     
@@ -92,7 +112,7 @@ class OutputFacade(object):
                 
                 genes_enriched_positions = mapping_results.get_map_with_genes()
                 
-                self.print_map_with_genes(genes_enriched_positions, map_has_cm_pos, map_has_bp_pos, \
+                self.print_map_with_genes(genes_enriched_positions, map_sort_by, map_has_cm_pos, map_has_bp_pos, \
                                                    multiple_param_text, load_annot, show_headers)
             
             elif show_markers:
@@ -216,95 +236,74 @@ class OutputFacade(object):
         
         return
     
-    def print_map_with_genes(self, positions, map_has_cm_pos, map_has_bp_pos, multiple_param, load_annot, show_headers = False):
+    def __output_features_header(self, map_has_cm_pos, map_has_bp_pos, multiple_param):
+        headers_row = []
+        self.__output_base_header(headers_row, map_has_cm_pos, map_has_bp_pos, multiple_param)
         
-        sys.stderr.write("\tprinting map with genes...\n")
+        headers_row.append(MapHeaders.FEATURE_HEADERS[GenesFields.GENES_ID_POS])
+        headers_row.append(MapHeaders.FEATURE_HEADERS[GenesFields.GENES_TYPE_POS])
+        headers_row.append(MapHeaders.FEATURE_HEADERS[GenesFields.GENES_CHR_POS])
         
-        if show_headers:
-            headers_row = []
-            self.__output_base_header(headers_row, map_has_cm_pos, map_has_bp_pos, multiple_param)
-            
-            headers_row.append(MapHeaders.GENES_HEADERS[GenesFields.GENES_ID_POS])
-            headers_row.append(MapHeaders.GENES_HEADERS[GenesFields.GENES_TYPE_POS])
-            headers_row.append(MapHeaders.GENES_HEADERS[GenesFields.GENES_CHR_POS])
-            
-            if map_has_cm_pos:
-                headers_row.append(MapHeaders.GENES_HEADERS[GenesFields.GENES_CM_POS])
-            
-            if map_has_bp_pos:
-                headers_row.append(MapHeaders.GENES_HEADERS[GenesFields.GENES_BP_POS])
-                
-            if load_annot:
-                headers_row.append(MapHeaders.ANNOT_HEADERS[AnnotFields.GENES_ANNOT_DESC])
-                headers_row.append(MapHeaders.ANNOT_HEADERS[AnnotFields.GENES_ANNOT_INTERPRO])
-                headers_row.append(MapHeaders.ANNOT_HEADERS[AnnotFields.GENES_ANNOT_PFAM])
-                headers_row.append(MapHeaders.ANNOT_HEADERS[AnnotFields.GENES_ANNOT_GO])
-            
-            self._output_desc.write("#"+"\t".join(headers_row)+"\n")
+        if map_has_cm_pos:
+            headers_row.append(MapHeaders.FEATURE_HEADERS[GenesFields.GENES_CM_POS])
         
-        for pos in positions:
-            current_row = []
-            self.__output_base_pos(current_row, pos, map_has_cm_pos, map_has_bp_pos, multiple_param)
-            
-            gene = pos[MapPosition.MAP_FIELDS:]
-            
-            gene_cm = gene[GenesFields.GENES_CM_POS]
-            if gene_cm != "-":
-                if self._beauty_nums:
-                    cm_pos = str("%0.2f" % float(gene_cm))
-                else:
-                    cm_pos = gene_cm
-            else:
-                cm_pos = gene_cm
-            
-            gene_data = []
-            gene_data.append(gene[GenesFields.GENES_ID_POS])
-            gene_data.append(gene[GenesFields.GENES_TYPE_POS])
-            gene_data.append(str(gene[GenesFields.GENES_CHR_POS]))
-            
-            if map_has_cm_pos:
-                gene_data.append(cm_pos)
-            
-            if map_has_bp_pos:
-                gene_data.append(str(gene[GenesFields.GENES_BP_POS]))
-            
-            current_row.extend(gene_data)
-            
-            if load_annot:
-                annot = gene[len(MapHeaders.GENES_HEADERS):]
-                current_row.append(annot[AnnotFields.GENES_ANNOT_DESC]) # Readable description
-                # InterPro
-                current_row.append(annot[AnnotFields.GENES_ANNOT_INTERPRO])
-                current_row.append(annot[AnnotFields.GENES_ANNOT_PFAM]) # PFAM ID
-                #output_buffer.append("<td>"+x[7]+"</td>") # PFAM source
-                current_row.append(annot[AnnotFields.GENES_ANNOT_GO]) # GO terms
-            
-            self._output_desc.write("\t".join([str(x) for x in current_row])+"\n")
-            
-        sys.stderr.write("\tmap with genes printed.\n")
+        if map_has_bp_pos:
+            headers_row.append(MapHeaders.FEATURE_HEADERS[GenesFields.GENES_BP_POS])
         
-        if self._verbose: sys.stderr.write("\tlines printed "+str(len(positions))+"\n")
-        
-        return
+        return headers_row
     
-    def print_map_with_genes(self, positions, map_sort_by, map_has_cm_pos, map_has_bp_pos, multiple_param, show_headers = False):
+    def __output_features_pos(self, pos, map_has_cm_pos, map_has_bp_pos, map_sort_by):
+        feature_data = []
+        
+        feature_data = []
+        feature = pos.get_feature()
+        feature_data.append(feature.get_feature_id())
+        feature_data.append(feature.get_feature_type())
+        feature_data.append(feature.get_dataset_name())
+        feature_data.append(feature.get_chrom_name())
+        
+        if map_has_cm_pos and map_has_bp_pos:
+            if map_sort_by == MapTypes.MAP_SORT_PARAM_CM:
+                feature_cm = feature.get_pos()
+                if feature_cm != "-":
+                    if self._beauty_nums:
+                        cm_pos = str("%0.2f" % float(feature_cm))
+                    else:
+                        cm_pos = feature_cm
+                else:
+                    cm_pos = feature_cm
+                feature_data.append(cm_pos)
+            elif map_sort_by == MapTypes.MAP_SORT_PARAM_BP:
+                feature_data.append(str(feature.get_pos()))
+            else:
+                raise m2pException("Unrecognized sort by "+map_sort_by+".")
+        
+        elif map_has_cm_pos:
+            feature_cm = feature.get_pos()
+            if feature_cm != "-":
+                if self._beauty_nums:
+                    cm_pos = str("%0.2f" % float(feature_cm))
+                else:
+                    cm_pos = feature_cm
+            else:
+                cm_pos = feature_cm
+            feature_data.append(cm_pos)
+            
+        elif map_has_bp_pos:
+            feature_data.append(str(feature.get_pos()))
+        else:
+            raise m2pException("Map configuration indicates that has no cm nor bp positions.")
+        
+        return feature_data
+    
+    def print_map_with_genes(self, positions, map_sort_by, map_has_cm_pos, map_has_bp_pos, multiple_param, load_annot, show_headers = False):
         
         sys.stderr.write("\tprinting map with genes...\n")
         
         if show_headers:
-            headers_row = []
-            self.__output_base_header(headers_row, map_has_cm_pos, map_has_bp_pos, multiple_param)
             
-            headers_row.append(MapHeaders.GENES_HEADERS[GenesFields.GENES_ID_POS])
-            headers_row.append(MapHeaders.GENES_HEADERS[GenesFields.GENES_TYPE_POS])
-            headers_row.append(MapHeaders.GENES_HEADERS[GenesFields.GENES_CHR_POS])
+            headers_row = self.__output_features_header(map_has_cm_pos, map_has_bp_pos, multiple_param)
             
-            if map_has_cm_pos:
-                headers_row.append(MapHeaders.GENES_HEADERS[GenesFields.GENES_CM_POS])
-            
-            if map_has_bp_pos:
-                headers_row.append(MapHeaders.GENES_HEADERS[GenesFields.GENES_BP_POS])
-                
             if load_annot:
                 headers_row.append(MapHeaders.ANNOT_HEADERS[AnnotFields.GENES_ANNOT_DESC])
                 headers_row.append(MapHeaders.ANNOT_HEADERS[AnnotFields.GENES_ANNOT_INTERPRO])
@@ -317,57 +316,22 @@ class OutputFacade(object):
             current_row = []
             self.__output_base_pos(current_row, pos, map_has_cm_pos, map_has_bp_pos, multiple_param)
             
-            marker_data = []
-            marker = pos.get_feature()
-            marker_data.append(marker.get_marker_id())
-            marker_data.append(marker.get_dataset_name())
-            marker_data.append(marker.get_chrom_name())
+            feature_data = self.__output_features_pos(pos, map_has_cm_pos, map_has_bp_pos, map_sort_by)
             
-            if map_has_cm_pos and map_has_bp_pos:
-                if map_sort_by == MapTypes.MAP_SORT_PARAM_CM:
-                    marker_cm = marker.get_pos() #marker[MarkersFields.MARKER_CM_POS]
-                    if marker_cm != "-":
-                        if self._beauty_nums:
-                            cm_pos = str("%0.2f" % float(marker_cm))
-                        else:
-                            cm_pos = marker_cm
-                    else:
-                        cm_pos = marker_cm
-                    marker_data.append(cm_pos)
-                elif map_sort_by == MapTypes.MAP_SORT_PARAM_BP:
-                    marker_data.append(str(marker.get_pos()))
-                else:
-                    raise m2pException("Unrecognized sort by "+map_sort_by+".")
+            current_row.extend(feature_data)
             
-            elif map_has_cm_pos:
-                marker_cm = marker.get_pos() #marker[MarkersFields.MARKER_CM_POS]
-                if marker_cm != "-":
-                    if self._beauty_nums:
-                        cm_pos = str("%0.2f" % float(marker_cm))
-                    else:
-                        cm_pos = marker_cm
-                else:
-                    cm_pos = marker_cm
-                marker_data.append(cm_pos)
-                
-            elif map_has_bp_pos:
-                marker_data.append(str(marker.get_pos()))
-            else:
-                raise m2pException("Map configuration indicates that has no cm nor bp positions.")
-            
-            #if marker[MarkersFields.MARKER_GENES_CONFIGURED_POS]:
-            #    if len(marker[MarkersFields.MARKER_GENES_POS]) > 0:
-            #        marker_data.append(",".join(marker[MarkersFields.MARKER_GENES_POS]))
-            #    else:
-            #        marker_data.append("no hits")
-            #else:
-            #    marker_data.append("nd")
-            
-            current_row.extend(marker_data)
+            #if load_annot:
+            #    annot = gene[len(MapHeaders.FEATURE_HEADERS):]
+            #    current_row.append(annot[AnnotFields.GENES_ANNOT_DESC]) # Readable description
+            #    # InterPro
+            #    current_row.append(annot[AnnotFields.GENES_ANNOT_INTERPRO])
+            #    current_row.append(annot[AnnotFields.GENES_ANNOT_PFAM]) # PFAM ID
+            #    #output_buffer.append("<td>"+x[7]+"</td>") # PFAM source
+            #    current_row.append(annot[AnnotFields.GENES_ANNOT_GO]) # GO terms
             
             self._output_desc.write("\t".join([str(x) for x in current_row])+"\n")
             
-        sys.stderr.write("OutputFacade: map with markers printed.\n")
+        sys.stderr.write("OutputFacade: map with genes printed.\n")
         
         if self._verbose: sys.stderr.write("\tlines printed "+str(len(positions))+"\n")
         
@@ -378,18 +342,8 @@ class OutputFacade(object):
         sys.stderr.write("\tprinting map with markers...\n")
         
         if show_headers:
-            headers_row = []
-            self.__output_base_header(headers_row, map_has_cm_pos, map_has_bp_pos, multiple_param)
             
-            headers_row.append(MapHeaders.MARKERS_HEADERS[MarkersFields.MARKER_ID_POS])
-            headers_row.append(MapHeaders.MARKERS_HEADERS[MarkersFields.MARKER_DATASET_POS])
-            headers_row.append(MapHeaders.MARKERS_HEADERS[MarkersFields.MARKER_CHR_POS])
-            if map_has_cm_pos:
-                headers_row.append(MapHeaders.MARKERS_HEADERS[MarkersFields.MARKER_CM_POS])
-            if map_has_bp_pos:
-                headers_row.append(MapHeaders.MARKERS_HEADERS[MarkersFields.MARKER_BP_POS])
-            
-            #headers_row.append(MapHeaders.MARKERS_HEADERS[MarkersFields.MARKER_GENES_POS])
+            headers_row = self.__output_features_header(map_has_cm_pos, map_has_bp_pos, multiple_param)
             
             self._output_desc.write("#"+"\t".join(headers_row)+"\n")
         
@@ -397,53 +351,9 @@ class OutputFacade(object):
             current_row = []
             self.__output_base_pos(current_row, pos, map_has_cm_pos, map_has_bp_pos, multiple_param)
             
-            marker_data = []
-            marker = pos.get_feature()
-            marker_data.append(marker.get_feature_id())
-            marker_data.append(marker.get_dataset_name())
-            marker_data.append(marker.get_chrom_name())
+            feature_data = self.__output_features_pos(pos, map_has_cm_pos, map_has_bp_pos, map_sort_by)
             
-            if map_has_cm_pos and map_has_bp_pos:
-                if map_sort_by == MapTypes.MAP_SORT_PARAM_CM:
-                    marker_cm = marker.get_pos() #marker[MarkersFields.MARKER_CM_POS]
-                    if marker_cm != "-":
-                        if self._beauty_nums:
-                            cm_pos = str("%0.2f" % float(marker_cm))
-                        else:
-                            cm_pos = marker_cm
-                    else:
-                        cm_pos = marker_cm
-                    marker_data.append(cm_pos)
-                elif map_sort_by == MapTypes.MAP_SORT_PARAM_BP:
-                    marker_data.append(str(marker.get_pos()))
-                else:
-                    raise m2pException("Unrecognized sort by "+map_sort_by+".")
-            
-            elif map_has_cm_pos:
-                marker_cm = marker.get_pos() #marker[MarkersFields.MARKER_CM_POS]
-                if marker_cm != "-":
-                    if self._beauty_nums:
-                        cm_pos = str("%0.2f" % float(marker_cm))
-                    else:
-                        cm_pos = marker_cm
-                else:
-                    cm_pos = marker_cm
-                marker_data.append(cm_pos)
-                
-            elif map_has_bp_pos:
-                marker_data.append(str(marker.get_pos()))
-            else:
-                raise m2pException("Map configuration indicates that has no cm nor bp positions.")
-            
-            #if marker[MarkersFields.MARKER_GENES_CONFIGURED_POS]:
-            #    if len(marker[MarkersFields.MARKER_GENES_POS]) > 0:
-            #        marker_data.append(",".join(marker[MarkersFields.MARKER_GENES_POS]))
-            #    else:
-            #        marker_data.append("no hits")
-            #else:
-            #    marker_data.append("nd")
-            
-            current_row.extend(marker_data)
+            current_row.extend(feature_data)
             
             self._output_desc.write("\t".join([str(x) for x in current_row])+"\n")
             
@@ -452,6 +362,77 @@ class OutputFacade(object):
         if self._verbose: sys.stderr.write("\tlines printed "+str(len(positions))+"\n")
         
         return
+    
+        #def print_map_with_genes(self, positions, map_has_cm_pos, map_has_bp_pos, multiple_param, load_annot, show_headers = False):
+    #    
+    #    sys.stderr.write("\tprinting map with genes...\n")
+    #    
+    #    if show_headers:
+    #        headers_row = []
+    #        self.__output_base_header(headers_row, map_has_cm_pos, map_has_bp_pos, multiple_param)
+    #        
+    #        headers_row.append(MapHeaders.GENES_HEADERS[GenesFields.GENES_ID_POS])
+    #        headers_row.append(MapHeaders.GENES_HEADERS[GenesFields.GENES_TYPE_POS])
+    #        headers_row.append(MapHeaders.GENES_HEADERS[GenesFields.GENES_CHR_POS])
+    #        
+    #        if map_has_cm_pos:
+    #            headers_row.append(MapHeaders.GENES_HEADERS[GenesFields.GENES_CM_POS])
+    #        
+    #        if map_has_bp_pos:
+    #            headers_row.append(MapHeaders.GENES_HEADERS[GenesFields.GENES_BP_POS])
+    #            
+    #        if load_annot:
+    #            headers_row.append(MapHeaders.ANNOT_HEADERS[AnnotFields.GENES_ANNOT_DESC])
+    #            headers_row.append(MapHeaders.ANNOT_HEADERS[AnnotFields.GENES_ANNOT_INTERPRO])
+    #            headers_row.append(MapHeaders.ANNOT_HEADERS[AnnotFields.GENES_ANNOT_PFAM])
+    #            headers_row.append(MapHeaders.ANNOT_HEADERS[AnnotFields.GENES_ANNOT_GO])
+    #        
+    #        self._output_desc.write("#"+"\t".join(headers_row)+"\n")
+    #    
+    #    for pos in positions:
+    #        current_row = []
+    #        self.__output_base_pos(current_row, pos, map_has_cm_pos, map_has_bp_pos, multiple_param)
+    #        
+    #        gene = pos[MapPosition.MAP_FIELDS:]
+    #        
+    #        gene_cm = gene[GenesFields.GENES_CM_POS]
+    #        if gene_cm != "-":
+    #            if self._beauty_nums:
+    #                cm_pos = str("%0.2f" % float(gene_cm))
+    #            else:
+    #                cm_pos = gene_cm
+    #        else:
+    #            cm_pos = gene_cm
+    #        
+    #        gene_data = []
+    #        gene_data.append(gene[GenesFields.GENES_ID_POS])
+    #        gene_data.append(gene[GenesFields.GENES_TYPE_POS])
+    #        gene_data.append(str(gene[GenesFields.GENES_CHR_POS]))
+    #        
+    #        if map_has_cm_pos:
+    #            gene_data.append(cm_pos)
+    #        
+    #        if map_has_bp_pos:
+    #            gene_data.append(str(gene[GenesFields.GENES_BP_POS]))
+    #        
+    #        current_row.extend(gene_data)
+    #        
+    #        if load_annot:
+    #            annot = gene[len(MapHeaders.GENES_HEADERS):]
+    #            current_row.append(annot[AnnotFields.GENES_ANNOT_DESC]) # Readable description
+    #            # InterPro
+    #            current_row.append(annot[AnnotFields.GENES_ANNOT_INTERPRO])
+    #            current_row.append(annot[AnnotFields.GENES_ANNOT_PFAM]) # PFAM ID
+    #            #output_buffer.append("<td>"+x[7]+"</td>") # PFAM source
+    #            current_row.append(annot[AnnotFields.GENES_ANNOT_GO]) # GO terms
+    #        
+    #        self._output_desc.write("\t".join([str(x) for x in current_row])+"\n")
+    #        
+    #    sys.stderr.write("\tmap with genes printed.\n")
+    #    
+    #    if self._verbose: sys.stderr.write("\tlines printed "+str(len(positions))+"\n")
+    #    
+    #    return
     
     def output_unmapped(self, section_name, unmapped_records, show_headers = False):
         sys.stderr.write("\tprinting unmapped...\n")

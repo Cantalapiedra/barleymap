@@ -340,9 +340,21 @@ try:
             
         ########### GENES
         if show_genes:
-            mapMarkers.enrich_with_genes(show_genes_param, load_annot,
-                                         extend, extend_window,
-                                         sort_by, constrain_fine_mapping = False)
+            
+            # Datasets config
+            datasets_conf_file = __app_path+DATASETS_CONF
+            datasets_config = DatasetsConfig(datasets_conf_file)
+            
+            # Load DatasetsFacade
+            datasets_path = __app_path+config_path_dict["datasets_path"]
+            datasets_facade = DatasetsFacade(datasets_config, datasets_path, verbose = verbose_param)
+            
+            mapMarkers.enrich_with_genes(datasets_facade, extend, extend_window,
+                                         load_annot, constrain_fine_mapping = False)
+            
+            #mapMarkers.enrich_with_genes(show_genes_param, load_annot,
+            #                             extend, extend_window,
+            #                             sort_by, constrain_fine_mapping = False)
         
         mapping_results = mapMarkers.get_mapping_results()
         
