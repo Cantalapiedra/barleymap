@@ -287,6 +287,92 @@ class OutputFacade(object):
         
         return
     
+    def print_map_with_genes(self, positions, map_sort_by, map_has_cm_pos, map_has_bp_pos, multiple_param, show_headers = False):
+        
+        sys.stderr.write("\tprinting map with genes...\n")
+        
+        if show_headers:
+            headers_row = []
+            self.__output_base_header(headers_row, map_has_cm_pos, map_has_bp_pos, multiple_param)
+            
+            headers_row.append(MapHeaders.GENES_HEADERS[GenesFields.GENES_ID_POS])
+            headers_row.append(MapHeaders.GENES_HEADERS[GenesFields.GENES_TYPE_POS])
+            headers_row.append(MapHeaders.GENES_HEADERS[GenesFields.GENES_CHR_POS])
+            
+            if map_has_cm_pos:
+                headers_row.append(MapHeaders.GENES_HEADERS[GenesFields.GENES_CM_POS])
+            
+            if map_has_bp_pos:
+                headers_row.append(MapHeaders.GENES_HEADERS[GenesFields.GENES_BP_POS])
+                
+            if load_annot:
+                headers_row.append(MapHeaders.ANNOT_HEADERS[AnnotFields.GENES_ANNOT_DESC])
+                headers_row.append(MapHeaders.ANNOT_HEADERS[AnnotFields.GENES_ANNOT_INTERPRO])
+                headers_row.append(MapHeaders.ANNOT_HEADERS[AnnotFields.GENES_ANNOT_PFAM])
+                headers_row.append(MapHeaders.ANNOT_HEADERS[AnnotFields.GENES_ANNOT_GO])
+            
+            self._output_desc.write("#"+"\t".join(headers_row)+"\n")
+        
+        for pos in positions:
+            current_row = []
+            self.__output_base_pos(current_row, pos, map_has_cm_pos, map_has_bp_pos, multiple_param)
+            
+            marker_data = []
+            marker = pos.get_feature()
+            marker_data.append(marker.get_marker_id())
+            marker_data.append(marker.get_dataset_name())
+            marker_data.append(marker.get_chrom_name())
+            
+            if map_has_cm_pos and map_has_bp_pos:
+                if map_sort_by == MapTypes.MAP_SORT_PARAM_CM:
+                    marker_cm = marker.get_pos() #marker[MarkersFields.MARKER_CM_POS]
+                    if marker_cm != "-":
+                        if self._beauty_nums:
+                            cm_pos = str("%0.2f" % float(marker_cm))
+                        else:
+                            cm_pos = marker_cm
+                    else:
+                        cm_pos = marker_cm
+                    marker_data.append(cm_pos)
+                elif map_sort_by == MapTypes.MAP_SORT_PARAM_BP:
+                    marker_data.append(str(marker.get_pos()))
+                else:
+                    raise m2pException("Unrecognized sort by "+map_sort_by+".")
+            
+            elif map_has_cm_pos:
+                marker_cm = marker.get_pos() #marker[MarkersFields.MARKER_CM_POS]
+                if marker_cm != "-":
+                    if self._beauty_nums:
+                        cm_pos = str("%0.2f" % float(marker_cm))
+                    else:
+                        cm_pos = marker_cm
+                else:
+                    cm_pos = marker_cm
+                marker_data.append(cm_pos)
+                
+            elif map_has_bp_pos:
+                marker_data.append(str(marker.get_pos()))
+            else:
+                raise m2pException("Map configuration indicates that has no cm nor bp positions.")
+            
+            #if marker[MarkersFields.MARKER_GENES_CONFIGURED_POS]:
+            #    if len(marker[MarkersFields.MARKER_GENES_POS]) > 0:
+            #        marker_data.append(",".join(marker[MarkersFields.MARKER_GENES_POS]))
+            #    else:
+            #        marker_data.append("no hits")
+            #else:
+            #    marker_data.append("nd")
+            
+            current_row.extend(marker_data)
+            
+            self._output_desc.write("\t".join([str(x) for x in current_row])+"\n")
+            
+        sys.stderr.write("OutputFacade: map with markers printed.\n")
+        
+        if self._verbose: sys.stderr.write("\tlines printed "+str(len(positions))+"\n")
+        
+        return
+    
     def print_map_with_markers(self, positions, map_sort_by, map_has_cm_pos, map_has_bp_pos, multiple_param, show_headers = False):
         
         sys.stderr.write("\tprinting map with markers...\n")
@@ -313,7 +399,7 @@ class OutputFacade(object):
             
             marker_data = []
             marker = pos.get_feature()
-            marker_data.append(marker.get_marker_id())
+            marker_data.append(marker.get_feature_id())
             marker_data.append(marker.get_dataset_name())
             marker_data.append(marker.get_chrom_name())
             
