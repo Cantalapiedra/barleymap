@@ -102,11 +102,11 @@ try:
                          help='Whether load annotation info for genes (yes) or not (no).'+\
                          '(default '+DEFAULT_LOAD_ANNOT_PARAM+')')
     
-    optParser.add_option('--extend', action='store', dest='extend', type='string', \
-                         help='Whether extend search for genes (yes) or not (no).'+\
-                         '(default '+DEFAULT_EXTEND_PARAM+')')
+    #optParser.add_option('--extend', action='store', dest='extend', type='string', \
+    #                     help='Whether extend search for genes (yes) or not (no).'+\
+    #                     '(default '+DEFAULT_EXTEND_PARAM+')')
     
-    optParser.add_option('--extend-window', action='store', dest='extend_window', type='string', \
+    optParser.add_option('--extend', action='store', dest='extend_window', type='string', \
                          help='Centimorgans or basepairs (depending on sort) to extend the search for genes.'+\
                          '(default '+str(DEFAULT_EXTEND_WINDOW)+')')
     
@@ -181,19 +181,26 @@ try:
         load_annot = DEFAULT_LOAD_ANNOT
         load_annot_param = DEFAULT_LOAD_ANNOT_PARAM
         
-    ## Extend genes shown, on marker or in the edges when between markers
-    if options.extend and options.extend == "yes":
-        extend = True
-        extend_param = "yes"
-    else:
-        extend = DEFAULT_EXTEND
-        extend_param = DEFAULT_EXTEND_PARAM
+    ### Extend genes shown, on marker or in the edges when between markers
+    #if options.extend and options.extend == "yes":
+    #    extend = True
+    #    extend_param = "yes"
+    #else:
+    #    extend = DEFAULT_EXTEND
+    #    extend_param = DEFAULT_EXTEND_PARAM
     
     ## Genes window
     if options.extend_window:
         extend_window = float(options.extend_window)
     else:
         extend_window = DEFAULT_EXTEND_WINDOW
+    
+    if extend_window > 0.0:
+        extend = True
+        extend_param = "yes"
+    else:
+        extend = False
+        extend_param = "no"
     
     ## Show unmapped
     if options.show_unmapped and options.show_unmapped == "yes":
