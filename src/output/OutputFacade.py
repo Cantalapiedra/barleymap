@@ -22,10 +22,20 @@ class MapHeaders(object):
     MARKER_CM_POS = 2
     MARKER_BP_POS = 3
     MULTIPLE_POS = 4
-    OTHER_ALIGNMENTS_POS = 5
+    OTHER_ALIGNMENTS = 5
     MAP_NAME = 6
     
+    PHYSICAL_ID = 0
+    PHYSICAL_CHR = 1
+    PHYSICAL_START_POS = 2
+    PHYSICAL_END_POS = 3
+    PHYSICAL_STRAND = 4
+    PHYSICAL_MULTIPLE_POS = 5
+    PHYSICAL_OTHER_ALIGNMENTS = 6
+    PHYSICAL_MAP_NAME = 7
+    
     OUTPUT_HEADERS = ["Marker", "chr", "cM", "base_pairs", "multiple_positions", "other_alignments", "Map"]
+    PHYSICAL_HEADERS = ["Marker", "chr", "start", "end", "strand", "multiple_positions", "other_alignments", "Map"]
     FEATURE_HEADERS = ["Feature", "Feature_type", "Dataset", "chr", "cM", "bp"]
     
     ANNOT_HEADERS = ["Description", "InterPro", "Signatures", "PFAM server", "GO terms"]
@@ -101,7 +111,7 @@ class OutputFacade(object):
                 
                 sorted_positions = mapping_results.get_mapped()
                 
-                self.print_genetic_map(sorted_positions, map_has_cm_pos, map_has_bp_pos, \
+                self.print_genetic_map(sorted_positions, map_is_physical, map_has_cm_pos, map_has_bp_pos, \
                                                 multiple_param_text, show_headers)
             
             elif show_genes:
@@ -112,7 +122,7 @@ class OutputFacade(object):
                 
                 genes_enriched_positions = mapping_results.get_map_with_genes()
                 
-                self.print_map_with_genes(genes_enriched_positions, map_sort_by, map_has_cm_pos, map_has_bp_pos, \
+                self.print_map_with_genes(genes_enriched_positions, map_sort_by, map_is_physical, map_has_cm_pos, map_has_bp_pos, \
                                                    multiple_param_text, load_annot, show_headers)
             
             elif show_markers:
@@ -123,7 +133,7 @@ class OutputFacade(object):
                 
                 marker_enriched_positions = mapping_results.get_map_with_markers()
                 
-                self.print_map_with_markers(marker_enriched_positions, map_sort_by, map_has_cm_pos, map_has_bp_pos, \
+                self.print_map_with_markers(marker_enriched_positions, map_sort_by, map_is_physical, map_has_cm_pos, map_has_bp_pos, \
                                                      multiple_param_text, show_headers)
                 
             # else: this could never happen!?
@@ -155,7 +165,7 @@ class OutputFacade(object):
         return
     
     ## OUTPUT FOR BASIC MAP FIELDS
-    def __output_base_pos(self, current_row, pos, map_has_cm_pos, map_has_bp_pos, multiple_param):
+    def __output_base_pos(self, current_row, pos, map_as_physical, map_has_cm_pos, map_has_bp_pos, multiple_param):
         
         ## Marker ID
         current_row.append(str(pos.get_marker_id())) #[MapFields.MARKER_NAME_POS]))
@@ -164,21 +174,28 @@ class OutputFacade(object):
         chrom = pos.get_chrom_name() #[MapFields.MARKER_CHR_POS]
         current_row.append(str(chrom))
         
-        ## cM
-        if map_has_cm_pos:
-            cm = pos.get_cm_pos() #[MapFields.MARKER_CM_POS]
-            if cm != "-":
-                if self._beauty_nums:
-                    current_row.append(str("%0.2f" % float(cm)))
+        # Physical map
+        if map_as_physical:
+            current_row.append(pos.get_bp_pos())
+            current_row.append(pos.get_bp_end_pos())
+            current_row.append(pos.get_strand())
+            
+        else:
+            ## cM
+            if map_has_cm_pos:
+                cm = pos.get_cm_pos() #[MapFields.MARKER_CM_POS]
+                if cm != "-":
+                    if self._beauty_nums:
+                        current_row.append(str("%0.2f" % float(cm)))
+                    else:
+                        current_row.append(cm)
                 else:
                     current_row.append(cm)
-            else:
-                current_row.append(cm)
-        
-        ## bp
-        if map_has_bp_pos:
-            bp = pos.get_bp_pos() #[MapFields.MARKER_BP_POS]
-            current_row.append(str(bp))
+            
+            ## bp
+            if map_has_bp_pos:
+                bp = pos.get_bp_pos() #[MapFields.MARKER_BP_POS]
+                current_row.append(str(bp))
         
         if pos.is_empty():
             current_row.append("-") # multiple positions
@@ -196,37 +213,49 @@ class OutputFacade(object):
         
         return
     
-    def __output_base_header(self, current_row, map_has_cm_pos, map_has_bp_pos, multiple_param):
+    def __output_base_header(self, current_row, map_as_physical, map_has_cm_pos, map_has_bp_pos, multiple_param):
         
-        current_row.append(MapHeaders.OUTPUT_HEADERS[MapHeaders.MARKER_NAME_POS])
-        current_row.append(MapHeaders.OUTPUT_HEADERS[MapHeaders.MARKER_CHR_POS])
-        
-        if map_has_cm_pos:
-            current_row.append(MapHeaders.OUTPUT_HEADERS[MapHeaders.MARKER_CM_POS])
-        
-        if map_has_bp_pos:
-            current_row.append(MapHeaders.OUTPUT_HEADERS[MapHeaders.MARKER_BP_POS])
-        
-        if multiple_param == "yes":
-            current_row.append(MapHeaders.OUTPUT_HEADERS[MapHeaders.MULTIPLE_POS])
-        
-        current_row.append(MapHeaders.OUTPUT_HEADERS[MapHeaders.OTHER_ALIGNMENTS_POS])
+        if map_as_physical:
+            current_row.append(MapHeaders.PHYSICAL_HEADERS[MapHeaders.PHYSICAL_ID])
+            current_row.append(MapHeaders.PHYSICAL_HEADERS[MapHeaders.PHYSICAL_CHR])
+            current_row.append(MapHeaders.PHYSICAL_HEADERS[MapHeaders.PHYSICAL_START_POS])
+            current_row.append(MapHeaders.PHYSICAL_HEADERS[MapHeaders.PHYSICAL_END_POS])
+            current_row.append(MapHeaders.PHYSICAL_HEADERS[MapHeaders.PHYSICAL_STRAND])
+            
+            if multiple_param == "yes":
+                current_row.append(MapHeaders.PHYSICAL_HEADERS[MapHeaders.PHYSICAL_MULTIPLE_POS])
+            
+            current_row.append(MapHeaders.PHYSICAL_HEADERS[MapHeaders.PHYSICAL_OTHER_ALIGNMENTS])
+            
+        else:
+            current_row.append(MapHeaders.OUTPUT_HEADERS[MapHeaders.MARKER_NAME_POS])
+            current_row.append(MapHeaders.OUTPUT_HEADERS[MapHeaders.MARKER_CHR_POS])
+            if map_has_cm_pos:
+                current_row.append(MapHeaders.OUTPUT_HEADERS[MapHeaders.MARKER_CM_POS])
+            
+            if map_has_bp_pos:
+                current_row.append(MapHeaders.OUTPUT_HEADERS[MapHeaders.MARKER_BP_POS])
+            
+            if multiple_param == "yes":
+                current_row.append(MapHeaders.OUTPUT_HEADERS[MapHeaders.MULTIPLE_POS])
+            
+            current_row.append(MapHeaders.OUTPUT_HEADERS[MapHeaders.OTHER_ALIGNMENTS])
         
         return
     
-    def print_genetic_map(self, positions, map_has_cm_pos, map_has_bp_pos, multiple_param, show_headers = False):
+    def print_genetic_map(self, positions, map_as_physical, map_has_cm_pos, map_has_bp_pos, multiple_param, show_headers = False):
         
         sys.stderr.write("\tprinting plain genetic map...\n")
         
         if show_headers:
             headers_row = []
-            self.__output_base_header(headers_row, map_has_cm_pos, map_has_bp_pos, multiple_param)
+            self.__output_base_header(headers_row, map_as_physical, map_has_cm_pos, map_has_bp_pos, multiple_param)
             
             self._output_desc.write("#"+"\t".join(headers_row)+"\n")
         
         for pos in positions:
             current_row = []
-            self.__output_base_pos(current_row, pos, map_has_cm_pos, map_has_bp_pos, multiple_param)
+            self.__output_base_pos(current_row, pos, map_as_physical, map_has_cm_pos, map_has_bp_pos, multiple_param)
             
             self._output_desc.write("\t".join([str(x) for x in current_row])+"\n")
         
@@ -236,9 +265,9 @@ class OutputFacade(object):
         
         return
     
-    def __output_features_header(self, map_has_cm_pos, map_has_bp_pos, multiple_param):
+    def __output_features_header(self, map_as_physical, map_has_cm_pos, map_has_bp_pos, multiple_param):
         headers_row = []
-        self.__output_base_header(headers_row, map_has_cm_pos, map_has_bp_pos, multiple_param)
+        self.__output_base_header(headers_row, map_as_physical, map_has_cm_pos, map_has_bp_pos, multiple_param)
         
         headers_row.append(MapHeaders.FEATURE_HEADERS[GenesFields.GENES_ID_POS])
         headers_row.append(MapHeaders.FEATURE_HEADERS[GenesFields.GENES_TYPE_POS])
@@ -296,13 +325,13 @@ class OutputFacade(object):
         
         return feature_data
     
-    def print_map_with_genes(self, positions, map_sort_by, map_has_cm_pos, map_has_bp_pos, multiple_param, load_annot, show_headers = False):
+    def print_map_with_genes(self, positions, map_sort_by, map_as_physical, map_has_cm_pos, map_has_bp_pos, multiple_param, load_annot, show_headers = False):
         
         sys.stderr.write("\tprinting map with genes...\n")
         
         if show_headers:
             
-            headers_row = self.__output_features_header(map_has_cm_pos, map_has_bp_pos, multiple_param)
+            headers_row = self.__output_features_header(map_as_physical, map_has_cm_pos, map_has_bp_pos, multiple_param)
             
             if load_annot:
                 headers_row.append(MapHeaders.ANNOT_HEADERS[AnnotFields.GENES_ANNOT_DESC])
@@ -314,7 +343,7 @@ class OutputFacade(object):
         
         for pos in positions:
             current_row = []
-            self.__output_base_pos(current_row, pos, map_has_cm_pos, map_has_bp_pos, multiple_param)
+            self.__output_base_pos(current_row, pos, map_as_physical, map_has_cm_pos, map_has_bp_pos, multiple_param)
             
             feature_data = self.__output_features_pos(pos, map_has_cm_pos, map_has_bp_pos, map_sort_by)
             
@@ -337,19 +366,19 @@ class OutputFacade(object):
         
         return
     
-    def print_map_with_markers(self, positions, map_sort_by, map_has_cm_pos, map_has_bp_pos, multiple_param, show_headers = False):
+    def print_map_with_markers(self, positions, map_sort_by, map_as_physical, map_has_cm_pos, map_has_bp_pos, multiple_param, show_headers = False):
         
         sys.stderr.write("\tprinting map with markers...\n")
         
         if show_headers:
             
-            headers_row = self.__output_features_header(map_has_cm_pos, map_has_bp_pos, multiple_param)
+            headers_row = self.__output_features_header(map_as_physical, map_has_cm_pos, map_has_bp_pos, multiple_param)
             
             self._output_desc.write("#"+"\t".join(headers_row)+"\n")
         
         for pos in positions:
             current_row = []
-            self.__output_base_pos(current_row, pos, map_has_cm_pos, map_has_bp_pos, multiple_param)
+            self.__output_base_pos(current_row, pos, map_as_physical, map_has_cm_pos, map_has_bp_pos, multiple_param)
             
             feature_data = self.__output_features_pos(pos, map_has_cm_pos, map_has_bp_pos, map_sort_by)
             

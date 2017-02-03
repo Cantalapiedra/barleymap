@@ -142,6 +142,9 @@ try:
                          help='Whether to output only maps (no), or unmapped results as well (yes).'+\
                          '(default '+DEFAULT_SHOW_UNMAPPED_PARAM+')')
     
+    optParser.add_option('-f', action='store_true', dest='format_numbers', \
+                         help='cM positions will be output with all decimals (default, 2 decimals).')
+    
     optParser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='More information printed.')
     
     (options, arguments) = optParser.parse_args()
@@ -156,6 +159,9 @@ try:
     else: verbose_param = False
     
     if verbose_param: sys.stderr.write("Command: "+" ".join(sys.argv)+"\n")
+    
+    if options.format_numbers: beauty_nums = False
+    else: beauty_nums = True
     
     ########## ARGUMENT DEFAULTS
     # Query mode
@@ -372,7 +378,7 @@ try:
     
     ############################################################ OUTPUT
     
-    outputPrinter = OutputFacade().get_plain_printer(sys.stdout, verbose = verbose_param, beauty_nums = False)
+    outputPrinter = OutputFacade().get_plain_printer(sys.stdout, verbose = verbose_param, beauty_nums = beauty_nums)
     
     outputPrinter.print_maps(maps_dict,
                              show_genes, show_markers, show_unmapped,

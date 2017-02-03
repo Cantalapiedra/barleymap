@@ -20,16 +20,16 @@ from barleymapcore.db.PathsConfig import PathsConfig
 from barleymapcore.db.MapsConfig import MapsConfig
 from barleymapcore.maps.MapMarkers import MapMarkers
 from output.OutputFacade import OutputFacade
-from barleymapcore.utils.parse_gtf_file import parse_gtf_file
+from barleymapcore.utils.parse_gtf_file import parse_gtf_file, parse_bed_file
 from barleymapcore.utils.data_utils import read_paths
 
 _SCRIPT = os.path.basename(__file__)
 
 DEFAULT_N_THREADS = 1
 
-def __gtf_to_map_file(features, maps_path, map_config, map_output_path):
+def __features_to_map_file(features, maps_path, map_config, map_output_path, verbose_param):
     
-    mapMarkers = MapMarkers(maps_path, map_config, verbose = True)
+    mapMarkers = MapMarkers(maps_path, map_config, verbose = verbose_param)
     
     unaligned = [] # Better this than None
     mapMarkers.create_map(features, unaligned, map_config.get_default_sort_by(), multiple_param = False)
@@ -62,13 +62,14 @@ def __gtf_to_map_file(features, maps_path, map_config, map_output_path):
 
 def __write_command(map_name, file_path, output_path, threads):
     cmd = "bmap_align"
+    raw_numbers = "-f"
     aligner = "--aligner=gmap"
     _threads = "--threads="+str(threads)
     maps = "--maps="+map_name
     out = "> "+output_path
     err = "2> "+output_path+".err"
     
-    command = " ".join([cmd, aligner, _threads, maps, file_path, out, err])
+    command = " ".join([cmd, raw_numbers, aligner, _threads, maps, file_path, out, err])
     
     return command
 
@@ -97,9 +98,14 @@ try:
     optParser.add_option('--threads', action='store', dest='n_threads', type='string',
                     help='Number of threads to perform alignments (default '+str(DEFAULT_N_THREADS)+').')
     
+    optParser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='More information printed.')
+    
     (options, arguments) = optParser.parse_args()
     
-    sys.stderr.write("Command: "+" ".join(sys.argv)+"\n")
+    if options.verbose: verbose_param = True
+    else: verbose_param = False
+    
+    if verbose_param: sys.stderr.write("Command: "+" ".join(sys.argv)+"\n")
     
     # Num threads
     if options.n_threads: n_threads = int(options.n_threads)
@@ -121,7 +127,7 @@ try:
     
     sys.stderr.write(_SCRIPT+": loading configuration file "+datasets_conf_file+"\n")
     
-    datasets_config = DatasetsConfig(datasets_conf_file, verbose = False)
+    datasets_config = DatasetsConfig(datasets_conf_file, verbose = verbose_param)
     
     datasets = datasets_config.get_datasets()
     
@@ -163,7 +169,7 @@ try:
             os.mkdir(dataset_path)
             
             maps_conf_file = __app_path+ConfigBase.MAPS_CONF
-            maps_config = MapsConfig(maps_conf_file, verbose = False)
+            maps_config = MapsConfig(maps_conf_file, verbose = verbose_param)
             
             # align to all the maps
             if (len(dataset_db_list)==1) and (dataset_db_list[0] == DatasetsConfig.DATABASES_ANY):
@@ -215,7 +221,7 @@ try:
             os.mkdir(dataset_path)
             
             maps_conf_file = __app_path+ConfigBase.MAPS_CONF
-            maps_config = MapsConfig(maps_conf_file, verbose = False)
+            maps_config = MapsConfig(maps_conf_file, verbose = verbose_param)
             
             # align to all the maps
             if (len(dataset_db_list)==1) and (dataset_db_list[0] == DatasetsConfig.DATABASES_ANY):
@@ -247,11 +253,55 @@ try:
                         sys.stderr.write("\tMap: "+map_name+"\n")
                         sys.stderr.write("\t\toutput file "+dataset_mapping_path+"\n")
                         
-                        __gtf_to_map_file(features, maps_path, map_config, dataset_mapping_path)
+                        __features_to_map_file(features, maps_path, map_config, dataset_mapping_path, verbose_param)
             
             sys.stdout.write(_SCRIPT+": dataset "+dataset_name+" created.\n")
         
-        ### 3) Other
+        ### 3) BED files
+        elif dataset_file_type == DatasetsConfig.FILE_TYPE_BED:
+            
+            ### Create the new directory
+            sys.stderr.write("\tA new directory "+dataset_path+" will be created.\n")
+            os.mkdir(dataset_path)
+            
+            maps_conf_file = __app_path+ConfigBase.MAPS_CONF
+            maps_config = MapsConfig(maps_conf_file, verbose = verbose_param)
+            
+            # align to all the maps
+            if (len(dataset_db_list)==1) and (dataset_db_list[0] == DatasetsConfig.DATABASES_ANY):
+                
+                raise m2pException("BED files have to be associated to a single database in datasets configuration.")
+                
+            # align to maps which are associated to databases also associated to this dataset
+            else:
+                
+                features = parse_bed_file(dataset_file_path, dataset_db_list, dataset_type, dataset_file_type) # barleymapcore.utils
+                
+                config_path_dict = read_paths(app_abs_path+"/paths.conf") # data_utils.read_paths
+                __app_path = config_path_dict["app_path"]
+                maps_path = __app_path+config_path_dict["maps_path"]
+                
+                for map_id in maps_config.get_maps():
+                    
+                    map_config = maps_config.get_map_config(map_id)
+                    map_db_list = map_config.get_db_list()
+                    
+                    common_dbs = filter(lambda x: x in dataset_db_list, map_db_list)
+                    # refactor to: set(map_db_lis).intersection(dataset_db_list)
+                    
+                    if len(common_dbs)>0:
+                        
+                        map_name = map_config.get_name()
+                        dataset_mapping_path = dataset_path+dataset_id+"."+map_id
+                        
+                        sys.stderr.write("\tMap: "+map_name+"\n")
+                        sys.stderr.write("\t\toutput file "+dataset_mapping_path+"\n")
+                        
+                        __features_to_map_file(features, maps_path, map_config, dataset_mapping_path, verbose_param)
+            
+            sys.stdout.write(_SCRIPT+": dataset "+dataset_name+" created.\n")
+            
+        ### 4) Others
         else:
             sys.stdout.write("Nothing to do with dataset file type "+dataset_file_type+"\n")
 
