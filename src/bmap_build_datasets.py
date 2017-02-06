@@ -130,10 +130,11 @@ try:
     datasets_config = DatasetsConfig(datasets_conf_file, verbose = verbose_param)
     
     datasets = datasets_config.get_datasets()
+    datasets_list = datasets_config.get_datasets_list()
     
     datasets_dict = {}
     
-    for dataset_id in datasets: #enumerate(datasets_names.split(",")):
+    for dataset_id in datasets_list: #enumerate(datasets_names.split(",")):
         
         dataset_config = datasets_config.get_dataset_config(dataset_id)
         dataset_name = dataset_config.get_dataset_name()
@@ -275,7 +276,7 @@ try:
             # align to maps which are associated to databases also associated to this dataset
             else:
                 
-                features = parse_bed_file(dataset_file_path, dataset_db_list, dataset_type, dataset_file_type) # barleymapcore.utils
+                features = parse_bed_file(dataset_file_path, dataset_db_list) # barleymapcore.utils
                 
                 config_path_dict = read_paths(app_abs_path+"/paths.conf") # data_utils.read_paths
                 __app_path = config_path_dict["app_path"]
