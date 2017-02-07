@@ -1,5 +1,5 @@
-bmap_find -v --maps=POPSEQ --sort=bp --genes=yes --show-unmapped=no \
---extend=0.5 \
+bmap_find -v --maps=MorexGenome --sort=bp --genes=yes --show-unmapped=no \
+--extend=2000 \
 test_markers_tiny.ids
 
 # IBSC_2012,POPSEQ,MorexGenome

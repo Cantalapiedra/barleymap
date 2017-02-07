@@ -3,7 +3,7 @@
 
 # bmap_find.py is part of Barleymap.
 # Copyright (C)  2013-2014  Carlos P Cantalapiedra.
-# Copyright (C) 2016 Carlos P Cantalapiedra
+# Copyright (C) 2016-2017 Carlos P Cantalapiedra
 # (terms of use can be found within the distributed LICENSE file).
 
 ############################################
@@ -14,18 +14,23 @@
 import sys, os, traceback
 from optparse import OptionParser
 
-from barleymapcore.utils.data_utils import read_paths
+from barleymapcore.db.ConfigBase import ConfigBase
+from barleymapcore.db.PathsConfig import PathsConfig
 from barleymapcore.db.MapsConfig import MapsConfig
 from barleymapcore.db.DatasetsConfig import DatasetsConfig
-from barleymapcore.db.DatabasesConfig import DatabasesConfig
 from barleymapcore.datasets.DatasetsFacade import DatasetsFacade
+from barleymapcore.annotators.GenesAnnotator import AnnotatorsFactory
 from barleymapcore.maps.MapMarkers import MapMarkers
 from barleymapcore.m2p_exception import m2pException
+
 from output.OutputFacade import OutputFacade
 
-DATABASES_CONF = "conf/databases.conf"
-MAPS_CONF = "conf/maps.conf"
-DATASETS_CONF = "conf/datasets.conf"
+PATHS_CONF = ConfigBase.PATHS_CONF
+DATABASES_CONF = ConfigBase.DATABASES_CONF
+MAPS_CONF = ConfigBase.MAPS_CONF
+DATASETS_CONF = ConfigBase.DATASETS_CONF
+DATASETS_ANNOTATION_CONF = ConfigBase.DATASETS_ANNOTATION_CONF
+ANNOTATION_TYPES_CONF = ConfigBase.ANNOTATION_TYPES_CONF
 
 DEFAULT_BEST_SCORE = True
 DEFAULT_BEST_SCORE_PARAM = "yes"
@@ -67,11 +72,13 @@ def _print_parameters(query_ids_path, genetic_map_name, \
 ############# BARLEYMAP_FIND_MARKERS
 try:
     
-    ## Argument parsing
+    ## Usage
     __usage = "usage: bmap_find.py [OPTIONS] [IDs_FILE]\n\n"+\
               "typical: bmap_find.py --maps=map queries.ids"
     optParser = OptionParser(__usage)
     
+    ########## Define parameters
+    ##########
     optParser.add_option('--maps', action='store', dest='maps_param', type='string', help='Comma delimited list of Maps to show.')
     
     optParser.add_option('--best-score', action='store', dest='best_score', type='string',
@@ -102,10 +109,6 @@ try:
                          help='Whether load annotation info for genes (yes) or not (no).'+\
                          '(default '+DEFAULT_LOAD_ANNOT_PARAM+')')
     
-    #optParser.add_option('--extend', action='store', dest='extend', type='string', \
-    #                     help='Whether extend search for genes (yes) or not (no).'+\
-    #                     '(default '+DEFAULT_EXTEND_PARAM+')')
-    
     optParser.add_option('--extend', action='store', dest='extend_window', type='string', \
                          help='Centimorgans or basepairs (depending on sort) to extend the search for genes.'+\
                          '(default '+str(DEFAULT_EXTEND_WINDOW)+')')
@@ -119,6 +122,8 @@ try:
     
     optParser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='More information printed.')
     
+    ########### Read parameters
+    ###########
     (options, arguments) = optParser.parse_args()
     
     if not arguments or len(arguments)==0:
@@ -127,15 +132,16 @@ try:
     # INPUT FILE
     query_ids_path = arguments[0] # THIS IS MANDATORY
     
+    # Verbose
     if options.verbose: verbose_param = True
     else: verbose_param = False
     
     if verbose_param: sys.stderr.write("Command: "+" ".join(sys.argv)+"\n")
     
+    # Output format of decimal numbers (cM positions)
     if options.format_numbers: beauty_nums = False
     else: beauty_nums = True
     
-    ########## ARGUMENT DEFAULTS
     ## Show only alignments from database with best scores
     if options.best_score and options.best_score == "no":
         best_score_filter = False
@@ -186,14 +192,6 @@ try:
     else:
         load_annot = DEFAULT_LOAD_ANNOT
         load_annot_param = DEFAULT_LOAD_ANNOT_PARAM
-        
-    ### Extend genes shown, on marker or in the edges when between markers
-    #if options.extend and options.extend == "yes":
-    #    extend = True
-    #    extend_param = "yes"
-    #else:
-    #    extend = DEFAULT_EXTEND
-    #    extend_param = DEFAULT_EXTEND_PARAM
     
     ## Genes window
     if options.extend_window:
@@ -216,27 +214,21 @@ try:
         show_unmapped = DEFAULT_SHOW_UNMAPPED
         show_unmapped_param = DEFAULT_SHOW_UNMAPPED_PARAM
     
-    ## Read conf file
+    ######### Read configuration files
+    #########
     app_abs_path = os.path.dirname(os.path.abspath(__file__))
-
-    config_path_dict = read_paths(app_abs_path+"/paths.conf") # data_utils.read_paths
-    __app_path = config_path_dict["app_path"]
+    
+    paths_config = PathsConfig(app_abs_path, verbose_param)
+    __app_path = paths_config.get_app_path()
     
     # Datasets
     datasets_conf_file = __app_path+DATASETS_CONF
-    datasets_config = DatasetsConfig(datasets_conf_file)
+    datasets_config = DatasetsConfig(datasets_conf_file, verbose_param)
     datasets_ids = datasets_config.get_datasets().keys()
-    #(datasets_names, datasets_ids) = load_data(datasets_conf_file, verbose = verbose_param) # data_utils.load_datasets
     
-    # Databases
-    databases_conf_file = __app_path+DATABASES_CONF
-    databases_config = DatabasesConfig(databases_conf_file)
-    databases_ids = databases_config.get_databases().keys()
-    #(databases_names, databases_ids) = load_data(databases_conf_file, verbose = verbose_param) # data_utils.load_data
-    
-    # Genetic maps
+    # Maps
     maps_conf_file = __app_path+MAPS_CONF
-    maps_config = MapsConfig(maps_conf_file)
+    maps_config = MapsConfig(maps_conf_file, verbose_param)
     if options.maps_param:
         maps_names = options.maps_param
         maps_ids = maps_config.get_maps_ids(maps_names.strip().split(","))
@@ -245,8 +237,10 @@ try:
         maps_names = ",".join(maps_config.get_maps_names(maps_ids))
     #(maps_names, maps_ids) = load_data(maps_conf_file, users_list = options.maps_param, verbose = verbose_param)
     
-    maps_path = __app_path+config_path_dict["maps_path"]
+    maps_path = paths_config.get_maps_path() #__app_path+config_path_dict["maps_path"]
     
+    ##### Print parameters
+    #####
     if verbose_param: _print_parameters(query_ids_path, maps_names, \
                       sort_param, multiple_param_text, options.best_score, \
                       show_genes_param, show_markers_param, \
@@ -258,7 +252,7 @@ try:
     
     ############ ALIGNMENTS - DATASETS
     # Load configuration paths
-    datasets_path = __app_path+config_path_dict["datasets_path"]
+    datasets_path = paths_config.get_datasets_path() #__app_path+config_path_dict["datasets_path"]
     datasets_facade = DatasetsFacade(datasets_config, datasets_path, verbose = verbose_param)
     
     maps_dict = {}
@@ -281,12 +275,19 @@ try:
             
         ########### GENES
         if show_genes:
-            mapMarkers.enrich_with_genes(datasets_facade, extend, extend_window,
-                                         load_annot, constrain_fine_mapping = False)
             
-            #mapMarkers.enrich_with_genes(show_genes_param, load_annot,
-            #                             extend, extend_window, extend_window,
-            #                             sort_by, constrain_fine_mapping = False)
+            if load_annot:
+                ## Load annotation config
+                dsannot_conf_file = __app_path+DATASETS_ANNOTATION_CONF
+                anntypes_conf_file = __app_path+ANNOTATION_TYPES_CONF
+                annot_path = paths_config.get_annot_path()
+                
+                annotator = AnnotatorsFactory.get_annotator(dsannot_conf_file, anntypes_conf_file, annot_path, verbose_param)
+            else:
+                annotator = None
+            
+            mapMarkers.enrich_with_genes(datasets_facade, extend, extend_window,
+                                         annotator, constrain_fine_mapping = False)
         
         mapping_results = mapMarkers.get_mapping_results()
         
