@@ -19,7 +19,7 @@ from barleymapcore.db.ConfigBase import ConfigBase
 from barleymapcore.db.PathsConfig import PathsConfig
 from barleymapcore.db.MapsConfig import MapsConfig
 from barleymapcore.maps.MapMarkers import MapMarkers
-from output.OutputFacade import OutputFacade
+from barleymapcore.output.OutputFacade import OutputFacade
 from barleymapcore.utils.parse_gtf_file import parse_gtf_file, parse_bed_file
 from barleymapcore.utils.data_utils import read_paths
 

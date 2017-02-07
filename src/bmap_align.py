@@ -24,7 +24,7 @@ from barleymapcore.datasets.DatasetsFacade import DatasetsFacade
 from barleymapcore.annotators.GenesAnnotator import AnnotatorsFactory
 from barleymapcore.maps.MapMarkers import MapMarkers
 from barleymapcore.m2p_exception import m2pException
-from output.OutputFacade import OutputFacade
+from barleymapcore.output.OutputFacade import OutputFacade
 
 PATHS_CONF = ConfigBase.PATHS_CONF
 DATABASES_CONF = ConfigBase.DATABASES_CONF
@@ -311,6 +311,31 @@ try:
                              blastn_dbs_path, gmap_dbs_path, hsblastn_dbs_path, gmapl_app_path,
                              tmp_files_path, databases_config, verbose = verbose_param)
     
+    ############ Pre-loading of some objects
+    ############
+    # DatasetsFacade
+    if show_markers or show_genes:
+        # Datasets config
+        datasets_conf_file = __app_path+DATASETS_CONF
+        datasets_config = DatasetsConfig(datasets_conf_file)
+        
+        # Load DatasetsFacade
+        datasets_path = paths_config.get_datasets_path() #__app_path+config_path_dict["datasets_path"]
+        datasets_facade = DatasetsFacade(datasets_config, datasets_path, verbose = verbose_param)
+    
+    # GenesAnnotator
+    if show_genes and load_annot:
+        ## Load annotation config
+        dsannot_conf_file = __app_path+DATASETS_ANNOTATION_CONF
+        anntypes_conf_file = __app_path+ANNOTATION_TYPES_CONF
+        annot_path = paths_config.get_annot_path()
+        
+        annotator = AnnotatorsFactory.get_annotator(dsannot_conf_file, anntypes_conf_file, annot_path, verbose_param)
+    else:
+        annotator = None
+        
+    ########### Create maps
+    ###########
     maps_dict = {}
     
     for map_id in maps_ids:
@@ -339,14 +364,6 @@ try:
         
         if show_markers or show_genes:
             
-            # Datasets config
-            datasets_conf_file = __app_path+DATASETS_CONF
-            datasets_config = DatasetsConfig(datasets_conf_file)
-            
-            # Load DatasetsFacade
-            datasets_path = paths_config.get_datasets_path() #__app_path+config_path_dict["datasets_path"]
-            datasets_facade = DatasetsFacade(datasets_config, datasets_path, verbose = verbose_param)
-            
             ############ OTHER MARKERS
             if show_markers and not show_genes:
                 
@@ -357,16 +374,7 @@ try:
             ########### GENES
             if show_genes:
                 
-                if load_annot:
-                    ## Load annotation config
-                    dsannot_conf_file = __app_path+DATASETS_ANNOTATION_CONF
-                    anntypes_conf_file = __app_path+ANNOTATION_TYPES_CONF
-                    annot_path = paths_config.get_annot_path()
-                    
-                    annotator = AnnotatorsFactory.get_annotator(dsannot_conf_file, anntypes_conf_file, annot_path, verbose_param)
-                else:
-                    annotator = None
-                
+                # Enrich with genes
                 mapMarkers.enrich_with_genes(datasets_facade, extend, extend_window,
                                              annotator, constrain_fine_mapping = False)
         
@@ -383,7 +391,7 @@ try:
     
     outputPrinter.print_maps(maps_dict,
                              show_genes, show_markers, show_unmapped,
-                             multiple_param_text, load_annot, show_headers = True)
+                             multiple_param_text, load_annot, annotator, show_headers = True)
 
 except m2pException as m2pe:
     sys.stderr.write("\nThere was an error.\n")
