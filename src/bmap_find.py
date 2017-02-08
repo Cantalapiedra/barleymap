@@ -32,39 +32,24 @@ DATASETS_CONF = ConfigBase.DATASETS_CONF
 DATASETS_ANNOTATION_CONF = ConfigBase.DATASETS_ANNOTATION_CONF
 ANNOTATION_TYPES_CONF = ConfigBase.ANNOTATION_TYPES_CONF
 
-DEFAULT_BEST_SCORE = True
-DEFAULT_BEST_SCORE_PARAM = "yes"
 DEFAULT_SORT_PARAM = "map default"
-DEFAULT_SHOW_MULTIPLES = True
-DEFAULT_SHOW_MULTIPLES_PARAM = "yes"
-DEFAULT_SHOW_GENES = False
-DEFAULT_SHOW_GENES_PARAM = "no"
-DEFAULT_SHOW_MARKERS = False
-DEFAULT_SHOW_MARKERS_PARAM = "no"
-DEFAULT_LOAD_ANNOT = False
-DEFAULT_LOAD_ANNOT_PARAM = "no"
-DEFAULT_EXTEND = False
-DEFAULT_EXTEND_PARAM = "no"
 DEFAULT_EXTEND_WINDOW = 0.0
-DEFAULT_SHOW_UNMAPPED = False
-DEFAULT_SHOW_UNMAPPED_PARAM = "no"
 
 def _print_parameters(query_ids_path, genetic_map_name, \
                       sort_param, multiple_param, best_score, \
-                      show_genes_param, show_markers_param, \
-                      load_annot_param, extend_param, extend_window, \
+                      show_genes, show_markers, \
+                      load_annot, extend_window, \
                       show_unmapped_param, collapsed_view):
     sys.stderr.write("\nParameters:\n")
     sys.stderr.write("\tIDs query file: "+query_ids_path+"\n")
     sys.stderr.write("\tGenetic maps: "+genetic_map_name+"\n")
-    sys.stderr.write("\tBest score filtering: "+str(best_score)+"\n")
+    sys.stderr.write("\tBest score filtering: "+str("yes" if best_score else "no")+"\n")
     sys.stderr.write("\tSort: "+sort_param+"\n")
-    sys.stderr.write("\tShow multiples: "+str(multiple_param)+"\n")
-    sys.stderr.write("\tShow genes: "+str(show_genes_param)+"\n")
-    sys.stderr.write("\tShow markers: "+str(show_markers_param)+"\n")
-    sys.stderr.write("\tLoad annotation: "+str(load_annot_param)+"\n")
-    sys.stderr.write("\tExtend genes search: "+str(extend_param)+"\n")
-    sys.stderr.write("\tGenes window: "+str(extend_window)+"\n")
+    sys.stderr.write("\tShow multiples: "+str("yes" if multiple_param else "no")+"\n")
+    sys.stderr.write("\tShow genes: "+str("yes" if show_genes else "no")+"\n")
+    sys.stderr.write("\tShow markers: "+str("yes" if show_markers else "no")+"\n")
+    sys.stderr.write("\tLoad annotation: "+str("yes" if load_annot else "no")+"\n")
+    sys.stderr.write("\tExtend genes/markers search: "+str(extend_window)+"\n")
     sys.stderr.write("\tShow unmapped: "+str(show_unmapped_param)+"\n")
     sys.stderr.write("\tShow results as collapsed rows: "+str(collapsed_view)+"\n")
     
@@ -82,49 +67,39 @@ try:
     ##########
     optParser.add_option('--maps', action='store', dest='maps_param', type='string', help='Comma delimited list of Maps to show.')
     
-    optParser.add_option('--best-score', action='store', dest='best_score', type='string',
-                         help='Whether return secondary hits (no) '+\
-                         'or overall best score hits (yes) '+\
-                         '(default '+DEFAULT_BEST_SCORE_PARAM+').')
+    optParser.add_option('-b', '--best-score', action='store_true', dest='best_score',
+                         help='Will return only best score hits.')
     
     optParser.add_option('--sort', action='store', dest='sort_param', type='string', \
                          help='Sort results by centimorgan (cm) or basepairs (bp) '+\
                          '(default: defined for each map in maps configuration.')
     
-    optParser.add_option('--show-multiples', action='store', dest='multiple_param', type='string', \
-                         help='Whether show (yes) or not (no) IDs with multiple positions.'+\
-                         '(default '+DEFAULT_SHOW_MULTIPLES_PARAM+'')
+    optParser.add_option('-k', '--show-multiples', action='store_true', dest='multiple_param',
+                         help='Queries with multiple positions will be shown (are obviated by default).')
     
-    optParser.add_option('--genes', action='store', dest='show_genes', type='string', \
-                         help='Show genes on marker (marker), between markers (between) '+\
-                         'or dont show (no). '+\
-                         '(default '+DEFAULT_SHOW_GENES_PARAM+')'+\
-                         'If --genes is active, --markers option is ignored.')
+    optParser.add_option('-g', '--genes', action='store_true', dest='show_genes',
+                         help='Genes at positions of queries will be shown.')
     
-    optParser.add_option('--markers', action='store', dest='show_markers', type='string', \
-                         help='Show additional markers (yes) or not (no). '+\
-                         '(default '+DEFAULT_SHOW_MARKERS_PARAM+')'+\
-                         'Ignored if --genes active.')
+    optParser.add_option('-m', '--markers', action='store_true', dest='show_markers',
+                         help='Additional markers at positions of queries will be shown. Ignored if -g.')
     
-    optParser.add_option('--annot', action='store', dest='load_annot', type='string', \
-                         help='Whether load annotation info for genes (yes) or not (no).'+\
-                         '(default '+DEFAULT_LOAD_ANNOT_PARAM+')')
-    
-    optParser.add_option('--extend', action='store', dest='extend_window', type='string', \
-                         help='Centimorgans or basepairs (depending on sort) to extend the search for genes.'+\
+    optParser.add_option('--extend', action='store', dest='extend_window',
+                         help='Centimorgans or basepairs (depending on sort) to extend the search of -g or -m.'+\
                          '(default '+str(DEFAULT_EXTEND_WINDOW)+')')
     
-    optParser.add_option('--show-unmapped', action='store', dest='show_unmapped', type='string', \
-                         help='Whether to output only maps (no), or unmapped results as well (yes).'+\
-                         '(default '+DEFAULT_SHOW_UNMAPPED_PARAM+')')
+    optParser.add_option('-a', '--annot', action='store_true', dest='load_annot',
+                         help='Annotation info for genes will be shown.')
+    
+    optParser.add_option('-u', '--show-unmapped', action='store_true', dest='show_unmapped',
+                         help='Not found (unaligned, unmapped), will be shown.')
+    
+    optParser.add_option('-c', '--collapse', action='store_true', dest='collapse',
+                         help='Mapping results and features (markers, genes) will be shown at the same level.')
     
     optParser.add_option('-f', action='store_true', dest='format_numbers', \
                          help='cM positions will be output with all decimals (default, 2 decimals).')
     
     optParser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='More information printed.')
-    
-    optParser.add_option('-c', '--collapse', action='store_true', dest='collapse',
-                         help='Mapping results and features (markers, genes) will be shown at the same level.')
     
     ########### Read parameters
     ###########
@@ -137,26 +112,16 @@ try:
     query_ids_path = arguments[0] # THIS IS MANDATORY
     
     # Verbose
-    if options.verbose: verbose_param = True
-    else: verbose_param = False
+    verbose_param = options.verbose
     
     if verbose_param: sys.stderr.write("Command: "+" ".join(sys.argv)+"\n")
     
     # Output format of decimal numbers (cM positions)
-    if options.format_numbers: beauty_nums = False
-    else: beauty_nums = True
+    beauty_nums = not options.format_numbers
     
     ## Show only alignments from database with best scores
-    if options.best_score and options.best_score == "no":
-        best_score_filter = False
-        best_score_param = "no"
-    elif options.best_score and options.best_score == "yes":
-        best_score_filter = True
-        best_score_param = "yes"
-    else:
-        best_score_filter = DEFAULT_BEST_SCORE
-        best_score_param = DEFAULT_BEST_SCORE_PARAM
-        
+    best_score = options.best_score
+    
     ## Sort
     if options.sort_param and options.sort_param == "bp":
         sort_param = "bp"
@@ -166,36 +131,16 @@ try:
         sort_param = DEFAULT_SORT_PARAM
     
     ## Multiple
-    if options.multiple_param and options.multiple_param == "yes":
-        multiple_param = True
-        multiple_param_text = "yes"
-    else:
-        multiple_param = DEFAULT_SHOW_MULTIPLES
-        multiple_param_text = DEFAULT_SHOW_MULTIPLES_PARAM
+    multiple_param = options.multiple_param
     
     ## Show genes
-    if options.show_genes and options.show_genes == "yes":
-        show_genes = True
-        show_genes_param = "yes"
-    else:
-        show_genes = DEFAULT_SHOW_GENES
-        show_genes_param = DEFAULT_SHOW_GENES_PARAM
+    show_genes = options.show_genes
     
     ## Show markers
-    if options.show_markers and options.show_markers == "yes":
-        show_markers = True
-        show_markers_param = "yes"
-    else:
-        show_markers = DEFAULT_SHOW_MARKERS
-        show_markers_param = DEFAULT_SHOW_MARKERS_PARAM
+    show_markers = options.show_markers
     
     ## Annotation
-    if options.load_annot and options.load_annot == "yes":
-        load_annot = True
-        load_annot_param = "yes"
-    else:
-        load_annot = DEFAULT_LOAD_ANNOT
-        load_annot_param = DEFAULT_LOAD_ANNOT_PARAM
+    load_annot = options.load_annot
     
     ## Genes window
     if options.extend_window:
@@ -203,24 +148,11 @@ try:
     else:
         extend_window = DEFAULT_EXTEND_WINDOW
     
-    if extend_window > 0.0:
-        extend = True
-        extend_param = "yes"
-    else:
-        extend = False
-        extend_param = "no"
-    
     ## Show unmapped
-    if options.show_unmapped and options.show_unmapped == "yes":
-        show_unmapped_param = "yes"
-        show_unmapped = True
-    else:
-        show_unmapped = DEFAULT_SHOW_UNMAPPED
-        show_unmapped_param = DEFAULT_SHOW_UNMAPPED_PARAM
+    show_unmapped = options.show_unmapped
     
     # Collapsed view
-    if options.collapse: collapsed_view = True
-    else: collapsed_view = False
+    collapsed_view = options.collapse
     
     ######### Read configuration files
     #########
@@ -250,9 +182,9 @@ try:
     ##### Print parameters
     #####
     if verbose_param: _print_parameters(query_ids_path, maps_names, \
-                      sort_param, multiple_param_text, options.best_score, \
-                      show_genes_param, show_markers_param, \
-                      load_annot_param, extend_param, extend_window, \
+                      sort_param, multiple_param, best_score, \
+                      show_genes, show_markers, \
+                      load_annot, extend_window, \
                       show_unmapped_param, collapsed_view)
     
     ############################################################ MAIN
@@ -284,8 +216,6 @@ try:
     
     ########### Create maps
     ###########
-    #maps_dict = {}
-    
     for map_id in maps_ids:
         sys.stderr.write("bmap_find: Map "+map_id+"\n")
         map_config = maps_config.get_map_config(map_id)
@@ -295,42 +225,34 @@ try:
         ############ MAPS
         mapMarkers = MapMarkers(maps_path, map_config, verbose_param)
         
-        mapMarkers.setup_map(query_ids_path, datasets_ids, datasets_facade, best_score_filter, sort_by, multiple_param)
+        mapMarkers.setup_map(query_ids_path, datasets_ids, datasets_facade, best_score, sort_by, multiple_param)
         
         ############ OTHER MARKERS
         if show_markers and not show_genes:
             
             # Enrich with markers
-            mapMarkers.enrich_with_markers(datasets_facade, extend, extend_window,
+            mapMarkers.enrich_with_markers(datasets_facade, extend_window,
                                             collapsed_view, constrain_fine_mapping = False)
             
         ########### GENES
         if show_genes:
             
             # Enrich with genes
-            mapMarkers.enrich_with_genes(datasets_facade, extend, extend_window,
+            mapMarkers.enrich_with_genes(datasets_facade, extend_window,
                                          annotator, collapsed_view, constrain_fine_mapping = False)
         
         mapping_results = mapMarkers.get_mapping_results()
         
-        #if not map_id in maps_dict:
-        #    maps_dict[map_id] = mapping_results
-        #else:
-        #    raise Exception("Duplicated map "+map_id+".")
-        
         ############################################################ OUTPUT
-        
         if show_markers:
-            outputPrinter.print_map_with_markers(mapping_results, map_config, multiple_param_text)
+            outputPrinter.print_map_with_markers(mapping_results, map_config, multiple_param)
         elif show_genes:
-            outputPrinter.print_map_with_genes(mapping_results, map_config, multiple_param_text, load_annot, annotator)
+            outputPrinter.print_map_with_genes(mapping_results, map_config, multiple_param, load_annot, annotator)
         else:
-            outputPrinter.print_map(mapping_results, map_config, multiple_param_text)
+            outputPrinter.print_map(mapping_results, map_config, multiple_param)
         
         if show_unmapped:
             # Markers not found in datasets are included in unaligned map but is clearer show them as unmapped
-            #mapping_results.set_unmapped(mapping_results.get_unaligned())
-            
             outputPrinter.print_unaligned(mapping_results, map_config)
 
 except m2pException as m2pe:
