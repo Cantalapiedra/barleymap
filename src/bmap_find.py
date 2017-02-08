@@ -45,7 +45,7 @@ DEFAULT_LOAD_ANNOT = False
 DEFAULT_LOAD_ANNOT_PARAM = "no"
 DEFAULT_EXTEND = False
 DEFAULT_EXTEND_PARAM = "no"
-DEFAULT_EXTEND_WINDOW = 5.0
+DEFAULT_EXTEND_WINDOW = 0.0
 DEFAULT_SHOW_UNMAPPED = False
 DEFAULT_SHOW_UNMAPPED_PARAM = "no"
 
@@ -53,7 +53,7 @@ def _print_parameters(query_ids_path, genetic_map_name, \
                       sort_param, multiple_param, best_score, \
                       show_genes_param, show_markers_param, \
                       load_annot_param, extend_param, extend_window, \
-                      show_unmapped_param):
+                      show_unmapped_param, collapsed_view):
     sys.stderr.write("\nParameters:\n")
     sys.stderr.write("\tIDs query file: "+query_ids_path+"\n")
     sys.stderr.write("\tGenetic maps: "+genetic_map_name+"\n")
@@ -66,6 +66,7 @@ def _print_parameters(query_ids_path, genetic_map_name, \
     sys.stderr.write("\tExtend genes search: "+str(extend_param)+"\n")
     sys.stderr.write("\tGenes window: "+str(extend_window)+"\n")
     sys.stderr.write("\tShow unmapped: "+str(show_unmapped_param)+"\n")
+    sys.stderr.write("\tShow results as collapsed rows: "+str(collapsed_view)+"\n")
     
     return
     
@@ -121,6 +122,9 @@ try:
                          help='cM positions will be output with all decimals (default, 2 decimals).')
     
     optParser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='More information printed.')
+    
+    optParser.add_option('-c', '--collapse', action='store_true', dest='collapse',
+                         help='Mapping results and features (markers, genes) will be shown at the same level.')
     
     ########### Read parameters
     ###########
@@ -214,6 +218,10 @@ try:
         show_unmapped = DEFAULT_SHOW_UNMAPPED
         show_unmapped_param = DEFAULT_SHOW_UNMAPPED_PARAM
     
+    # Collapsed view
+    if options.collapse: collapsed_view = True
+    else: collapsed_view = False
+    
     ######### Read configuration files
     #########
     app_abs_path = os.path.dirname(os.path.abspath(__file__))
@@ -245,7 +253,7 @@ try:
                       sort_param, multiple_param_text, options.best_score, \
                       show_genes_param, show_markers_param, \
                       load_annot_param, extend_param, extend_window, \
-                      show_unmapped_param)
+                      show_unmapped_param, collapsed_view)
     
     ############################################################ MAIN
     if verbose_param: sys.stderr.write("\n")
@@ -267,10 +275,16 @@ try:
         annotator = AnnotatorsFactory.get_annotator(dsannot_conf_file, anntypes_conf_file, annot_path, verbose_param)
     else:
         annotator = None
+        
+    # OutputFacade
+    if collapsed_view:
+        outputPrinter = OutputFacade.get_collapsed_printer(sys.stdout, verbose = verbose_param, beauty_nums = beauty_nums, show_headers = True)
+    else:
+        outputPrinter = OutputFacade.get_expanded_printer(sys.stdout, verbose = verbose_param, beauty_nums = beauty_nums, show_headers = True)
     
     ########### Create maps
     ###########
-    maps_dict = {}
+    #maps_dict = {}
     
     for map_id in maps_ids:
         sys.stderr.write("bmap_find: Map "+map_id+"\n")
@@ -288,29 +302,36 @@ try:
             
             # Enrich with markers
             mapMarkers.enrich_with_markers(datasets_facade, extend, extend_window,
-                                            constrain_fine_mapping = False)
+                                            collapsed_view, constrain_fine_mapping = False)
             
         ########### GENES
         if show_genes:
             
             # Enrich with genes
             mapMarkers.enrich_with_genes(datasets_facade, extend, extend_window,
-                                         annotator, constrain_fine_mapping = False)
+                                         annotator, collapsed_view, constrain_fine_mapping = False)
         
         mapping_results = mapMarkers.get_mapping_results()
         
-        if not map_id in maps_dict:
-            maps_dict[map_id] = mapping_results
-        else:
-            raise Exception("Duplicated map "+map_id+".")
+        #if not map_id in maps_dict:
+        #    maps_dict[map_id] = mapping_results
+        #else:
+        #    raise Exception("Duplicated map "+map_id+".")
         
-    ############################################################ OUTPUT
-    
-    outputPrinter = OutputFacade().get_plain_printer(sys.stdout, verbose = verbose_param, beauty_nums = beauty_nums)
-    
-    outputPrinter.print_maps(maps_dict,
-                             show_genes, show_markers, show_unmapped,
-                             multiple_param_text, load_annot, annotator, show_headers = True)
+        ############################################################ OUTPUT
+        
+        if show_markers:
+            outputPrinter.print_map_with_markers(mapping_results, map_config, multiple_param_text)
+        elif show_genes:
+            outputPrinter.print_map_with_genes(mapping_results, map_config, multiple_param_text, load_annot, annotator)
+        else:
+            outputPrinter.print_map(mapping_results, map_config, multiple_param_text)
+        
+        if show_unmapped:
+            # Markers not found in datasets are included in unaligned map but is clearer show them as unmapped
+            #mapping_results.set_unmapped(mapping_results.get_unaligned())
+            
+            outputPrinter.print_unaligned(mapping_results, map_config)
 
 except m2pException as m2pe:
     sys.stderr.write("\nThere was an error.\n")

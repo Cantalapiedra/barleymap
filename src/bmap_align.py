@@ -50,7 +50,7 @@ DEFAULT_LOAD_ANNOT = False
 DEFAULT_LOAD_ANNOT_PARAM = "no"
 DEFAULT_EXTEND = False
 DEFAULT_EXTEND_PARAM = "no"
-DEFAULT_EXTEND_WINDOW = 5.0
+DEFAULT_EXTEND_WINDOW = 0.0
 DEFAULT_SHOW_UNMAPPED = False
 DEFAULT_SHOW_UNMAPPED_PARAM = "no"
 
@@ -74,7 +74,8 @@ def _print_parameters(fasta_path, genetic_map_name, query_type, \
     sys.stderr.write("\tLoad annotation: "+str(load_annot_param)+"\n")
     sys.stderr.write("\tExtend genes search: "+str(extend_param)+"\n")
     sys.stderr.write("\tGenes window: "+str(extend_window)+"\n")
-    sys.stderr.write("\tShow unmapped: "+str(show_unmapped_param)+"\n")
+    sys.stderr.write("\tShow unmapped and unaligned lists: "+str(show_unmapped_param)+"\n")
+    sys.stderr.write("\tShow results as collapsed rows: "+str(collapsed_view)+"\n")
     
     return
 
@@ -149,6 +150,9 @@ try:
                          help='cM positions will be output with all decimals (default, 2 decimals).')
     
     optParser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='More information printed.')
+    
+    optParser.add_option('-c', '--collapse', action='store_true', dest='collapse',
+                         help='Mapping results and features (markers, genes) will be shown at the same level.')
     
     ########### Read parameters
     ###########
@@ -258,6 +262,10 @@ try:
         show_unmapped = DEFAULT_SHOW_UNMAPPED
         show_unmapped_param = DEFAULT_SHOW_UNMAPPED_PARAM
     
+    # Collapsed view
+    if options.collapse: collapsed_view = True
+    else: collapsed_view = False
+    
     ######### Read configuration files
     #########
     app_abs_path = os.path.dirname(os.path.abspath(__file__))
@@ -334,6 +342,12 @@ try:
     else:
         annotator = None
         
+    # OutputFacade
+    if collapsed_view:
+        outputPrinter = OutputFacade.get_collapsed_printer(sys.stdout, verbose = verbose_param, beauty_nums = beauty_nums, show_headers = True)
+    else:
+        outputPrinter = OutputFacade.get_expanded_printer(sys.stdout, verbose = verbose_param, beauty_nums = beauty_nums, show_headers = True)
+    
     ########### Create maps
     ###########
     maps_dict = {}
@@ -369,14 +383,14 @@ try:
                 
                 # Enrich with markers
                 mapMarkers.enrich_with_markers(datasets_facade, extend, extend_window,
-                                                constrain_fine_mapping = False)
+                                                collapsed_view, constrain_fine_mapping = False)
                 
             ########### GENES
             if show_genes:
                 
                 # Enrich with genes
                 mapMarkers.enrich_with_genes(datasets_facade, extend, extend_window,
-                                             annotator, constrain_fine_mapping = False)
+                                             annotator, collapsed_view, constrain_fine_mapping = False)
         
         mapping_results = mapMarkers.get_mapping_results()
         
@@ -384,14 +398,21 @@ try:
             maps_dict[map_id] = mapping_results
         else:
             raise Exception("Duplicated map "+map_id+".")
-    
-    ############################################################ OUTPUT
-    
-    outputPrinter = OutputFacade().get_plain_printer(sys.stdout, verbose = verbose_param, beauty_nums = beauty_nums)
-    
-    outputPrinter.print_maps(maps_dict,
-                             show_genes, show_markers, show_unmapped,
-                             multiple_param_text, load_annot, annotator, show_headers = True)
+        
+        ############################################################ OUTPUT
+        if show_markers:
+            outputPrinter.print_map_with_markers(mapping_results, map_config, multiple_param_text)
+        elif show_genes:
+            outputPrinter.print_map_with_genes(mapping_results, map_config, multiple_param_text, load_annot, annotator)
+        else:
+            outputPrinter.print_map(mapping_results, map_config, multiple_param_text)
+        
+        if show_unmapped:
+            outputPrinter.print_unmapped(mapping_results, map_config)
+            
+        if show_unaligned:
+            outputPrinter.print_unaligned(mapping_results, map_config)
+
 
 except m2pException as m2pe:
     sys.stderr.write("\nThere was an error.\n")
@@ -404,29 +425,5 @@ except Exception as e:
                                    'laboratory of computational biology at EEAD).\n')
 finally:
     pass
-
-def __check_sort_param(map_name, sort_param, map_default_sort_by, map_has_cm_pos, map_has_bp_pos):
-    sort_by = ""
-    
-    if sort_param == map_default_sort_by:
-        sort_by = sort_param
-    else:
-        # sort_param has priority
-        if sort_param == MapTypes.MAP_SORT_PARAM_CM and map_has_cm_pos:
-            sort_by = sort_param
-        elif sort_param == MapTypes.MAP_SORT_PARAM_BP and map_has_bp_pos:
-            sort_by = sort_param
-        # else, check map_default_sort_by
-        else:
-            if sort_param != DEFAULT_SORT_PARAM:
-                sys.stderr.write("WARNING: the sort parameter "+sort_param+" is not compatible with map "+map_name+". Using default map sort parameter...\n")
-            if map_default_sort_by == MapTypes.MAP_SORT_PARAM_CM and map_has_cm_pos:
-                sort_by = map_default_sort_by
-            elif map_default_sort_by == MapTypes.MAP_SORT_PARAM_BP and map_has_bp_pos:
-                sort_by = map_default_sort_by
-            else:
-                raise Exception("Map default sort configure as \""+map_default_sort_by+"\" assigned to a map which has not such kind of position.")
-    
-    return sort_by
 
 ## END
