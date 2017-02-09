@@ -26,7 +26,6 @@ from barleymapcore.maps.MapMarkers import MapMarkers
 from barleymapcore.m2p_exception import m2pException
 from barleymapcore.output.OutputFacade import OutputFacade
 
-PATHS_CONF = ConfigBase.PATHS_CONF
 DATABASES_CONF = ConfigBase.DATABASES_CONF
 MAPS_CONF = ConfigBase.MAPS_CONF
 DATASETS_CONF = ConfigBase.DATASETS_CONF
