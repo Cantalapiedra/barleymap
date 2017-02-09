@@ -1,4 +1,4 @@
-bmap_find -v --maps=MorexGenome,POPSEQ,IBSC_2012 --sort=bp --markers=yes --show-unmapped=no \
+bmap_find -v --maps=MorexGenome,POPSEQ,IBSC_2012 --sort=bp -m \
 --extend=0 \
 test_markers_tiny.ids
 

@@ -294,7 +294,7 @@ try:
                                     threshold_id, threshold_cov, n_threads,
                                     best_score, sort_by, multiple_param, tmp_files_dir)
         
-        mapMarkers.enrichment(show_markers, show_genes, datasets_facade, extend_window, collapsed_view, constrain_fine_mapping = False)
+        mapMarkers.enrichment(annotator, show_markers, show_genes, datasets_facade, extend_window, collapsed_view, constrain_fine_mapping = False)
         mapping_results = mapMarkers.get_mapping_results()
         
         ############################################################ OUTPUT
