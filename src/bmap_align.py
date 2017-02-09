@@ -32,14 +32,14 @@ DATASETS_CONF = ConfigBase.DATASETS_CONF
 DATASETS_ANNOTATION_CONF = ConfigBase.DATASETS_ANNOTATION_CONF
 ANNOTATION_TYPES_CONF = ConfigBase.ANNOTATION_TYPES_CONF
 
-DEFAULT_QUERY_MODE = "gmap"
+DEFAULT_ALIGNER_LIST = ["gmap"]
 DEFAULT_THRES_ID = 98.0
 DEFAULT_THRES_COV = 95.0
 DEFAULT_N_THREADS = 1
 DEFAULT_SORT_PARAM = "map default"
 DEFAULT_EXTEND_WINDOW = 0.0
 
-def _print_parameters(fasta_path, genetic_map_name, query_type, \
+def _print_parameters(fasta_path, genetic_map_name, aligner_list, \
                       threshold_id, threshold_cov, n_threads, \
                       sort_param, multiple_param, best_score, \
                       show_genes, show_markers, \
@@ -48,7 +48,7 @@ def _print_parameters(fasta_path, genetic_map_name, query_type, \
     sys.stderr.write("\nParameters:\n")
     sys.stderr.write("\tQuery fasta: "+fasta_path+"\n")
     sys.stderr.write("\tGenetic maps: "+genetic_map_name+"\n")
-    sys.stderr.write("\tAligner: "+query_type+"\n")
+    sys.stderr.write("\tAligner: "+",".join(aligner_list)+"\n")
     sys.stderr.write("\tThresholds --> %id="+str(threshold_id)+" : %query_cov="+str(threshold_cov)+"\n")
     sys.stderr.write("\tThreads: "+str(n_threads)+"\n")
     sys.stderr.write("\tBest score filtering: "+str("yes" if best_score else "no")+"\n")
@@ -75,10 +75,11 @@ try:
     ##########
     
     ## Parameters related with alignment
-    optParser.add_option('--aligner', action='store', dest='query_mode', type='string',
-                     help='Alignment software to use (default "'+DEFAULT_QUERY_MODE+'"). '+\
+    optParser.add_option('--aligner', action='store', dest='aligner', type='string',
+                     help='Alignment software to use (default "'+",".join(DEFAULT_ALIGNER_LIST)+'"). '+\
                      'The "gmap" option means to use only GMAP. '+\
                      'The "blastn" option means to use only Blastn. '+\
+                     'The "hsblastn" option means to use only HS-Blastn. '+\
                      'The order and aligners can be explicitly specified by separating the names by ","'+\
                      ' (e.g.: blastn,gmap --> First Blastn, then GMAP).')
     
@@ -112,7 +113,7 @@ try:
     optParser.add_option('-m', '--markers', action='store_true', dest='show_markers',
                          help='Additional markers at positions of queries will be shown. Ignored if -g.')
     
-    optParser.add_option('--extend', action='store', dest='extend_window',
+    optParser.add_option('-e', '--extend', action='store', dest='extend_window',
                          help='Centimorgans or basepairs (depending on sort) to extend the search of -g or -m.'+\
                          '(default '+str(DEFAULT_EXTEND_WINDOW)+')')
     
@@ -148,9 +149,14 @@ try:
     # Output format of decimal numbers (cM positions)
     beauty_nums = not options.format_numbers
     
-    # Query mode
-    if options.query_mode: query_mode = options.query_mode
-    else: query_mode = DEFAULT_QUERY_MODE
+    # Aligners list
+    if options.aligner:
+        if "," in options.aligner:
+            aligner_list = options.aligner.strip().split(",")
+        else:
+            aligner_list = [options.aligner]
+    else:
+        aligner_list = DEFAULT_ALIGNER_LIST
         
     # Threshold Identity
     if options.thres_id: threshold_id = float(options.thres_id)
@@ -220,49 +226,37 @@ try:
     
     ##### Print parameters
     #####
-    if verbose_param: _print_parameters(query_fasta_path, maps_names, query_mode, \
-                      threshold_id, threshold_cov, n_threads, \
-                      sort_param, multiple_param, best_score, \
-                      show_genes, show_markers, \
-                      load_annot, extend_window, \
+    if verbose_param: _print_parameters(query_fasta_path, maps_names, aligner_list,
+                      threshold_id, threshold_cov, n_threads,
+                      sort_param, multiple_param, best_score,
+                      show_genes, show_markers,
+                      load_annot, extend_window,
                       show_unmapped_param)
     
     ############### MAIN
     if verbose_param: sys.stderr.write("\n")
     
     ############# ALIGNMENTS - REFERENCES
-    # Load configuration paths
-    
-    split_blast_path = paths_config.get_split_blast_path() #__app_path+config_path_dict["split_blast_path"]
-    tmp_files_path = paths_config.get_tmp_files_path() #__app_path+config_path_dict["tmp_files_path"]
-    blastn_app_path = paths_config.get_blastn_app_path() #config_path_dict["blastn_app_path"]
-    gmap_app_path = paths_config.get_gmap_app_path() #config_path_dict["gmap_app_path"]
-    gmapl_app_path = paths_config.get_gmapl_app_path() #config_path_dict["gmapl_app_path"]
-    hsblastn_app_path = paths_config.get_hsblastn_app_path()  #config_path_dict["hsblastn_app_path"]
-    
-    blastn_dbs_path = paths_config.get_blastn_dbs_path()  #config_path_dict["blastn_dbs_path"]
-    gmap_dbs_path = paths_config.get_gmap_dbs_path() # config_path_dict["gmap_dbs_path"]
-    hsblastn_dbs_path = paths_config.get_hsblastn_dbs_path() #config_path_dict["hsblastn_dbs_path"]
     
     # Databases
     databases_conf_file = __app_path+DATABASES_CONF
     databases_config = DatabasesConfig(databases_conf_file, verbose_param)
     
-    facade = AlignmentFacade(split_blast_path, blastn_app_path, gmap_app_path, hsblastn_app_path,
-                             blastn_dbs_path, gmap_dbs_path, hsblastn_dbs_path, gmapl_app_path,
-                             tmp_files_path, databases_config, verbose = verbose_param)
+    #facade = AlignmentFacade(split_blast_path, blastn_app_path, gmap_app_path, hsblastn_app_path,
+    #                         blastn_dbs_path, gmap_dbs_path, hsblastn_dbs_path, gmapl_app_path,
+    #                         tmp_files_path, databases_config, verbose = verbose_param)
+    alignment_facade = AlignmentFacade(paths_config, verbose = verbose_param)
     
     ############ Pre-loading of some objects
     ############
     # DatasetsFacade
-    if show_markers or show_genes:
-        # Datasets config
-        datasets_conf_file = __app_path+DATASETS_CONF
-        datasets_config = DatasetsConfig(datasets_conf_file)
-        
-        # Load DatasetsFacade
-        datasets_path = paths_config.get_datasets_path() #__app_path+config_path_dict["datasets_path"]
-        datasets_facade = DatasetsFacade(datasets_config, datasets_path, verbose = verbose_param)
+    # Datasets config
+    datasets_conf_file = __app_path+DATASETS_CONF
+    datasets_config = DatasetsConfig(datasets_conf_file)
+    
+    # Load DatasetsFacade
+    datasets_path = paths_config.get_datasets_path() #__app_path+config_path_dict["datasets_path"]
+    datasets_facade = DatasetsFacade(datasets_config, datasets_path, verbose = verbose_param)
     
     # GenesAnnotator
     if show_genes and load_annot:
@@ -281,6 +275,9 @@ try:
     else:
         outputPrinter = OutputFacade.get_expanded_printer(sys.stdout, verbose = verbose_param, beauty_nums = beauty_nums, show_headers = True)
     
+    # Temp directory
+    tmp_files_dir = paths_config.get_tmp_files_path()
+    
     ########### Create maps
     ###########
     for map_id in maps_ids:
@@ -288,41 +285,16 @@ try:
         
         map_config = maps_config.get_map_config(map_id)
         databases_ids = map_config.get_db_list()
-        hierarchical = map_config.is_hierarchical()
         
         sort_by = map_config.check_sort_param(map_config, sort_param, DEFAULT_SORT_PARAM)
         
-        ############ Perform alignments
-        # TODO: avoid aligning to the same DB as one of a previous map
-        # this "TODO" would need to handle correctly best_score and hierarchical
-        facade.perform_alignment(query_fasta_path, databases_ids, hierarchical, query_mode,
-                                           threshold_id, threshold_cov, n_threads, \
-                                           best_score)
+        mapMarkers = MapMarkers(maps_path, map_config, alignment_facade, verbose_param)
         
-        results = facade.get_alignment_results()
-        unaligned = facade.get_alignment_unmapped()  
+        mapMarkers.perform_mappings(query_fasta_path, databases_ids, databases_config, aligner_list,
+                                    threshold_id, threshold_cov, n_threads,
+                                    best_score, sort_by, multiple_param, tmp_files_dir)
         
-        ############ MAPS
-        mapMarkers = MapMarkers(maps_path, map_config, verbose_param)
-        
-        mapMarkers.create_map(results, unaligned, sort_by, multiple_param)
-        
-        if show_markers or show_genes:
-            
-            ############ OTHER MARKERS
-            if show_markers and not show_genes:
-                
-                # Enrich with markers
-                mapMarkers.enrich_with_markers(datasets_facade, extend_window,
-                                                collapsed_view, constrain_fine_mapping = False)
-                
-            ########### GENES
-            if show_genes:
-                
-                # Enrich with genes
-                mapMarkers.enrich_with_genes(datasets_facade, extend_window,
-                                             annotator, collapsed_view, constrain_fine_mapping = False)
-        
+        mapMarkers.enrichment(show_markers, show_genes, datasets_facade, extend_window, collapsed_view, constrain_fine_mapping = False)
         mapping_results = mapMarkers.get_mapping_results()
         
         ############################################################ OUTPUT
@@ -336,7 +308,6 @@ try:
         if show_unmapped:
             outputPrinter.print_unmapped(mapping_results, map_config)
             outputPrinter.print_unaligned(mapping_results, map_config)
-
 
 except m2pException as m2pe:
     sys.stderr.write("\nThere was an error.\n")

@@ -36,22 +36,22 @@ DEFAULT_SORT_PARAM = "map default"
 DEFAULT_EXTEND_WINDOW = 0.0
 
 def _print_parameters(query_ids_path, genetic_map_name, \
-                      sort_param, multiple_param, best_score, \
+                      sort_param, multiple_param,
                       show_genes, show_markers, \
                       load_annot, extend_window, \
-                      show_unmapped_param, collapsed_view):
+                      show_unmapped, collapsed_view): #best_score):
     sys.stderr.write("\nParameters:\n")
     sys.stderr.write("\tIDs query file: "+query_ids_path+"\n")
     sys.stderr.write("\tGenetic maps: "+genetic_map_name+"\n")
-    sys.stderr.write("\tBest score filtering: "+str("yes" if best_score else "no")+"\n")
+    #sys.stderr.write("\tBest score filtering: "+str("yes" if best_score else "no")+"\n")
     sys.stderr.write("\tSort: "+sort_param+"\n")
     sys.stderr.write("\tShow multiples: "+str("yes" if multiple_param else "no")+"\n")
     sys.stderr.write("\tShow genes: "+str("yes" if show_genes else "no")+"\n")
     sys.stderr.write("\tShow markers: "+str("yes" if show_markers else "no")+"\n")
     sys.stderr.write("\tLoad annotation: "+str("yes" if load_annot else "no")+"\n")
     sys.stderr.write("\tExtend genes/markers search: "+str(extend_window)+"\n")
-    sys.stderr.write("\tShow unmapped: "+str(show_unmapped_param)+"\n")
-    sys.stderr.write("\tShow results as collapsed rows: "+str(collapsed_view)+"\n")
+    sys.stderr.write("\tShow unmapped: "+str("yes" if show_unmapped else "no")+"\n")
+    sys.stderr.write("\tShow results as collapsed rows: "+str("yes" if collapsed_view else "no")+"\n")
     
     return
     
@@ -67,8 +67,8 @@ try:
     ##########
     optParser.add_option('--maps', action='store', dest='maps_param', type='string', help='Comma delimited list of Maps to show.')
     
-    optParser.add_option('-b', '--best-score', action='store_true', dest='best_score',
-                         help='Will return only best score hits.')
+    #optParser.add_option('-b', '--best-score', action='store_true', dest='best_score',
+    #                     help='Will return only best score hits.')
     
     optParser.add_option('--sort', action='store', dest='sort_param', type='string', \
                          help='Sort results by centimorgan (cm) or basepairs (bp) '+\
@@ -83,7 +83,7 @@ try:
     optParser.add_option('-m', '--markers', action='store_true', dest='show_markers',
                          help='Additional markers at positions of queries will be shown. Ignored if -g.')
     
-    optParser.add_option('--extend', action='store', dest='extend_window',
+    optParser.add_option('-e', '--extend', action='store', dest='extend_window',
                          help='Centimorgans or basepairs (depending on sort) to extend the search of -g or -m.'+\
                          '(default '+str(DEFAULT_EXTEND_WINDOW)+')')
     
@@ -120,7 +120,7 @@ try:
     beauty_nums = not options.format_numbers
     
     ## Show only alignments from database with best scores
-    best_score = options.best_score
+    #best_score = options.best_score
     
     ## Sort
     if options.sort_param and options.sort_param == "bp":
@@ -181,11 +181,11 @@ try:
     
     ##### Print parameters
     #####
-    if verbose_param: _print_parameters(query_ids_path, maps_names, \
-                      sort_param, multiple_param, best_score, \
-                      show_genes, show_markers, \
-                      load_annot, extend_window, \
-                      show_unmapped_param, collapsed_view)
+    if verbose_param: _print_parameters(query_ids_path, maps_names,
+                      sort_param, multiple_param,
+                      show_genes, show_markers,
+                      load_annot, extend_window,
+                      show_unmapped, collapsed_view)
     
     ############################################################ MAIN
     if verbose_param: sys.stderr.write("\n")
@@ -222,25 +222,12 @@ try:
         
         sort_by = map_config.check_sort_param(map_config, sort_param, DEFAULT_SORT_PARAM)
         
-        ############ MAPS
-        mapMarkers = MapMarkers(maps_path, map_config, verbose_param)
+        mapMarkers = MapMarkers(maps_path, map_config, datasets_facade, verbose_param)
         
-        mapMarkers.setup_map(query_ids_path, datasets_ids, datasets_facade, best_score, sort_by, multiple_param)
+        mapMarkers.retrieve_mappings(query_ids_path, datasets_ids,
+                                    sort_by, multiple_param)
         
-        ############ OTHER MARKERS
-        if show_markers and not show_genes:
-            
-            # Enrich with markers
-            mapMarkers.enrich_with_markers(datasets_facade, extend_window,
-                                            collapsed_view, constrain_fine_mapping = False)
-            
-        ########### GENES
-        if show_genes:
-            
-            # Enrich with genes
-            mapMarkers.enrich_with_genes(datasets_facade, extend_window,
-                                         annotator, collapsed_view, constrain_fine_mapping = False)
-        
+        mapMarkers.enrichment(show_markers, show_genes, datasets_facade, extend_window, collapsed_view, constrain_fine_mapping = False)
         mapping_results = mapMarkers.get_mapping_results()
         
         ############################################################ OUTPUT
