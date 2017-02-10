@@ -299,15 +299,15 @@ try:
         
         ############################################################ OUTPUT
         if show_markers:
-            outputPrinter.print_map_with_markers(mapping_results, map_config, multiple_param)
+            outputPrinter.print_map_with_markers(mapping_results.get_map_with_markers(), map_config, multiple_param)
         elif show_genes:
-            outputPrinter.print_map_with_genes(mapping_results, map_config, multiple_param, load_annot, annotator)
+            outputPrinter.print_map_with_genes(mapping_results.get_map_with_genes(), map_config, multiple_param, load_annot, annotator)
         else:
-            outputPrinter.print_map(mapping_results, map_config, multiple_param)
+            outputPrinter.print_map(mapping_results.get_mapped(), map_config, multiple_param)
         
         if show_unmapped:
-            outputPrinter.print_unmapped(mapping_results, map_config)
-            outputPrinter.print_unaligned(mapping_results, map_config)
+            outputPrinter.print_unmapped(mapping_results.get_unmapped(), map_config)
+            outputPrinter.print_unaligned(mapping_results.get_unaligned(), map_config)
 
 except m2pException as m2pe:
     sys.stderr.write("\nThere was an error.\n")
