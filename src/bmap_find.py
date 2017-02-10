@@ -67,9 +67,6 @@ try:
     ##########
     optParser.add_option('--maps', action='store', dest='maps_param', type='string', help='Comma delimited list of Maps to show.')
     
-    #optParser.add_option('-b', '--best-score', action='store_true', dest='best_score',
-    #                     help='Will return only best score hits.')
-    
     optParser.add_option('--sort', action='store', dest='sort_param', type='string', \
                          help='Sort results by centimorgan (cm) or basepairs (bp) '+\
                          '(default: defined for each map in maps configuration.')

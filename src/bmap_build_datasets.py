@@ -25,14 +25,19 @@ from barleymapcore.utils.data_utils import read_paths
 
 _SCRIPT = os.path.basename(__file__)
 
+DEFAULT_THRES_ID = 98.0
+DEFAULT_THRES_COV = 95.0
 DEFAULT_N_THREADS = 1
+DEFAULT_ALIGNER = "gmap"
 
 def __features_to_map_file(features, maps_path, map_config, map_output_path, verbose_param):
+    
+    multiple_param = True
     
     mapMarkers = MapMarkers(maps_path, map_config, verbose = verbose_param)
     
     unaligned = [] # Better this than None
-    mapMarkers.create_map(features, unaligned, map_config.get_default_sort_by(), multiple_param = False)
+    mapMarkers.create_map(features, unaligned, map_config.get_default_sort_by(), multiple_param)
     
     mapping_results = mapMarkers.get_mapping_results()
     
@@ -40,19 +45,12 @@ def __features_to_map_file(features, maps_path, map_config, map_output_path, ver
     
     map_output = open(map_output_path, 'w')
     try:
-        outputPrinter = OutputFacade().get_plain_printer(map_output)
         
-        maps_dict = {map_config.get_id():mapping_results}
-        show_genes = False
-        show_markers = False
-        show_unmapped = False
-        multiple_param_text = "yes"
-        load_annot = False
-        show_headers = True
+        outputPrinter = OutputFacade.get_expanded_printer(map_output, verbose = verbose_param,
+                                                          beauty_nums = False, show_headers = True)
         
-        outputPrinter.print_maps(maps_dict,
-                                 show_genes, show_markers, show_unmapped,
-                                 multiple_param_text, load_annot, show_headers)  
+        outputPrinter.print_map(mapping_results, map_config, multiple_param)
+        
     except Exception as e:
         raise e
     finally:
@@ -63,13 +61,18 @@ def __features_to_map_file(features, maps_path, map_config, map_output_path, ver
 def __write_command(map_name, file_path, output_path, threads):
     cmd = "bmap_align"
     raw_numbers = "-f"
-    aligner = "--aligner=gmap"
+    aligner = "--aligner="+DEFAULT_ALIGNER
+    thres_id = "--thres-id="+str(DEFAULT_THRES_ID)
+    thres_cov = "--thres-cov="+str(DEFAULT_THRES_COV)
     _threads = "--threads="+str(threads)
     maps = "--maps="+map_name
+    show_multiple = "-k"
+    best_score = "-b"
     out = "> "+output_path
     err = "2> "+output_path+".err"
     
-    command = " ".join([cmd, raw_numbers, aligner, _threads, maps, file_path, out, err])
+    command = " ".join([cmd, raw_numbers, aligner, thres_id, thres_cov,
+                        _threads, maps, show_multiple, best_score, file_path, out, err])
     
     return command
 
@@ -120,7 +123,7 @@ try:
     __app_path = paths_config.get_app_path()
     
     # Datasets path
-    datasets_path = __app_path+paths_config.get_datasets_path()
+    datasets_path = paths_config.get_datasets_path()
     
     # Datasets configuration file
     datasets_conf_file = __app_path+ConfigBase.DATASETS_CONF
@@ -179,7 +182,8 @@ try:
                     
                     map_config = maps_config.get_map_config(map_id)
                     map_name = map_config.get_name()
-                    dataset_mapping_path = dataset_path+dataset_id+"."+map_id
+                    map_dir = map_config.get_map_dir()
+                    dataset_mapping_path = dataset_path+dataset_id+"."+map_dir
                     
                     sys.stderr.write("\tMap: "+map_name+"\n")
                     sys.stderr.write("\t\toutput file "+dataset_mapping_path+"\n")
@@ -202,7 +206,8 @@ try:
                     if len(common_dbs)>0:
                         
                         map_name = map_config.get_name()
-                        dataset_mapping_path = dataset_path+dataset_id+"."+map_id
+                        map_dir = map_config.get_map_dir()
+                        dataset_mapping_path = dataset_path+dataset_id+"."+map_dir
                         
                         sys.stderr.write("\tMap: "+map_name+"\n")
                         sys.stderr.write("\t\toutput file "+dataset_mapping_path+"\n")
@@ -211,7 +216,7 @@ try:
                         
                         __run_command(command)
             
-            sys.stdout.write(_SCRIPT+": dataset "+dataset_name+" created.\n")
+            sys.stdout.write(_SCRIPT+": dataset "+dataset_name+" with id "+dataset_id+" created.\n")
         
         ### 2) GTF FILES
         ###
@@ -249,14 +254,15 @@ try:
                     if len(common_dbs)>0:
                         
                         map_name = map_config.get_name()
-                        dataset_mapping_path = dataset_path+dataset_id+"."+map_id
+                        map_dir = map_config.get_map_dir()
+                        dataset_mapping_path = dataset_path+dataset_id+"."+map_dir
                         
                         sys.stderr.write("\tMap: "+map_name+"\n")
                         sys.stderr.write("\t\toutput file "+dataset_mapping_path+"\n")
                         
                         __features_to_map_file(features, maps_path, map_config, dataset_mapping_path, verbose_param)
             
-            sys.stdout.write(_SCRIPT+": dataset "+dataset_name+" created.\n")
+            sys.stdout.write(_SCRIPT+": dataset "+dataset_name+" with id "+dataset_id+" created.\n")
         
         ### 3) BED files
         elif dataset_file_type == DatasetsConfig.FILE_TYPE_BED:
@@ -293,14 +299,15 @@ try:
                     if len(common_dbs)>0:
                         
                         map_name = map_config.get_name()
-                        dataset_mapping_path = dataset_path+dataset_id+"."+map_id
+                        map_dir = map_config.get_map_dir()
+                        dataset_mapping_path = dataset_path+dataset_id+"."+map_dir
                         
                         sys.stderr.write("\tMap: "+map_name+"\n")
                         sys.stderr.write("\t\toutput file "+dataset_mapping_path+"\n")
                         
                         __features_to_map_file(features, maps_path, map_config, dataset_mapping_path, verbose_param)
             
-            sys.stdout.write(_SCRIPT+": dataset "+dataset_name+" created.\n")
+            sys.stdout.write(_SCRIPT+": dataset "+dataset_name+" with id "+dataset_id+" created.\n")
             
         ### 4) Others
         else:
