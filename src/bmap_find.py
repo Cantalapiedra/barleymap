@@ -43,7 +43,6 @@ def _print_parameters(query_ids_path, genetic_map_name, \
     sys.stderr.write("\nParameters:\n")
     sys.stderr.write("\tIDs query file: "+query_ids_path+"\n")
     sys.stderr.write("\tGenetic maps: "+genetic_map_name+"\n")
-    #sys.stderr.write("\tBest score filtering: "+str("yes" if best_score else "no")+"\n")
     sys.stderr.write("\tSort: "+sort_param+"\n")
     sys.stderr.write("\tShow multiples: "+str("yes" if multiple_param else "no")+"\n")
     sys.stderr.write("\tShow anchored features: "+str("yes" if show_anchored else "no")+"\n")
