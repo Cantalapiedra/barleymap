@@ -42,8 +42,8 @@ DEFAULT_EXTEND_WINDOW = 0.0
 def _print_parameters(fasta_path, genetic_map_name, aligner_list, \
                       threshold_id, threshold_cov, n_threads, \
                       sort_param, multiple_param, best_score, \
-                      show_genes, show_markers, \
-                      load_annot, extend_window, \
+                      show_anchored, show_genes, show_markers, \
+                      extend_window, \
                       show_unmapped_param, collapsed_view):
     sys.stderr.write("\nParameters:\n")
     sys.stderr.write("\tQuery fasta: "+fasta_path+"\n")
@@ -54,9 +54,10 @@ def _print_parameters(fasta_path, genetic_map_name, aligner_list, \
     sys.stderr.write("\tBest score filtering: "+str("yes" if best_score else "no")+"\n")
     sys.stderr.write("\tSort: "+sort_param+"\n")
     sys.stderr.write("\tShow multiples: "+str("yes" if multiple_param else "no")+"\n")
+    sys.stderr.write("\tShow anchored features: "+str("yes" if show_anchored else "no")+"\n")
     sys.stderr.write("\tShow genes: "+str("yes" if show_genes else "no")+"\n")
     sys.stderr.write("\tShow markers: "+str("yes" if show_markers else "no")+"\n")
-    sys.stderr.write("\tLoad annotation: "+str("yes" if load_annot else "no")+"\n")
+    #sys.stderr.write("\tLoad annotation: "+str("yes" if load_annot else "no")+"\n")
     sys.stderr.write("\tExtend genes/markers search: "+str(extend_window)+"\n")
     sys.stderr.write("\tShow unmapped: "+str(show_unmapped_param)+"\n")
     sys.stderr.write("\tShow results as collapsed rows: "+str(collapsed_view)+"\n")
@@ -107,6 +108,9 @@ try:
     optParser.add_option('-k', '--show-multiples', action='store_true', dest='multiple_param',
                          help='Queries with multiple positions will be shown (are obviated by default).')
     
+    optParser.add_option('-a', '--anchored', action='store_true', dest='show_anchored',
+                         help='Show anchored features at positions of queries.')
+    
     optParser.add_option('-g', '--genes', action='store_true', dest='show_genes',
                          help='Genes at positions of queries will be shown.')
     
@@ -117,8 +121,8 @@ try:
                          help='Centimorgans or basepairs (depending on sort) to extend the search of -g or -m.'+\
                          '(default '+str(DEFAULT_EXTEND_WINDOW)+')')
     
-    optParser.add_option('-a', '--annot', action='store_true', dest='load_annot',
-                         help='Annotation info for genes will be shown.')
+    #optParser.add_option('-a', '--annot', action='store_true', dest='load_annot',
+    #                     help='Annotation info for genes will be shown.')
     
     optParser.add_option('-u', '--show-unmapped', action='store_true', dest='show_unmapped',
                          help='Not found (unaligned, unmapped), will be shown.')
@@ -184,6 +188,9 @@ try:
     ## Multiple
     multiple_param = options.multiple_param
     
+    ## Show anchored
+    show_anchored = options.show_anchored
+    
     ## Show genes
     show_genes = options.show_genes
     
@@ -191,7 +198,7 @@ try:
     show_markers = options.show_markers
     
     ## Annotation
-    load_annot = options.load_annot
+    load_annot = True#options.load_annot
     
     ## Genes window
     if options.extend_window:
@@ -229,8 +236,8 @@ try:
     if verbose_param: _print_parameters(query_fasta_path, maps_names, aligner_list,
                       threshold_id, threshold_cov, n_threads,
                       sort_param, multiple_param, best_score,
-                      show_genes, show_markers,
-                      load_annot, extend_window,
+                      show_anchored, show_genes, show_markers,
+                      extend_window,
                       show_unmapped_param)
     
     ############### MAIN
@@ -294,7 +301,8 @@ try:
                                     threshold_id, threshold_cov, n_threads,
                                     best_score, sort_by, multiple_param, tmp_files_dir)
         
-        mapMarkers.enrichment(annotator, show_markers, show_genes, datasets_facade, extend_window, collapsed_view, constrain_fine_mapping = False)
+        mapMarkers.enrichment(annotator, show_markers, show_genes, show_anchored,
+                              datasets_facade, extend_window, collapsed_view, constrain_fine_mapping = False)
         mapping_results = mapMarkers.get_mapping_results()
         
         ############################################################ OUTPUT
@@ -302,6 +310,8 @@ try:
             outputPrinter.print_map_with_markers(mapping_results.get_map_with_markers(), map_config, multiple_param)
         elif show_genes:
             outputPrinter.print_map_with_genes(mapping_results.get_map_with_genes(), map_config, multiple_param, load_annot, annotator)
+        elif show_anchored:
+            outputPrinter.print_map_with_anchored(mapping_results.get_map_with_anchored(), map_config, multiple_param)
         else:
             outputPrinter.print_map(mapping_results.get_mapped(), map_config, multiple_param)
         
@@ -312,6 +322,7 @@ try:
 except m2pException as m2pe:
     sys.stderr.write("\nThere was an error.\n")
     sys.stderr.write(m2pe.msg+"\n")
+    traceback.print_exc(file=sys.stderr)
 except Exception as e:
     traceback.print_exc(file=sys.stderr)
     sys.stderr.write("\nERROR\n")
