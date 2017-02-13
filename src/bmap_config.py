@@ -3,6 +3,7 @@
 
 # check_config.py is part of Barleymap.
 # Copyright (C)  2013-2014  Carlos P Cantalapiedra.
+# Copyright (C)  2016-2017  Carlos P Cantalapiedra.
 # (terms of use can be found within the distributed LICENSE file).
 
 ###########################
@@ -13,19 +14,26 @@ import sys, os
 from optparse import OptionParser
 from barleymapcore.m2p_exception import m2pException
 
-from barleymapcore.utils.data_utils import read_paths
+from barleymapcore.db.ConfigBase import ConfigBase
+from barleymapcore.db.PathsConfig import PathsConfig
+
 from barleymapcore.db.DatabasesConfig import DatabasesConfig
 from barleymapcore.db.DatasetsConfig import DatasetsConfig
 from barleymapcore.db.MapsConfig import MapsConfig
-from barleymapcore.db.ConfigBase import ConfigBase
+from barleymapcore.db.DatasetsAnnotation import DatasetsAnnotation
+from barleymapcore.db.AnnotationTypes import AnnotationTypes
+
+from barleymapcore.utils.data_utils import read_paths
 
 DATABASES_CONF = ConfigBase.DATABASES_CONF
 DATASETS_CONF = ConfigBase.DATASETS_CONF
 MAPS_CONF = ConfigBase.MAPS_CONF
+DATASETS_ANNOTATION_CONF = ConfigBase.DATASETS_ANNOTATION_CONF
+ANNOTATION_TYPES_CONF = ConfigBase.ANNOTATION_TYPES_CONF
 
 def _print_paths(blastn_app_path, gmap_app_path, gmapl_app_path, hsblastn_app_path, \
                  blastn_dbs_path, gmap_dbs_path, hsblastn_dbs_path, \
-                 split_blast_path, genmap_path):
+                 split_blast_path, genmap_path, tmp_files_path):
     
     sys.stderr.write("\nBlastn:\n")
     sys.stderr.write("\tapp path: "+blastn_app_path+"\n")
@@ -44,6 +52,17 @@ def _print_paths(blastn_app_path, gmap_app_path, gmapl_app_path, hsblastn_app_pa
     sys.stderr.write("\tsplit_blast: "+split_blast_path+"\n")
     sys.stderr.write("\tgenmap: "+genmap_path+"\n")
     
+    sys.stderr.write("\nTemp. files path:\n")
+    sys.stderr.write("\t"+tmp_files_path+"\n")
+    
+    return
+
+def _print_ext_databases(dbs_path, num_found, dbs_found):
+    if num_found == 0:
+        sys.stderr.write("No additional databases were found in "+dbs_path+".\n\n")
+    else:
+        sys.stderr.write("Additional databases found in "+dbs_path+":\n\t"+"\n\t".join(dbs_found)+"\n\n")
+    
     return
 
 try:
@@ -53,50 +72,58 @@ try:
     
     (options, arguments) = optParser.parse_args()
     
-    sys.stderr.write("Warning: this command outputs to stderr.\n")
+    sys.stdout.write("Warning: this command outputs to stderr.\n")
     
     sys.stderr.write("Command: "+" ".join(sys.argv)+"\n")
     
-    ########## ARGUMENT DEFAULTS
+    ################################ Paths Configuration ###############################
+    ####################################################################################
     ## Read conf file
     app_abs_path = os.path.dirname(os.path.abspath(__file__))
     
-    config_path_dict = read_paths(app_abs_path+"/paths.conf") # data_utils.read_paths
-    __app_path = config_path_dict["app_path"]
+    paths_config = PathsConfig(app_abs_path, verbose = False)
+    __app_path = paths_config.get_app_path()
+    
+    split_blast_path = paths_config.get_split_blast_path()#__app_path+config_path_dict["split_blast_path"]
+    genmap_path = paths_config.get_genmap_path()#__app_path+config_path_dict["genmap_path"]
+    tmp_files_path = paths_config.get_tmp_files_path()#__app_path+config_path_dict["tmp_files_path"]
+    
+    blastn_app_path = paths_config.get_blastn_app_path()#config_path_dict["blastn_app_path"]
+    gmap_app_path = paths_config.get_gmap_app_path()#config_path_dict["gmap_app_path"]
+    gmapl_app_path = paths_config.get_gmapl_app_path()#config_path_dict["gmapl_app_path"]
+    hsblastn_app_path = paths_config.get_hsblastn_app_path()#config_path_dict["hsblastn_app_path"]
+    
+    blastn_dbs_path = paths_config.get_blastn_dbs_path()#config_path_dict["blastn_dbs_path"]
+    gmap_dbs_path = paths_config.get_gmap_dbs_path()#config_path_dict["gmap_dbs_path"]
+    hsblastn_dbs_path = paths_config.get_hsblastn_dbs_path()#config_path_dict["hsblastn_dbs_path"]
+    
     sys.stderr.write("\n")
-    
-    split_blast_path = __app_path+config_path_dict["split_blast_path"]
-    genmap_path = __app_path+config_path_dict["genmap_path"]
-    tmp_files_path = __app_path+config_path_dict["tmp_files_path"]
-    
-    blastn_app_path = config_path_dict["blastn_app_path"]
-    gmap_app_path = config_path_dict["gmap_app_path"]
-    gmapl_app_path = config_path_dict["gmapl_app_path"]
-    hsblastn_app_path = config_path_dict["hsblastn_app_path"]
-    
-    blastn_dbs_path = config_path_dict["blastn_dbs_path"]
-    gmap_dbs_path = config_path_dict["gmap_dbs_path"]
-    hsblastn_dbs_path = config_path_dict["hsblastn_dbs_path"]
-    
     sys.stderr.write("############# PATHS\n")
-    _print_paths(blastn_app_path, gmap_app_path, gmapl_app_path, hsblastn_app_path, \
-                 blastn_dbs_path, gmap_dbs_path, hsblastn_dbs_path, split_blast_path, genmap_path)
+    _print_paths(blastn_app_path, gmap_app_path, gmapl_app_path, hsblastn_app_path,
+                 blastn_dbs_path, gmap_dbs_path, hsblastn_dbs_path,
+                 split_blast_path, genmap_path, tmp_files_path)
     sys.stderr.write("\n")
     
-    # Databases
+    ############################ Databases configuration #################################
+    ######################################################################################
+    
+    ############### Configured databases
+    ###############
+    
     sys.stderr.write("############# DATABASES\n\n")
     databases_conf_file = __app_path+DATABASES_CONF
     databases_config = DatabasesConfig(databases_conf_file, verbose = False)
     for database_id in databases_config.get_databases():
         database_name = databases_config.get_database_name(database_id)
         database_type = databases_config.get_database_type(database_id)
-        sys.stderr.write("\tDB: "+database_name+" --> ID: "+database_id+", type: "+database_type+"\n")
+        sys.stderr.write("DB: "+database_name+" --> ID: "+database_id+", type: "+database_type+"\n")
     
     sys.stderr.write("\n")
     
-    ## External databases
-    sys.stderr.write("############# EXTERNAL DATABASES\n\n")
-    # blastn
+    ############## External databases
+    ##############
+    
+    # In blastn DBs path
     databases_ids = databases_config.get_databases_ids() # set(databases_ids)
     other_dbs = set()
     num_found = 0
@@ -106,16 +133,13 @@ try:
         if (db_name not in databases_ids) and (db_name not in other_dbs):
             num_found += 1
             if first:
-                sys.stderr.write("\tOther databases (can be used with align_external):\n")
+                sys.stderr.write("############# EXTERNAL DATABASES\n\n")
                 first = False
             other_dbs.add(db_name)
-            
-    if num_found == 0:
-        sys.stderr.write("\t\t-- Blastn database: (none found)\n")
-    else:
-        sys.stderr.write("\t\t-- Blast databases: "+", ".join(other_dbs)+"\n")
     
-    # gmap
+    _print_ext_databases(blastn_dbs_path, num_found, other_dbs)
+    
+    # In gmap DBs path
     other_dbs = set()
     num_found = 0
     for db_filename in os.listdir(gmap_dbs_path):
@@ -123,16 +147,13 @@ try:
         if (db_name not in databases_ids) and (db_name not in other_dbs):
             num_found += 1
             if first:
-                sys.stderr.write("\tOther databases (can be used with align_external):\n")
+                sys.stderr.write("############# EXTERNAL DATABASES\n\n")
                 first = False
             other_dbs.add(db_name)
     
-    if num_found == 0:
-        sys.stderr.write("\t\t-- GMAP database: (none found)\n")
-    else:
-        sys.stderr.write("\t\t-- GMAP databases: "+", ".join(other_dbs)+"\n")
+    _print_ext_databases(gmap_dbs_path, num_found, other_dbs)
     
-    # hs-blastn
+    # In hs-blastn DBs path
     other_dbs = set()
     num_found = 0
     for db_filename in os.listdir(hsblastn_dbs_path):
@@ -140,116 +161,105 @@ try:
         if (db_name not in databases_ids) and (db_name not in other_dbs):
             num_found += 1
             if first:
-                sys.stderr.write("\tOther databases (can be used with align_external):\n")
+                sys.stderr.write("############# EXTERNAL DATABASES\n\n")
                 first = False
             other_dbs.add(db_name)
     
-    if num_found == 0:
-        sys.stderr.write("\t\t-- HS-Blastn database: (none found)\n")
-    else:
-        sys.stderr.write("\t\t-- HS-Blastn databases: "+", ".join(other_dbs)+"\n")
+    _print_ext_databases(hsblastn_dbs_path, num_found, other_dbs)
     
-    sys.stderr.write("\n")
+    ########################## Maps configuration ##################################
+    ################################################################################
     
     # Genetic maps and associated genes
     sys.stderr.write("############# MAPS\n\n")
-    maps_path = __app_path+config_path_dict["maps_path"]
-    maps_dict = {}
-    for map_filename in os.listdir(maps_path):
-        maps_dict[map_filename] = maps_path+map_filename
     
-    # Genes
-    genes_files_dict = set()
-    genes_path = __app_path+config_path_dict["genes_path"]
-    for genes_filename in os.listdir(genes_path):
-        if genes_filename.endswith("_genes.tab"):
-            genes_files_dict.add(genes_filename[:genes_filename.find("_")])
-    
+    maps_path = paths_config.get_maps_path()#__app_path+config_path_dict["maps_path"]
     maps_conf_file = __app_path+MAPS_CONF
     maps_config = MapsConfig(maps_conf_file, verbose = False)
-    #(maps_names, maps_ids) = load_conf(maps_conf_file, verbose = False) # data_utils.load_conf
+    
     maps_ids = maps_config.get_maps_ids()
-    
     for map_id in maps_ids:
-        map_config = maps_config.get_map(map_id)
-        map_name = maps_config.get_map_name(map_config)
-        map_has_cm_pos = maps_config.get_map_has_cm_pos(map_config)
-        map_has_bp_pos = maps_config.get_map_has_bp_pos(map_config)
-        map_as_physical = maps_config.get_map_as_physical(map_config)
-        map_is_hierarchical = maps_config.get_map_is_hierarchical(map_config)
-        map_is_best_score = maps_config.get_map_is_best_score(map_config)
-        map_db_list = maps_config.get_map_db_list(map_config)
-        sys.stderr.write("\t-- "+map_name+" --> ID: "+map_id+\
-                         "\n\t\tcM positions: "+str(map_has_cm_pos)+"\n\t\tbasepairs positions: "+str(map_has_bp_pos)+\
-                        "\n\t\tis physical map: "+str(map_as_physical)+"\n\t\thierarchical search: "+str(map_is_hierarchical)+
-                        "\n\t\tshow only best score: "+str(map_is_best_score)+"\n\t\tassociated DB list: "+",".join(map_db_list)+"\n")
+        map_config = maps_config.get_map_config(map_id)
         
-        #map_databases = []
-        #for map_filename in os.listdir(maps_dict[map_id]):
-        #    if not map_filename.startswith(map_id): continue
-        #    
-        #    map_data = map_filename.split(".")
-        #    map_databases.append(map_data[-1])
-        #
-        #sys.stderr.write("\t\tPositions for databases: "+",".join(sorted(map_databases))+"\n")
-        #
-        #for genes_file in genes_files_dict:
-        #    if genes_file == map_id:
-        #        sys.stderr.write("\t\tIt also has genes associated to map positions.\n")
+        map_name = map_config.get_name()
+        map_has_cm_pos = map_config.has_cm_pos()
+        map_has_bp_pos = map_config.has_bp_pos()
+        map_default_sort_by = map_config.get_default_sort_by()
+        map_as_physical = map_config.as_physical()
+        map_search_type = map_config.get_search_type()
+        map_db_list = map_config.get_db_list()
+        map_dir = map_config.get_map_dir()
+        sys.stderr.write(""+map_name+" --> ID: "+map_id+", map path: "+maps_path+map_dir+"/"+\
+                         "\n\t"+"it has cM positions: "+str(map_has_cm_pos)+\
+                        "\n\t"+"it has bp positions: "+str(map_has_bp_pos)+\
+                        "\n\t"+"default sort by: "+str(map_default_sort_by)+\
+                        "\n\t"+"is physical map: "+str(map_as_physical)+\
+                        "\n\t"+"search type: "+str(map_search_type)+
+                        "\n\t"+"associated DB list: "+",".join(map_db_list)+"\n")
     
     sys.stderr.write("\n")
     
-    # Annotation
-    sys.stderr.write("############# Annotation for genes with maps positions associated\n\n")
-    annot_path = __app_path+config_path_dict["annot_path"]
-    for annot_filename in os.listdir(annot_path):
-        if annot_filename.startswith("."): continue
-        sys.stderr.write("\t"+annot_filename+"\n")
-    
-    sys.stderr.write("\n")
+    ########################### Datasets configuration ##################################
+    #####################################################################################
     
     # Datasets
-    datasets_path = __app_path+config_path_dict["datasets_path"]
-    datasets_dict = {}
-    for dataset_filename in os.listdir(datasets_path):
-        datasets_dict[dataset_filename] = datasets_path+dataset_filename
-        
     sys.stderr.write("############# DATASETS\n\n")
-    datasets_conf_file = config_path_dict["app_path"]+DATASETS_CONF
+    
+    datasets_path = paths_config.get_datasets_path()#__app_path+config_path_dict["maps_path"]
+    datasets_conf_file = __app_path+DATASETS_CONF
     datasets_config = DatasetsConfig(datasets_conf_file, verbose = False)
     
-    datasets_ids = datasets_config.get_datasets_ids()
+    ds_annot_conf_file = __app_path+DATASETS_ANNOTATION_CONF
+    ds_annot_config = DatasetsAnnotation(ds_annot_conf_file)
     
-    for dataset_id in datasets_ids: #enumerate(datasets_names.split(",")):
-        dataset_config = datasets_config.get_dataset(dataset_id)
-        dataset_name = datasets_config.get_dataset_name(dataset_config)
-        dataset_type = datasets_config.get_dataset_type(dataset_config)
-        sys.stderr.write("\t"+dataset_name+" --> ID: "+dataset_id+", type: "+dataset_type+"\n")
+    annot_types_conf_file = __app_path+ANNOTATION_TYPES_CONF
+    anntypes_config = AnnotationTypes(annot_types_conf_file)
+    
+    datasets_list = datasets_config.get_datasets_list()
+    for dataset in datasets_list:
+        dataset_config = datasets_config.get_dataset_config(dataset)
+        ds_name = dataset_config.get_dataset_name()
+        ds_type = dataset_config.get_dataset_type()
+        ds_file_type = dataset_config.get_file_type()
+        ds_db_list = dataset_config.get_db_list()
+        ds_synonyms = dataset_config.get_synonyms()
         
-        dataset_has_genes = False
-        dataset_databases = []
-        dataset_maps = []
-        for dataset_filename in os.listdir(datasets_dict[dataset_id]):
-            
-            if not dataset_filename.startswith(dataset_id): continue
-            
-            dataset_data = dataset_filename.split(".")
-            
-            if len(dataset_data) < 2: continue
-            
-            #if dataset_data[-2] == "genes":
-            #    dataset_has_genes = True
-            
-            if dataset_data[-1] == "hits" and dataset_data[-2] in databases_ids:
-                dataset_databases.append(dataset_data[-2])
-            
-            if dataset_data[-1] == "hits" and dataset_data[-2] in maps_ids:
-                dataset_maps.append(dataset_data[-2])
+        ds_paths = []
+        if ds_file_type == DatasetsConfig.FILE_TYPE_MAP:
+            for db_id in ds_db_list:
+                for map_id in maps_ids:
+                    map_config = maps_config.get_map_config(map_id)
+                    map_db_list = map_config.get_db_list()
+                    map_dir = map_config.get_map_dir()
+                    if db_id in map_db_list:
+                        ds_paths.append(maps_path+"/"+map_dir+"/"+map_dir+"."+db_id)
+        else:
+            ds_paths.append(dataset_config.get_file_path())
         
-        #sys.stderr.write("\t\tIt has hits to genes: "+str(dataset_has_genes)+"\n")
-        sys.stderr.write("\t\tHits to databases: "+",".join(sorted(dataset_databases))+"\n")
-        sys.stderr.write("\t\tHits to maps: "+",".join(sorted(dataset_maps))+"\n")
-        sys.stderr.write("\n")
+        sys.stderr.write(""+ds_name+" --> ID: "+dataset+\
+                         "\n\t"+"Type: "+ds_type+\
+                         "\n\t"+"File type: "+ds_file_type+", paths:\n\t\t"+"\n\t\t".join(ds_paths)+\
+                         "\n\t"+"associated DBs: "+",".join(ds_db_list)+\
+                         "\n\t"+"synonyms file: "+ds_synonyms+"\n")
+        
+        if ds_type == DatasetsConfig.DATASET_TYPE_GENE:
+            ds_ann_dict = ds_annot_config.get_dsann()
+            dataset_ds_ann_list = [ds_ann for ds_ann in ds_ann_dict if ds_ann_dict[ds_ann].get_dataset_id()==dataset]
+            sys.stderr.write("\tGene Annotations\n")
+            
+            for dataset_ds_ann_id in dataset_ds_ann_list:
+                ds_ann_config = ds_annot_config.get_dsann_config(dataset_ds_ann_id)
+                ds_ann_name = ds_ann_config.get_name()
+                ds_anntype_id = ds_ann_config.get_anntype_id()
+                ds_ann_filename = ds_ann_config.get_filename()
+                
+                sys.stderr.write("\t\t"+ds_ann_name+" --> ID: "+dataset_ds_ann_id+\
+                                 " --> annotation file: "+ds_ann_filename+\
+                                 " --> type: "+ds_anntype_id+" ("+str(anntypes_config.get_anntype(ds_anntype_id))+")"+\
+                                 "\n")
+        
+        
+    
     
     sys.stderr.write("\n")
 
