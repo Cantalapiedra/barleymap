@@ -61,7 +61,7 @@ def __features_to_map_file(features, maps_path, map_config, map_output_path, ver
     
     return
 
-def __write_command(map_name, file_path, output_path, threads):
+def __write_command(map_name, file_path, output_path, threads, verbose = False):
     cmd = "bmap_align"
     raw_numbers = "-f"
     aligner = "--aligner="+DEFAULT_ALIGNER
@@ -74,8 +74,11 @@ def __write_command(map_name, file_path, output_path, threads):
     out = "> "+output_path
     err = "2> "+output_path+".err"
     
-    command = " ".join([cmd, raw_numbers, aligner, thres_id, thres_cov,
-                        _threads, maps, show_multiple, best_score, file_path, out, err])
+    command = [cmd, raw_numbers, aligner, thres_id, thres_cov,
+                        _threads, maps, show_multiple, best_score, file_path, out, err]
+    
+    if verbose: command.append("-v")
+    command = " ".join(command)
     
     return command
 

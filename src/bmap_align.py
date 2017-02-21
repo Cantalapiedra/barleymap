@@ -44,7 +44,7 @@ def _print_parameters(fasta_path, genetic_map_name, aligner_list, \
                       sort_param, multiple_param, best_score, \
                       show_anchored, show_genes, show_markers, \
                       extend_window, \
-                      show_unmapped_param, collapsed_view):
+                      show_unmapped, collapsed_view):
     sys.stderr.write("\nParameters:\n")
     sys.stderr.write("\tQuery fasta: "+fasta_path+"\n")
     sys.stderr.write("\tGenetic maps: "+genetic_map_name+"\n")
@@ -59,7 +59,7 @@ def _print_parameters(fasta_path, genetic_map_name, aligner_list, \
     sys.stderr.write("\tShow markers: "+str("yes" if show_markers else "no")+"\n")
     #sys.stderr.write("\tLoad annotation: "+str("yes" if load_annot else "no")+"\n")
     sys.stderr.write("\tExtend genes/markers search: "+str(extend_window)+"\n")
-    sys.stderr.write("\tShow unmapped: "+str(show_unmapped_param)+"\n")
+    sys.stderr.write("\tShow unmapped: "+str(show_unmapped)+"\n")
     sys.stderr.write("\tShow results as collapsed rows: "+str(collapsed_view)+"\n")
     
     return
@@ -238,7 +238,7 @@ try:
                       sort_param, multiple_param, best_score,
                       show_anchored, show_genes, show_markers,
                       extend_window,
-                      show_unmapped_param)
+                      show_unmapped)
     
     ############### MAIN
     if verbose_param: sys.stderr.write("\n")
