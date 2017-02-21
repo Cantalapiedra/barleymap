@@ -39,12 +39,11 @@ DEFAULT_N_THREADS = 1
 DEFAULT_SORT_PARAM = "map default"
 DEFAULT_EXTEND_WINDOW = 0.0
 
-def _print_parameters(fasta_path, genetic_map_name, aligner_list, \
-                      threshold_id, threshold_cov, n_threads, \
-                      sort_param, multiple_param, best_score, \
-                      show_anchored, show_genes, show_markers, \
-                      extend_window, \
-                      show_unmapped, collapsed_view):
+def _print_parameters(fasta_path, genetic_map_name, aligner_list,
+                      threshold_id, threshold_cov, n_threads,
+                      sort_param, multiple_param, best_score,
+                      show_anchored, show_genes, show_markers,
+                      extend_window, show_unmapped, collapsed_view):
     sys.stderr.write("\nParameters:\n")
     sys.stderr.write("\tQuery fasta: "+fasta_path+"\n")
     sys.stderr.write("\tGenetic maps: "+genetic_map_name+"\n")
@@ -237,8 +236,7 @@ try:
                       threshold_id, threshold_cov, n_threads,
                       sort_param, multiple_param, best_score,
                       show_anchored, show_genes, show_markers,
-                      extend_window,
-                      show_unmapped)
+                      extend_window, show_unmapped, collapsed_view)
     
     ############### MAIN
     if verbose_param: sys.stderr.write("\n")
