@@ -134,7 +134,7 @@ if options.ref_type: ref_type_param = options.ref_type
 else: ref_type_param = DEFAULT_REF_TYPE
 
 # Verbosity
-verbose_param = options.verbose
+verbose_param = options.verbose if options.verbose else False
 
 # Databases
 databases_conf_file = __app_path+DATABASES_CONF

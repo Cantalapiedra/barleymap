@@ -121,7 +121,7 @@ if options.search_type: search_type = options.search_type
 else: search_type = DEFAULT_HIERARCHICAL
 
 # Verbosity
-verbose_param = options.verbose
+verbose_param = options.verbose if options.verbose else False
 
 # Genetic maps
 maps_conf_file = __app_path+MAPS_CONF

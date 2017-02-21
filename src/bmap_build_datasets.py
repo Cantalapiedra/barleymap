@@ -139,7 +139,7 @@ try:
     
     (options, arguments) = optParser.parse_args()
     
-    verbose_param = options.verbose
+    verbose_param = options.verbose if options.verbose else False
     
     if verbose_param: sys.stderr.write("Command: "+" ".join(sys.argv)+"\n")
     

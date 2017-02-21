@@ -112,7 +112,7 @@ try:
     query_ids_path = arguments[0] # THIS IS MANDATORY
     
     # Verbose
-    verbose_param = options.verbose
+    verbose_param = options.verbose if options.verbose else False
     
     if verbose_param: sys.stderr.write("Command: "+" ".join(sys.argv)+"\n")
     
@@ -131,16 +131,16 @@ try:
         sort_param = DEFAULT_SORT_PARAM
     
     ## Multiple
-    multiple_param = options.multiple_param
+    multiple_param = options.multiple_param if options.multiple_param else False
     
     ## Show anchored
-    show_anchored = options.show_anchored
+    show_anchored = options.show_anchored if options.show_anchored else False
     
     ## Show genes
-    show_genes = options.show_genes
+    show_genes = options.show_genes if options.show_genes else False
     
     ## Show markers
-    show_markers = options.show_markers
+    show_markers = options.show_markers if options.show_markers else False
     
     ## Annotation
     load_annot = True#options.load_annot
@@ -152,10 +152,10 @@ try:
         extend_window = DEFAULT_EXTEND_WINDOW
     
     ## Show unmapped
-    show_unmapped = options.show_unmapped
+    show_unmapped = options.show_unmapped if options.show_unmapped else False
     
     # Collapsed view
-    collapsed_view = options.collapse
+    collapsed_view = options.collapse if options.collapse else False
     
     ######### Read configuration files
     #########
