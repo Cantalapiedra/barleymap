@@ -161,7 +161,8 @@ try:
     #########
     app_abs_path = os.path.dirname(os.path.abspath(__file__))
     
-    paths_config = PathsConfig(app_abs_path, verbose_param)
+    paths_config = PathsConfig()
+    paths_config.load_config(app_abs_path)
     __app_path = paths_config.get_app_path()
     
     # Datasets

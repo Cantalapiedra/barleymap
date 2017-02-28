@@ -89,10 +89,15 @@ query_fasta_path = arguments[0] # THIS IS MANDATORY
 sys.stderr.write("Command: "+" ".join(sys.argv)+"\n")
 
 ########## ARGUMENT DEFAULTS
+
+# Verbosity
+verbose_param = options.verbose if options.verbose else False
+
 ## Read conf file
 app_abs_path = os.path.dirname(os.path.abspath(__file__))
 
-paths_config = PathsConfig(app_abs_path)
+paths_config = PathsConfig()
+paths_config.load_config(app_abs_path)
 __app_path = paths_config.get_app_path()
 
 # Aligners list
@@ -119,9 +124,6 @@ else: n_threads = DEFAULT_N_THREADS
 # Hierarchical
 if options.search_type: search_type = options.search_type
 else: search_type = DEFAULT_HIERARCHICAL
-
-# Verbosity
-verbose_param = options.verbose if options.verbose else False
 
 # Genetic maps
 maps_conf_file = __app_path+MAPS_CONF

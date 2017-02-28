@@ -98,10 +98,15 @@ query_fasta_path = arguments[0] # THIS IS MANDATORY
 sys.stderr.write("Command: "+" ".join(sys.argv)+"\n")
 
 ########## ARGUMENT DEFAULTS
+
+# Verbosity
+verbose_param = options.verbose if options.verbose else False
+
 ## Read conf file
 app_abs_path = os.path.dirname(os.path.abspath(__file__))
 
-paths_config = PathsConfig(app_abs_path)
+paths_config = PathsConfig()
+paths_config.load_config(app_abs_path)
 __app_path = paths_config.get_app_path()
 
 # Aligners list
@@ -132,9 +137,6 @@ else: search_type = DEFAULT_HIERARCHICAL
 # ref_type
 if options.ref_type: ref_type_param = options.ref_type
 else: ref_type_param = DEFAULT_REF_TYPE
-
-# Verbosity
-verbose_param = options.verbose if options.verbose else False
 
 # Databases
 databases_conf_file = __app_path+DATABASES_CONF
