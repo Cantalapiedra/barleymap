@@ -1,20 +1,10 @@
 #!/usr/bin/perl
 
+# modified by CPCantalapiedra for Barleymap web (20170302)
 # modified by CPCantalapiedra for Barleymap web (20140321) from previous
 # modifications (see below).
 # This version adds features and simplifies the program so that just those functions
 # used by Barleymap web (http://floresta.eead.csic.es/barleymap/) are implemented.
-
-# --plot option is not supported.
-# --square option is not supported.
-# --compact option is not supported.
-
-# Added:
-# pos_position argument: to allow to specify in which position of the data resides the positional information
-#			for example, if it is genetic/physical map, the position to show will depend
-#			on the "sort" parameters chosen by the user...
-# map_as_physical: it is required to specify whenever base pairs are used in the "pos_position"
-#			field of the data.
 
 # modified by Bruno Contreras Moreira EEAD-CSIC based on:
 
@@ -43,49 +33,6 @@
 =head1 NAME
 
 Genetic-mapper - SVG Genetic Map Drawer
-
-=head1 SYNOPSIS
-
-  # Command line help
-  ..:: SVG Genetic Map Drawer ::..
-  > Standalone program version 0.5 <
-
-  Usage: genetic_mapper.pl [-options] --map=<map.csv>
-
-   Options
-     --chr=<name>
-           Draw only the specified chromosome/linkage group.
-     --bar
-           Use a coloured visualisation with a dark bar at the marker position.
-     --plot
-           Rather than a list marker names, plots a circle. If the LOD-score is
-           provided a dark disk fill the circle proportionality to its value.
-     --var
-           If specified with --bar or --plot the size of the bar/circle is
-           proportional to the number of markers.
-     --square
-           Small squares are used rather than names (incompatible with --plot).
-     --pos
-           The marker positions are indicated on the left site of the chromosome.
-     --compact
-           A more compact/stylish chromosome is used (incompatible with --bar).
-     --karyotype=<karyotype.file>
-           Specify a karytype to scale the physical chromosme. Rather than using
-           genetic distances, expect nucleotide position in than map file.
-           FORMAT: "chr - ID LABEL START END COMMENT"
-     --scale= ]0,+oo[
-           Change the scale of the figure (default x10).
-     --verbose
-           Become chatty.
-     --chrom_order
-	   A file with chromosome name and chromosome order, for those cases in which
-	   the chromosomes in "--map" are not strictly numeric or sorted as if they are.
-
-  # stylish
-  ./genetic_mapper.pl --var --compact --plot --map=map.csv > lg13.svg
-
-  # Classic publication style
-  ./genetic_mapper.pl --pos --chr=13 --map=map.csv > lg13.svg
 
 =head1 DESCRIPTION
 
@@ -141,26 +88,8 @@ use Getopt::Long;
 #----------------------------------------------------------
 our ($VERSION) = 0.5;
 
-#----------------------------------------------------------
-my ($verbose, $shify, $bar, $var, $pflag, $scale, $font, $karyotype, $map, $chrom_order, $chr, $map_as_physical, $pos_position) = (0, 30, 0, 0, 10, 0, 0, 0, 0, 2);
-GetOptions('m|map=s' => \$map,
-	   'o|chrom-order=s' => \$chrom_order,
-	   'scale:f' => \$scale,
-	   'pos_position:f' => \$pos_position,
-	   'map_as_physical!' => \$map_as_physical,
-	   'bar!' => \$bar,
-	   'var!' => \$var,
-	   'p|pos|position!' => \$pflag,
-	   'c|chr:s' => \$chr,
-	   'v|verbose!' => \$verbose);
-
-# 'k|karyotype:s' => \$karyotype,
-
-my @font   = ('Helvetica', 4, 13, 10);
-#my @font=('InaiMathi',4,13,11);
-#my @font=('Optima',4,13,10);
-#my @font=('Lucida Console',4,13,10);
-#my @font=('Myriad Pro',4,13,10);
+#----------------------------------------------- CONSTANTS
+my @font   = ('Helvetica', 4, 12, 8);
 
 my $ADDCMTOEQUALLOCS = 0.1;
 my $MAXGENESSAMESPOT = 3;
@@ -171,50 +100,103 @@ my $div = 1;
 my $PHYS_MAP_SCALE = 30;
 
 my $GEN_MAP_SEP = 120; # Initial separator for genetic maps
-my $GEN_MAP_CHR_WIDTH = 240; # Fixed width for every chromosome in genetic maps
-my $PHYS_MAP_SEP = 140; # Initial separator for physical maps
-my $PHYS_MAP_CHR_WIDTH = 250; # Fixed width for every chromosome in physical maps
+my $GEN_MAP_CHR_WIDTH = 200; # Fixed width for every chromosome in genetic maps
+my $PHYS_MAP_SEP = 120; # Initial separator for physical maps
+my $PHYS_MAP_CHR_WIDTH = 200; # Fixed width for every chromosome in physical maps
 
-my $CHR_WIDTH = 40; # NOTE: this is not a parameter that adapts the whole painting
-# of chromosomes. It is only the background of the chromosome. Ticks for markers
-# and other features wont adapt to this variable
+my $CHR_WIDTH = 20;
+my $CHR_HEIGHT = 160;
 
+#----------------------------------------------------------
+my $verbose = 0;
+my $shify = 30;
+my $map;
+my $chrom_order;
+my $chrommax = 0;
+my $map_as_physical;
+my $finemapping; # whether show complete chromosomes or only the mapped region
+my $pos_position = 2;
+
+GetOptions('m|map=s' => \$map,
+	   'o|chrom-order=s' => \$chrom_order,
+	   'chrommax:f' => \$chrommax,
+	   'pos_position:f' => \$pos_position,
+	   'map_as_physical!' => \$map_as_physical,
+	   'fine_mapping!' => \$finemapping,
+	   'v|verbose!' => \$verbose);
+
+# chrommax: position on chrom_order file of the maximum size of chromosomes
+
+################################### Read chromosome name and order from provided file
+### --> chrom_conf{chrom_name} = "order", "max"
+### rev_chrom_conf{chrom_order} -> "name", "max"
 my (%chrom_conf);
+my (%rev_chrom_conf);
+my ($maxmax); # maximum position of all chromosomes
 
 print STDERR "Parsing map chromosomes configuration\n";
 
 if (defined $chrom_order && -r $chrom_order && (open my $IN, '<', $chrom_order))
 {
-#<$IN>;
-while (<$IN>){
+    while (<$IN>)
+    {
 	print {*STDERR} $_;
 	chomp;
 	my @data = split m/\t/;
-	$chrom_conf{$data[0]} = $data[1];
+	
+	$chrom_conf{$data[0]}{"order"} = $data[1];
+	
+	if ($finemapping){
+	    $chrom_conf{$data[0]}{"max"} = -1; # to be defined from map positions
+	    $chrom_conf{$data[0]}{"min"} = -1;
+	} else {
+	    $chrom_conf{$data[0]}{"max"} = $data[$chrommax]; # as defined in the chromosomes file
+	    $chrom_conf{$data[0]}{"min"} = 1;
+	}
+	
+	$rev_chrom_conf{$data[1]}{"name"} = $data[0];
+	
+	if ($finemapping){
+	    $rev_chrom_conf{$data[1]}{"max"} = -1; # to be defined from map positions
+	    $rev_chrom_conf{$data[1]}{"min"} = -1; # to be defined from map positions
+	} else {
+	    $rev_chrom_conf{$data[1]}{"max"} = $data[$chrommax]; # as defined in the chromosomes file
+	    $rev_chrom_conf{$data[1]}{"min"} = 1; # as defined in the chromosomes file
+	}
+	
+	# Maximum of all chromosomes
+	if ($finemapping) {
+	    $maxmax = -1; # to be defined from map positions
+	} else {
+	    $maxmax = $data[$chrommax] if (!defined $maxmax || $maxmax < $data[$chrommax]);
+	}
+    }
+    close $IN;
 }
-close $IN;
-}
+#######################################################################################
 
-if ($scale>0 && defined $map && -r $map && (open my $IN, '<', $map))
+########################################################################## Process maps
+### --> chromosomes{chrom_id}{$location}
+if (defined $map && -r $map && (open my $IN, '<', $map))
 {
-    my (@clips, @final);
-    my (%chromosomes, %max, %anchor, %annot, %HC, %div_dict, %num_features, %max_locus_site);
+    my (@final);
+    my (%chromosomes, %max, %anchor, %div_dict, %num_features, %max_locus_site);
     my (%previous_locations,%anchor_locations,$new_location,$extra);
-    my ($maxmax,$maxlog,$chromosomeid,$location,$marker,$annot,$color,$maxlabel,$currchrom);
+    my ($maxlog,$chromosomeid,$location,$marker,$color,$maxlabel,$currchrom);
     
     # Variables used inside CHROMOSOME LOOP
-    my ($niidea,$niidea_2,$chr_text_x,$chr_text_y);
+    my ($chr_text_x,$chr_text_y);
     
     # Variables used inside LOCI LOOP
     my ($locus2,$size,$position,$shpos,$x_pos,$y_pos,$label,$legend_x,$legend_y);
     
     my $sep = $GEN_MAP_SEP; # this changes if map_as_physical
     my $chr_width = $GEN_MAP_CHR_WIDTH; # this changes if map_as_physical
-    my $yshift = ($pflag ? $sep : 0); # x position for first chromosome
-    my $laxtYlabels = 0;
-    <$IN>;
+    my $yshift = $sep; # x position for first chromosome
     
-    ## Reading input file
+    ## Parse input file
+    ##
+    #<$IN>; # skip first line O.,o
     while (<$IN>)
     {
         chomp;
@@ -223,51 +205,37 @@ if ($scale>0 && defined $map && -r $map && (open my $IN, '<', $map))
 	#print {*STDERR} $_;
         my @data = split m/\t/;
 	
-        if ((scalar @data > 2 && defined $data[1]) && (!defined $chr || $data[1] eq $chr))
+        if (scalar @data > 2 && defined $data[1])
         {
 	    $currchrom = $data[1];
-	    $chromosomeid = int($chrom_conf{$currchrom});
-	    #$chromosomeid = int($data[1]); # int($data[1] * 10) / 10;
-	    if ($map_as_physical) {
-		$location = int($data[$pos_position]); # int($data[$pos_position] * 1000);
-	    } else {
-		$location = int($data[$pos_position]); # * 100) / 100; # int($data[$pos_position] * 1000);
-	    }
+	    $chromosomeid = int($chrom_conf{$currchrom}{"order"});
+	    
+	    $location = int($data[$pos_position]); # int($data[$pos_position] * 1000);
 	    
 	    $marker = $data[0];
-	    $annot = '';
-
+	    
 	    # 1st read anchor marker
+	    ## Needed for multiple position markers? CPC
 	    if(!$anchor{$marker})
 	    {
 		$anchor{$marker}=1; 
-	    }  ## Needed for multiple position markers? CPC
+	    }
 	    
 	    if($anchor_locations{$location})
 	    {
 		$anchor_locations{$location}++; 
 		$location += ($ADDCMTOEQUALLOCS * $anchor_locations{$location});
-	    }
-	    else{ $anchor_locations{$location}++; }	#print "a $marker $location\n";
+	    } else {
+		$anchor_locations{$location}++;
+	    }	#print "a $marker $location\n";
 	    
 	    if (!exists $chromosomes{$chromosomeid}{$location})
 	    {
 		@{$chromosomes{$chromosomeid}{$location}} = ($data[0], 1, -1);
-	    }
-	    else
-	    {
+	    } else {
 		$chromosomes{$chromosomeid}{$location}[0] .= q{,} . $marker;
 		$chromosomes{$chromosomeid}{$location}[1] += 1;
 		$chromosomes{$chromosomeid}{$location}[2] += 0;
-	    }
-	    
-	    if (!exists $max{$chromosomeid} || $max{$chromosomeid} < $location) # $location / 1000)
-	    {
-		$max{$chromosomeid} = $location; # / $div;
-		$maxmax = $max{$chromosomeid} if (!defined $maxmax || $maxmax < $max{$chromosomeid});
-		if ($map_as_physical) {
-		    $maxmax = $maxmax / $PHYS_MAP_SCALE;
-		}
 	    }
 	    
 	    if (!exists $num_features{$chromosomeid}) {
@@ -275,10 +243,27 @@ if ($scale>0 && defined $map && -r $map && (open my $IN, '<', $map))
 	    } else {
 		$num_features{$chromosomeid} += 1;
 	    }
-
+	    
+	    # If finemapping: update minimum and maximum chromosome positions
+	    if ($finemapping) {
+		if ($location <= $chrom_conf{$currchrom}{"min"} || $chrom_conf{$currchrom}{"min"} == -1) {
+		    $chrom_conf{$currchrom}{"min"} = $location;
+		    $rev_chrom_conf{$chromosomeid}{"min"} = $location;
+		}
+		
+		if ($location >= $chrom_conf{$currchrom}{"max"} || $chrom_conf{$currchrom}{"max"} == -1) {
+		    $chrom_conf{$currchrom}{"max"} = $location;
+		    $rev_chrom_conf{$chromosomeid}{"max"} = $location;
+		}
+		
+		$maxmax = $location if (!defined $maxmax || $maxmax < $location || $maxmax == -1);
+	    }
+	    
         }
     }
     close $IN;
+    
+    #print STDERR "Max chromosome size:".$maxmax."\n";
     
     if ($map_as_physical) {
 	$sep = $PHYS_MAP_SEP;
@@ -287,7 +272,7 @@ if ($scale>0 && defined $map && -r $map && (open my $IN, '<', $map))
 	$sep = $GEN_MAP_SEP;
 	$chr_width = $GEN_MAP_CHR_WIDTH;
     }
-    $yshift = ($pflag ? $sep : 0); # x position for first chromosome
+    $yshift = $sep; # x position for first chromosome
     
     if (scalar keys %chromosomes > 0)
     {
@@ -295,182 +280,189 @@ if ($scale>0 && defined $map && -r $map && (open my $IN, '<', $map))
         my $i = 0;
         foreach my $chrnum (sort { $a <=> $b } keys %chromosomes)
         {
-	    my %rhash = reverse %chrom_conf;
-	    my $chromname = $rhash{$chrnum};
-	    #my $chromname = $chrom_conf{$chrnum};
+	    my $chromname = $rev_chrom_conf{$chrnum}{"name"};
+	    my $chrom_max = $rev_chrom_conf{$chrnum}{"max"};
+	    my $chrom_min = $rev_chrom_conf{$chrnum}{"min"};
 	    
-            $yshift += (($pflag ? $sep : 0) + $chr_width) if ($i++ > 0); # x position for current chromosome
+	    print {*STDERR} "Chrom: ".$chromname." ".$chrnum." ".$chrom_max." ".$chrom_min." ".$maxmax."\n";
 	    
-            print {*STDERR} '***** Linkage Group ', $chrnum, " *****\n" if ($verbose);
-            my (@locussite, @legend);
+            $yshift += ($sep + $chr_width) if ($i++ > 0); # x position for current chromosome
+	    
+            my (@legend);
             my $plast = -999;
+	    
+	    ############# Print the chromosome number
+	    push @final, ' <g id="Layer_' . $chrnum . '">';
+	    
+	    $chr_text_x = $yshift + ($CHR_WIDTH / 2); # ($yshift + 22);
+	    $chr_text_y = ((($shify + ((3 * $font[3]) / 2)) / 2) - $font[1]);
+	    
+            push @final, '  <text class="text" style="font-size:' . ((3 * $font[3]) / 2) . 'pt;" text-anchor="middle" \
+			    x="' . $chr_text_x . '" y="' . $chr_text_y . '">' . $chromname . '</text>';
+	    #########################################
 	    
 	    #### LOCI LOOP
             foreach my $locus (sort {$a<=>$b} keys %{$chromosomes{$chrnum}})
             {
-		#print {*STDERR} $locus . "\n";
-		if ($map_as_physical) {
-		    $locus2 = ($locus / $maxmax);
-		    #print {*STDERR} "Locus " . $locus . " - " . $locus2 . "\n";
-		} else {
-		    $locus2 = $locus; #($locus / $maxmax);
-		}
-		
-                print {*STDERR} $locus2, "\t", $chromosomes{$chrnum}{$locus}[0], "\t", (defined $chromosomes{$chrnum}{$locus}[2] ? $chromosomes{$chrnum}{$locus}[2] : q{}), "\n" if ($verbose);
-                $size = 5 + ($var ? ($chromosomes{$chrnum}{$locus}[1] * 0.05 * $scale) : 0);
-                $position = ($locus2 >= ($plast + ($font[2] / $scale)) ? $locus2 : $plast + ($font[2] / $scale));
-		#$position = $position * $scale;
-                $shpos = ($position - $locus2) * $scale;
-		
-                if ($bar)
-                {
-                    #push @locussite, '   <path class="locus" d="M' . ($yshift + 2) . q{ } . ($shify + ($locus2 * $scale) + ($size / 2)) . 'h40v-' . $size . 'h-40z"/>';
-                    if ($pflag)
-                    {
-                        push @legend, '  <path class="line" d="M'
-			. ($yshift - 5 - 12 - 39) . q{ } . ($shify + ($locus2 * $scale) + ($shpos))
-			. 'h12 l45 -' . ($shpos) . ' l0 0'
-			. 'h' . $CHR_WIDTH . ' l45 ' . ($shpos) . ' l0 0 h12"/>';
-			
-                        push @legend, '  <path class="whiteline" d="M'
-			. ($yshift + 2) . q{ }
-			. ($shify + ($locus2 * $scale))
-			. 'h ' . $CHR_WIDTH . '"/>' if ($locus2 > 0 && $locus2 < $max{$chrnum});
-                    }
-                }
-                if ($pflag) {
-		    $x_pos = ($yshift - 105 + 41);
-		    $y_pos = ($shify + ($locus2 * $scale) + $shpos + $font[1]);
-		    
-		    $label = "";
-		    if ($map_as_physical) {
-			$label = sprintf "%.0f", $locus;
+		# position of this locus
+		# note that $chrom_min + 1 will be 0 when not finemapping, and chrom min position when finemapping
+		if ($finemapping) {
+		    if ($chrom_max - $chrom_min <= 0) {
+			$locus2 = $CHR_HEIGHT / 2; # If there is only one marker, show it in the middle of the chromosome track
 		    } else {
-			$label = sprintf "%.2f", $locus;
+			$locus2 = (($locus - $chrom_min) / ($chrom_max - $chrom_min)) * $CHR_HEIGHT;
 		    }
-		    
-		    push @legend, '  <text class="text" text-anchor="end" x="' . $x_pos . '" y="' . $y_pos . '">' . $label . '</text>';
+		} else {
+		    $locus2 = ($locus / $maxmax) * $CHR_HEIGHT;
 		}
+		
+		#print {*STDERR} "Locus " . $locus . " - " . $locus2 . "\n";
+		
+		### This is the graphical position of the LABELS of the marker
+		$position = ($locus2 >= $plast + $font[2] ? $locus2 : $plast + $font[2]);
+		
+		### This is the graphical position of the marker ON the chromosome
+                $shpos = ($position - $locus2) * 1;
+		
+		### This is the position of labels plus the global vertical margin $shify
+		$y_pos = ($shify + $position); #$locus2 + $shpos);
+		
+		#print {*STDERR} "\tPos: ".$position.", shpos: ".$shpos.", ypos: ".$y_pos."\n";
+		
+		### Plot the labels showing the numerical position of markers on the chromosomes
+		###
+		my $x_lab = ($yshift - 64);
+		$legend_y = $y_pos + ($font[3] / 2);
+		
+		#$x_pos = ($yshift - 64);
+		
+		$label = "";
+		if ($map_as_physical) {
+		    $label = sprintf "%.0f", $locus;
+		} else {
+		    $label = sprintf "%.2f", $locus;
+		}
+		
+		push @legend, '  <text class="text" text-anchor="end" x="' . $x_lab . '" y="' . $legend_y . '">' . $label . '</text>';
+		
+		### Plot the paths which connect the labels and the marker ticks on the chromosomes
+		###
+		$x_lab = $x_lab + 8; #($yshift - 56); # leftmost position of the path
+		my $tick = 6;
+		my $leng = $chr_text_x - ($CHR_WIDTH / 2) - ($x_lab + $tick); #45;
+		
+		push @legend, '  <path class="line" d="M'
+		. $x_lab . q{ } . $y_pos
+		. 'h'.$tick.' l'.$leng.' -' . ($shpos) . ' l0 0'
+		. 'h' . $CHR_WIDTH . ' l'.$leng.' ' . ($shpos) . ' l0 0 h'.$tick.'"/>';
 		
 		# if input are simply markers make sure they are treated as anchors
-		if(!keys(%anchor)){ $color = $ANCHORCOLOR }
-		else
-		{
+		if(!keys(%anchor)) {
+		    $color = $ANCHORCOLOR
+		} else {
 		    if($anchor{$chromosomes{$chrnum}{$locus}[0]}){ $color = $ANCHORCOLOR }
 		    else{ $color = $RESTCOLOR }
 		}
 		
-		$legend_x = ($yshift + 105);
-		$legend_y = ($shify + ($locus2 * $scale) + $shpos + $font[1]);
+		### Plot the marker name labels on the chromosomes
+		###
+		$legend_x = $x_lab + $tick + $leng + $CHR_WIDTH + $leng + $tick + 8; # + 105;
 		
-		push @legend, '  <text class="text" style="fill:'.$color.'" x="' . $legend_x . '" y="' . $legend_y . '">' . $chromosomes{$chrnum}{$locus}[0] . '</text>';
+		push @legend, '  <text class="text" style="fill:'.$color.'" x="' . $legend_x . '" y="' . $legend_y . '">' .
+				$chromosomes{$chrnum}{$locus}[0] .
+				'</text>';
 		
-                $plast = $position;
+		###
 		
-		#print {*STDERR} "Last " . $laxtYlabels . "\n";
-		$laxtYlabels = $shify + ($locus2 * $scale) + $shpos;  ############################## LAST LABEL #######################
-		$maxlabel = $legend_y if (!defined $maxlabel || $maxlabel < $legend_y);
-		#print {*STDERR} "Max " . $maxlabel . "\n";
+                $plast = $position; # previous label position (to shift the next one if necessary)
+		
+		$maxlabel = $y_pos if (!defined $maxlabel || $maxlabel < $y_pos);
             }
 	    # END OF LOCI LOOP
 	    
 	    if (!exists $max_locus_site{$chrnum}) {
-		$max_locus_site{$chrnum} = ($shify + ($locus2 * $scale) + ($size / 2));
+		$max_locus_site{$chrnum} = $shify + $locus2;
 	    }
 	    
-            if ($bar) {
-		
-		if ($map_as_physical) {
-		    $niidea = ($shify + (($max{$chrnum} / $maxmax) * $scale) - 15.37);
-		    $niidea_2 = ((($max{$chrnum} / $maxmax) * $scale) - 30.7);
-		} else {
-		    $niidea = ($shify + ($max{$chrnum} * $scale) - 15.37);
-		    $niidea_2 = (($max{$chrnum} * $scale) - 30.7);
-		}
-		
-		#### CLIPPING DOES NOT WORK PROPERLY WITH MOZILLA FIREFOX
-#                push @clips,
-#                  '  <clipPath id="clip_' . $chrnum
-#                  . "\">\n   <path d=\"M "
-#                  . ($yshift + 5) . q{ } . $niidea
-#                  . ' c 0 22.7 ' . $CHR_WIDTH . ' 22.7 ' . $CHR_WIDTH . ' 0 ' # lower bezier
-#		  . ' v -' . $niidea_2
-#                  . " c 0 -22.7 -" . $CHR_WIDTH . ' -22.7 -' . $CHR_WIDTH . " 0 " # upper bezier
-#		  . " z\"/>\n  "
-#		  . "</clipPath>";
-            }
+	    ##### Plot the graphical chromosomes
+	    #####
+	    my $bezier_height = 22.7;
+	    my $rect_height = ($chrom_max / $maxmax) * $CHR_HEIGHT;
+	    if ($finemapping) { # when finemapping, all chromosomes have the same length
+		$rect_height = $CHR_HEIGHT;
+	    }
 	    
-            push @final, ' <g id="Layer_' . $chrnum . '">';
+	    my $rect_start = $chr_text_x - ($CHR_WIDTH / 2);
+	    my $rect_y_start = $chr_text_y + 2 + $rect_height;
+	    my $rect_y_end = $rect_height - $bezier_height;
 	    
-	    $chr_text_x = ($yshift + 22);
-	    $chr_text_y = ((($shify + ((3 * $font[3]) / 2)) / 2) - $font[1]);
-            push @final, '  <text class="text" style="font-size:' . ((3 * $font[3]) / 2) . 'pt;" text-anchor="middle" x="' . $chr_text_x . '" y="' . $chr_text_y . '">' . $chromname . '</text>';
-            if ($bar) {
-		push @final, '   <g id="locii_' . $chrnum . '"';
-		#### CLIPPING DOES NOT WORK PROPERLY WITH MOZILLA FIREFOX
-		#push @final, ' clip-path="url(#clip_' . $chrnum . ")";
-		push @final, "\">\n  ";
-		
-		my $rect_height = 0;
-		if ($map_as_physical) {
-		    $rect_height = $max_locus_site{$chrnum};
-		    #$rect_height = ((2 * $shify) + (($max{$chrnum} / $maxmax) * $scale));
-		} else {
-		    $rect_height = $max_locus_site{$chrnum};
-		    #$rect_height = ((2 * $shify) + ($max{$chrnum} * $scale));
-		}
-		
-		#### CLIPPING DOES NOT WORK PROPERLY WITH MOZILLA FIREFOX
-		#push @final, "<rect x=\"" . $yshift . '" y="20" width="40" height="' . $rect_height . '" fill="url(#bgrad)"/>';
-		push @final, '  <path class="chromosome" d="M '
-                  . ($yshift + 2) . q{ } . $niidea
-                  . ' c 0 22.7 ' . $CHR_WIDTH . ' 22.7 ' . $CHR_WIDTH . ' 0 ' # lower bezier
-		  . ' v -' . $niidea_2
-                  . " c 0 -22.7 -" . $CHR_WIDTH . ' -22.7 -' . $CHR_WIDTH . " 0 " # upper bezier
-		  . " z\"/>\n  ";
-		
-		#print {*STDERR} $yshift . " - " . "0" . " - " . "40" . " - " . $rect_height . " - " . $laxtYlabels . "\n";
-		
-	    } # ' . ((2 * $shify) + ($max{$chrnum} * $scale)) . '
+	    push @final, '  <path class="chromosome" d="M '
+	      . $rect_start . q{ } . $rect_y_start
+	      . ' c 0 '.$bezier_height.' ' . $CHR_WIDTH . ' '.$bezier_height.' ' . $CHR_WIDTH . ' 0 ' # lower bezier
+	      . ' v -' . $rect_y_end #$niidea_2
+	      . " c 0 -".$bezier_height." -" . $CHR_WIDTH . ' -'.$bezier_height.' -' . $CHR_WIDTH . " 0 " # upper bezier
+	      . " z\"/>\n  ";
 	    
-            push @final, @locussite;
             push @final, '  </g>';
             push @final, @legend;
             push @final, ' </g>';
         }
 	### END OF CHROMOSOME LOOP
 	
-	if($laxtYlabels < ((2 * $shify) + ($maxmax * $scale)))
-	{
-	    if ($map_as_physical) {
-		$laxtYlabels = ((2 * $shify) + ($PHYS_MAP_SCALE * $scale))
-	    } else {
-		$laxtYlabels = ((2 * $shify) + ($maxmax * $scale))
-	    }
+	# maximum position for this karyotype
+	# to adjust the svg height
+	if ($maxlabel < $CHR_HEIGHT) {
+	    $maxlabel = $CHR_HEIGHT;
 	}
 	
-	my $svg_width = (($yshift + $chr_width));
-	my $svg_height = $maxlabel+40;#$font[3];
+	my $svg_width = $yshift + $chr_width;
+	my $svg_height = $maxlabel+60;#$font[3];
 	
-	#print {*STDERR} $maxmax . " - " . $laxtYlabels . " - " . $svg_height . "\n";
+        print {*STDOUT} "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n\
+	<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n";
 	
-        print {*STDOUT} "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n";
         print {*STDOUT} '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="', $svg_width, '" height="', $svg_height, "\">\n";
         print {*STDOUT} " <defs>\n";
-        if ($bar) { print {*STDOUT} join("\n", @clips), "\n"; }
-        print {*STDOUT} "  <style type=\"text/css\">\n   .text { font-size: ", $font[3], 'pt; fill: #000; font-family: ', $font[0], "; }\n   .line { stroke:#000; stroke-width:", '1', "; fill:none; }\n";
-        if ($bar) { print {*STDOUT} "   .whiteline { stroke:#999; stroke-width:1.5; fill:none; }\n   .locus { fill:url(#lograd); }\n   .chromosome { fill:url(#bgrad); }\n"; }
+	
+        print {*STDOUT} "  <style type=\"text/css\">\n   .text { font-size: ", $font[3], 'pt; fill: #000; font-family: ', $font[0], "; }\n   \
+	.line { stroke:#000; stroke-width:", '1', "; fill:none; }\n";
+        
+	print {*STDOUT} "   .whiteline { stroke:#999; stroke-width:1.5; fill:none; }\n   \
+		   .locus { fill:url(#lograd); }\n   \
+		   .chromosome { fill:url(#bgrad); }\n";
+	
         print {*STDOUT} "  </style>\n";
-
-        if ($bar)
-        {
-            print {*STDOUT}
-              "  <linearGradient id=\"bgrad\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"0%\">\n   <stop offset=\"0%\"   style=\"stop-color:#BBA\"/>\n   <stop offset=\"50%\"  style=\"stop-color:#FFE\"/>\n   <stop offset=\"100%\" style=\"stop-color:#BBA\"/>\n  </linearGradient>\n  <linearGradient id=\"lograd\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"0%\">\n   <stop offset=\"0%\"   style=\"stop-color:#000\"/>\n   <stop offset=\"50%\"  style=\"stop-color:#666\"/>\n   <stop offset=\"100%\" style=\"stop-color:#000\"/>\n  </linearGradient>\n";
-        }
+	
+	print {*STDOUT}
+	  "  <linearGradient id=\"bgrad\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"0%\">\n   \
+				<stop offset=\"0%\"   style=\"stop-color:#BBA\"/>\n   \
+				<stop offset=\"50%\"  style=\"stop-color:#FFE\"/>\n   \
+				<stop offset=\"100%\" style=\"stop-color:#BBA\"/>\n  \
+	    </linearGradient>\n  \
+	    <linearGradient id=\"lograd\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"0%\">\n   \
+				<stop offset=\"0%\"   style=\"stop-color:#000\"/>\n   \
+				<stop offset=\"50%\"  style=\"stop-color:#666\"/>\n   \
+				<stop offset=\"100%\" style=\"stop-color:#000\"/>\n  \
+	    </linearGradient>\n";
+	      
         print {*STDOUT} " </defs>\n";
         print {*STDOUT} join("\n", @final), "\n";
         print {*STDOUT} "</svg>\n";
     }
 } else {
-    print {*STDERR} "\n  ..:: SVG Genetic Map Drawer ::..\n  > Standalone program version $VERSION <\n\n  Usage: $0 [-options] --map=<map.csv>\n\n   Options\n     --chr <string>\n           Draw only the specified chromosome/linkage group.\n     --bar\n           Use a coloured visualisation with a bark bar at the marker position.\n     --plot\n           Rather than a list marker names, plots a circle. If the LOD-score is\n           provided a dark disk fill the circle proportionality to its value.\n     --var\n           If specified with --bar or --plot the size of the bar/circle is\n           proportional to the number of markers.\n     --square\n           Small squares are used rather than names (incompatible with --plot).\n     --pos\n           The marker positions are indicated on the left site of the chromosome.\n     --compact\n           A more compact/stylish chromosome is used (incompatible with --bar).\n     --karyotype=<karyotype.file>\n           Specify a karytype to scale the physical chromosme. Rather than using\n           genetic distances, expect nucleotide position in than map file.\n           FORMAT: \"chr - ID LABEL START END COMMENT\"\n     --scale= ]0,+oo[\n           Change the scale of the figure (default x10).\n     --verbose\n           Become chatty.\n\n";
+    print {*STDERR} "\n  ..:: SVG Genetic Map Drawer ::..\n  > Standalone program version $VERSION <\n\n  \
+    Usage: $0 [-options] --map=<map.csv>\n\n   Options\n     --chr <string>\n           \
+    Draw only the specified chromosome/linkage group.\n     \
+    --bar\n           Use a coloured visualisation with a bark bar at the marker position.\n     \
+    --plot\n           Rather than a list marker names, plots a circle. \
+    If the LOD-score is\n provided a dark disk fill the circle proportionality to its value.\n     \
+    --var\n           If specified with --bar or --plot the size of the bar/circle is\n  proportional to the number of markers.\n     \
+    --square\n           Small squares are used rather than names (incompatible with --plot).\n     \
+    --pos\n           The marker positions are indicated on the left site of the chromosome.\n     \
+    --compact\n           A more compact/stylish chromosome is used (incompatible with --bar).\n     \
+    --karyotype=<karyotype.file>\n           Specify a karytype to scale the physical chromosme. \
+    Rather than using\n           genetic distances, expect nucleotide position in than map file.\n           \
+    FORMAT: \"chr - ID LABEL START END COMMENT\"\n     \
+    --scale= ]0,+oo[\n           Change the scale of the figure (default x10).\n     \
+    --verbose\n           Become chatty.\n\n";
 }
