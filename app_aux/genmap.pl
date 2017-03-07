@@ -77,6 +77,9 @@ Genetic-mapper - SVG Genetic Map Drawer
            Change the scale of the figure (default x10).
      --verbose
            Become chatty.
+     --chrom_order
+	   A file with chromosome name and chromosome order, for those cases in which
+	   the chromosomes in "--map" are not strictly numeric or sorted as if they are.
 
   # stylish
   ./genetic_mapper.pl --var --compact --plot --map=map.csv > lg13.svg
@@ -139,8 +142,9 @@ use Getopt::Long;
 our ($VERSION) = 0.5;
 
 #----------------------------------------------------------
-my ($verbose, $shify, $bar, $var, $pflag, $scale, $font, $karyotype, $map, $chr, $map_as_physical, $pos_position) = (0, 30, 0, 0, 10, 0, 0, 0, 2);
+my ($verbose, $shify, $bar, $var, $pflag, $scale, $font, $karyotype, $map, $chrom_order, $chr, $map_as_physical, $pos_position) = (0, 30, 0, 0, 10, 0, 0, 0, 0, 2);
 GetOptions('m|map=s' => \$map,
+	   'o|chrom-order=s' => \$chrom_order,
 	   'scale:f' => \$scale,
 	   'pos_position:f' => \$pos_position,
 	   'map_as_physical!' => \$map_as_physical,
@@ -164,7 +168,7 @@ my $ANCHORCOLOR = '#000000';
 my $RESTCOLOR   = '#FF0000';
 my $div = 1;
 
-my $PHYS_MAP_SCALE = 150;
+my $PHYS_MAP_SCALE = 30;
 
 my $GEN_MAP_SEP = 120; # Initial separator for genetic maps
 my $GEN_MAP_CHR_WIDTH = 240; # Fixed width for every chromosome in genetic maps
@@ -175,12 +179,28 @@ my $CHR_WIDTH = 40; # NOTE: this is not a parameter that adapts the whole painti
 # of chromosomes. It is only the background of the chromosome. Ticks for markers
 # and other features wont adapt to this variable
 
+my (%chrom_conf);
+
+print STDERR "Parsing map chromosomes configuration\n";
+
+if (defined $chrom_order && -r $chrom_order && (open my $IN, '<', $chrom_order))
+{
+#<$IN>;
+while (<$IN>){
+	print {*STDERR} $_;
+	chomp;
+	my @data = split m/\t/;
+	$chrom_conf{$data[0]} = $data[1];
+}
+close $IN;
+}
+
 if ($scale>0 && defined $map && -r $map && (open my $IN, '<', $map))
 {
     my (@clips, @final);
     my (%chromosomes, %max, %anchor, %annot, %HC, %div_dict, %num_features, %max_locus_site);
     my (%previous_locations,%anchor_locations,$new_location,$extra);
-    my ($maxmax,$maxlog,$chromosomeid,$location,$marker,$annot,$color,$maxlabel);
+    my ($maxmax,$maxlog,$chromosomeid,$location,$marker,$annot,$color,$maxlabel,$currchrom);
     
     # Variables used inside CHROMOSOME LOOP
     my ($niidea,$niidea_2,$chr_text_x,$chr_text_y);
@@ -198,16 +218,20 @@ if ($scale>0 && defined $map && -r $map && (open my $IN, '<', $map))
     while (<$IN>)
     {
         chomp;
+	next if (m/^#/);
+	next if (m/^>/);
 	#print {*STDERR} $_;
         my @data = split m/\t/;
 	
         if ((scalar @data > 2 && defined $data[1]) && (!defined $chr || $data[1] eq $chr))
         {
-	    $chromosomeid = int($data[1]); # int($data[1] * 10) / 10;
+	    $currchrom = $data[1];
+	    $chromosomeid = int($chrom_conf{$currchrom});
+	    #$chromosomeid = int($data[1]); # int($data[1] * 10) / 10;
 	    if ($map_as_physical) {
 		$location = int($data[$pos_position]); # int($data[$pos_position] * 1000);
 	    } else {
-		$location = int($data[$pos_position] * 100) / 100; # int($data[$pos_position] * 1000);
+		$location = int($data[$pos_position]); # * 100) / 100; # int($data[$pos_position] * 1000);
 	    }
 	    
 	    $marker = $data[0];
@@ -251,6 +275,7 @@ if ($scale>0 && defined $map && -r $map && (open my $IN, '<', $map))
 	    } else {
 		$num_features{$chromosomeid} += 1;
 	    }
+
         }
     }
     close $IN;
@@ -270,6 +295,10 @@ if ($scale>0 && defined $map && -r $map && (open my $IN, '<', $map))
         my $i = 0;
         foreach my $chrnum (sort { $a <=> $b } keys %chromosomes)
         {
+	    my %rhash = reverse %chrom_conf;
+	    my $chromname = $rhash{$chrnum};
+	    #my $chromname = $chrom_conf{$chrnum};
+	    
             $yshift += (($pflag ? $sep : 0) + $chr_width) if ($i++ > 0); # x position for current chromosome
 	    
             print {*STDERR} '***** Linkage Group ', $chrnum, " *****\n" if ($verbose);
@@ -284,12 +313,13 @@ if ($scale>0 && defined $map && -r $map && (open my $IN, '<', $map))
 		    $locus2 = ($locus / $maxmax);
 		    #print {*STDERR} "Locus " . $locus . " - " . $locus2 . "\n";
 		} else {
-		    $locus2 = $locus;
+		    $locus2 = $locus; #($locus / $maxmax);
 		}
 		
                 print {*STDERR} $locus2, "\t", $chromosomes{$chrnum}{$locus}[0], "\t", (defined $chromosomes{$chrnum}{$locus}[2] ? $chromosomes{$chrnum}{$locus}[2] : q{}), "\n" if ($verbose);
                 $size = 5 + ($var ? ($chromosomes{$chrnum}{$locus}[1] * 0.05 * $scale) : 0);
                 $position = ($locus2 >= ($plast + ($font[2] / $scale)) ? $locus2 : $plast + ($font[2] / $scale));
+		#$position = $position * $scale;
                 $shpos = ($position - $locus2) * $scale;
 		
                 if ($bar)
@@ -314,7 +344,7 @@ if ($scale>0 && defined $map && -r $map && (open my $IN, '<', $map))
 		    
 		    $label = "";
 		    if ($map_as_physical) {
-			$label = $locus;
+			$label = sprintf "%.0f", $locus;
 		    } else {
 			$label = sprintf "%.2f", $locus;
 		    }
@@ -374,7 +404,7 @@ if ($scale>0 && defined $map && -r $map && (open my $IN, '<', $map))
 	    
 	    $chr_text_x = ($yshift + 22);
 	    $chr_text_y = ((($shify + ((3 * $font[3]) / 2)) / 2) - $font[1]);
-            push @final, '  <text class="text" style="font-size:' . ((3 * $font[3]) / 2) . 'pt;" text-anchor="middle" x="' . $chr_text_x . '" y="' . $chr_text_y . '">' . $chrnum . '</text>';
+            push @final, '  <text class="text" style="font-size:' . ((3 * $font[3]) / 2) . 'pt;" text-anchor="middle" x="' . $chr_text_x . '" y="' . $chr_text_y . '">' . $chromname . '</text>';
             if ($bar) {
 		push @final, '   <g id="locii_' . $chrnum . '"';
 		#### CLIPPING DOES NOT WORK PROPERLY WITH MOZILLA FIREFOX
