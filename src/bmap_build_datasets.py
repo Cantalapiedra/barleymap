@@ -104,26 +104,26 @@ def _create_dir(dataset_path):
     
     return
 
-def __map_file_to_dataset_file(map_reader, map_file, dataset_file, verbose = False):
-    
-    mapping_results = map_reader.read_as_mapping_results(map_file)
-    
-    sys.stderr.write("Mapped results "+str(len(mapping_results))+"\n")
-    
-    map_output = open(dataset_file, 'w')
-    try:
-        
-        outputPrinter = OutputFacade.get_expanded_printer(map_output, verbose = verbose,
-                                                          beauty_nums = False, show_headers = True)
-        
-        outputPrinter.print_map(mapping_results, map_config, multiple_param = True)
-        
-    except Exception as e:
-        raise e
-    finally:
-        map_output.close()
-    
-    return
+#def __map_file_to_dataset_file(map_reader, map_file, dataset_file, verbose = False):
+#    
+#    mapping_results = map_reader.read_as_mapping_results(map_file)
+#    
+#    sys.stderr.write("Mapped results "+str(len(mapping_results))+"\n")
+#    
+#    map_output = open(dataset_file, 'w')
+#    try:
+#        
+#        outputPrinter = OutputFacade.get_expanded_printer(map_output, verbose = verbose,
+#                                                          beauty_nums = False, show_headers = True)
+#        
+#        outputPrinter.print_map(mapping_results, map_config, multiple_param = True)
+#        
+#    except Exception as e:
+#        raise e
+#    finally:
+#        map_output.close()
+#    
+#    return
 
 ##########################
 
@@ -175,6 +175,10 @@ try:
     for dataset_id in datasets_list: #enumerate(datasets_names.split(",")):
         
         dataset_config = datasets_config.get_dataset_config(dataset_id)
+        
+        # If the dataset name startswith ">" in the config file, will be ignored
+        if dataset_config.get_ignore_build(): continue
+        
         dataset_name = dataset_config.get_dataset_name()
         dataset_type = dataset_config.get_dataset_type()
         dataset_file_path = dataset_config.get_file_path()
@@ -370,61 +374,61 @@ try:
             sys.stdout.write(_SCRIPT+": dataset "+dataset_name+" with id "+dataset_id+" processed.\n")
         
         ### 4) Map files
-        elif dataset_file_type == DatasetsConfig.FILE_TYPE_MAP:
-            
-            # align to all the maps
-            if (len(dataset_db_list)==1) and (dataset_db_list[0] == DatasetsConfig.DATABASES_ANY):
-                
-                raise m2pException("Map files have to be associated to a single database in datasets configuration.")
-                
-            # align to maps which are associated to databases also associated to this dataset
-            else:
-                ### Create the new directory
-                _create_dir(dataset_path)
-                
-                maps_conf_file = __app_path+ConfigBase.MAPS_CONF
-                maps_config = MapsConfig(maps_conf_file, verbose = verbose_param)
-                
-                maps_path = paths_config.get_maps_path()
-                
-                for map_id in maps_config.get_maps():
-                    
-                    map_config = maps_config.get_map_config(map_id)
-                    map_db_list = map_config.get_db_list()
-                    
-                    map_reader = MapReader(maps_path, map_config, verbose_param)
-                    
-                    common_dbs = filter(lambda x: x in dataset_db_list, map_db_list)
-                    # refactor to: set(map_db_lis).intersection(dataset_db_list)
-                    
-                    if len(common_dbs)>0:
-                        
-                        map_name = map_config.get_name()
-                        map_dir = map_config.get_map_dir()
-                        
-                        for db_id in dataset_db_list:
-                            
-                            # output  file
-                            dataset_mapping_path = dataset_path+db_id+"."+map_dir#dataset_id+"."+map_dir
-                            
-                            if os.path.exists(dataset_mapping_path) and not os.path.islink(dataset_mapping_path):
-                                sys.stdout.write("\t\tPath "+dataset_mapping_path+" already exists and it will be skipeed.\n"+\
-                                                 "\t\tPlease, remove before re-building the dataset data.\n\n")
-                                continue
-                            
-                            # input file
-                            map_file_path = maps_path+"/"+map_dir+"/"+map_dir+"."+db_id
-                            #features = parse_map_file(map_file_path, db_id) # barleymapcore.utils
-                            
-                            sys.stderr.write("\tMap: "+map_name+"\n")
-                            sys.stderr.write("\t\tinput file "+map_file_path+"\n")
-                            sys.stderr.write("\t\toutput file "+dataset_mapping_path+"\n")
-                            
-                            __map_file_to_dataset_file(map_reader, map_file_path, dataset_mapping_path, verbose_param)
-                            
-                            #__features_to_map_file(features, maps_path, map_config, dataset_mapping_path, verbose_param)
-            
-            sys.stdout.write(_SCRIPT+": dataset "+dataset_name+" with id "+dataset_id+" processed.\n")
+        #elif dataset_file_type == DatasetsConfig.FILE_TYPE_MAP:
+        #    
+        #    # align to all the maps
+        #    if (len(dataset_db_list)==1) and (dataset_db_list[0] == DatasetsConfig.DATABASES_ANY):
+        #        
+        #        raise m2pException("Map files have to be associated to a single database in datasets configuration.")
+        #        
+        #    # align to maps which are associated to databases also associated to this dataset
+        #    else:
+        #        ### Create the new directory
+        #        _create_dir(dataset_path)
+        #        
+        #        maps_conf_file = __app_path+ConfigBase.MAPS_CONF
+        #        maps_config = MapsConfig(maps_conf_file, verbose = verbose_param)
+        #        
+        #        maps_path = paths_config.get_maps_path()
+        #        
+        #        for map_id in maps_config.get_maps():
+        #            
+        #            map_config = maps_config.get_map_config(map_id)
+        #            map_db_list = map_config.get_db_list()
+        #            
+        #            map_reader = MapReader(maps_path, map_config, verbose_param)
+        #            
+        #            common_dbs = filter(lambda x: x in dataset_db_list, map_db_list)
+        #            # refactor to: set(map_db_lis).intersection(dataset_db_list)
+        #            
+        #            if len(common_dbs)>0:
+        #                
+        #                map_name = map_config.get_name()
+        #                map_dir = map_config.get_map_dir()
+        #                
+        #                for db_id in dataset_db_list:
+        #                    
+        #                    # output  file
+        #                    dataset_mapping_path = dataset_path+db_id+"."+map_dir#dataset_id+"."+map_dir
+        #                    
+        #                    if os.path.exists(dataset_mapping_path) and not os.path.islink(dataset_mapping_path):
+        #                        sys.stdout.write("\t\tPath "+dataset_mapping_path+" already exists and it will be skipeed.\n"+\
+        #                                         "\t\tPlease, remove before re-building the dataset data.\n\n")
+        #                        continue
+        #                    
+        #                    # input file
+        #                    map_file_path = maps_path+"/"+map_dir+"/"+map_dir+"."+db_id
+        #                    #features = parse_map_file(map_file_path, db_id) # barleymapcore.utils
+        #                    
+        #                    sys.stderr.write("\tMap: "+map_name+"\n")
+        #                    sys.stderr.write("\t\tinput file "+map_file_path+"\n")
+        #                    sys.stderr.write("\t\toutput file "+dataset_mapping_path+"\n")
+        #                    
+        #                    __map_file_to_dataset_file(map_reader, map_file_path, dataset_mapping_path, verbose_param)
+        #                    
+        #                    #__features_to_map_file(features, maps_path, map_config, dataset_mapping_path, verbose_param)
+        #    
+        #    sys.stdout.write(_SCRIPT+": dataset "+dataset_name+" with id "+dataset_id+" processed.\n")
             
         ### 5) Others
         else:
