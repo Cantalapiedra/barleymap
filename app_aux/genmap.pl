@@ -99,6 +99,8 @@ my $div = 1;
 
 my $PHYS_MAP_SCALE = 30;
 
+my $MAX_PER_CHR = 30; # Maximum number of markers in chromosome to paint the text and all the lines
+
 my $GEN_MAP_SEP = 120; # Initial separator for genetic maps
 my $GEN_MAP_CHR_WIDTH = 200; # Fixed width for every chromosome in genetic maps
 my $PHYS_MAP_SEP = 120; # Initial separator for physical maps
@@ -154,6 +156,8 @@ if (defined $chrom_order && -r $chrom_order && (open my $IN, '<', $chrom_order))
 	    $chrom_conf{$data[0]}{"min"} = 1;
 	}
 	
+	$chrom_conf{$data[0]}{"num"} = 0; # num of markers on this chromosome
+	
 	$rev_chrom_conf{$data[1]}{"name"} = $data[0];
 	
 	if ($finemapping){
@@ -163,6 +167,8 @@ if (defined $chrom_order && -r $chrom_order && (open my $IN, '<', $chrom_order))
 	    $rev_chrom_conf{$data[1]}{"max"} = $data[$chrommax]; # as defined in the chromosomes file
 	    $rev_chrom_conf{$data[1]}{"min"} = 1; # as defined in the chromosomes file
 	}
+	
+	$rev_chrom_conf{$data[1]}{"num"} = 0; # num of markers on this chromosome
 	
 	# Maximum of all chromosomes
 	if ($finemapping) {
@@ -211,6 +217,9 @@ if (defined $map && -r $map && (open my $IN, '<', $map))
 	    $chromosomeid = int($chrom_conf{$currchrom}{"order"});
 	    
 	    $location = int($data[$pos_position]); # int($data[$pos_position] * 1000);
+	    
+	    $chrom_conf{$currchrom}{"num"} = $chrom_conf{$currchrom}{"num"} + 1;
+	    $rev_chrom_conf{$chromosomeid}{"num"} = $rev_chrom_conf{$chromosomeid}{"num"} + 1;
 	    
 	    $marker = $data[0];
 	    
@@ -283,6 +292,7 @@ if (defined $map && -r $map && (open my $IN, '<', $map))
 	    my $chromname = $rev_chrom_conf{$chrnum}{"name"};
 	    my $chrom_max = $rev_chrom_conf{$chrnum}{"max"};
 	    my $chrom_min = $rev_chrom_conf{$chrnum}{"min"};
+	    my $chrom_num = $rev_chrom_conf{$chrnum}{"num"};
 	    
 	    print {*STDERR} "Chrom: ".$chromname." ".$chrnum." ".$chrom_max." ".$chrom_min." ".$maxmax."\n";
 	    
@@ -343,7 +353,9 @@ if (defined $map && -r $map && (open my $IN, '<', $map))
 		    $label = sprintf "%.2f", $locus;
 		}
 		
-		push @legend, '  <text class="text" text-anchor="end" x="' . $x_lab . '" y="' . $legend_y . '">' . $label . '</text>';
+		if ($MAX_PER_CHR >= $chrom_num) {
+		    push @legend, '  <text class="text" text-anchor="end" x="' . $x_lab . '" y="' . $legend_y . '">' . $label . '</text>';
+		}
 		
 		### Plot the paths which connect the labels and the marker ticks on the chromosomes
 		###
@@ -351,10 +363,15 @@ if (defined $map && -r $map && (open my $IN, '<', $map))
 		my $tick = 6;
 		my $leng = $chr_text_x - ($CHR_WIDTH / 2) - ($x_lab + $tick); #45;
 		
-		push @legend, '  <path class="line" d="M'
-		. $x_lab . q{ } . $y_pos
-		. 'h'.$tick.' l'.$leng.' -' . ($shpos) . ' l0 0'
-		. 'h' . $CHR_WIDTH . ' l'.$leng.' ' . ($shpos) . ' l0 0 h'.$tick.'"/>';
+		if ($MAX_PER_CHR >= $chrom_num) {
+		    push @legend, '  <path class="line" d="M'
+		    . $x_lab . q{ } . $y_pos
+		    . 'h'.$tick.' l'.$leng.' -' . ($shpos) . ' l0 0'
+		    . 'h' . $CHR_WIDTH . ' l'.$leng.' ' . ($shpos) . ' l0 0 h'.$tick.'"/>';
+		    
+		} else {
+		    push @legend, '  <path class="line" d="M'. ($x_lab+$tick+$leng) . q{ } . ($y_pos-$shpos) . 'h' . $CHR_WIDTH . '"/>';
+		}
 		
 		# if input are simply markers make sure they are treated as anchors
 		if(!keys(%anchor)) {
@@ -368,15 +385,21 @@ if (defined $map && -r $map && (open my $IN, '<', $map))
 		###
 		$legend_x = $x_lab + $tick + $leng + $CHR_WIDTH + $leng + $tick + 8; # + 105;
 		
-		push @legend, '  <text class="text" style="fill:'.$color.'" x="' . $legend_x . '" y="' . $legend_y . '">' .
-				$chromosomes{$chrnum}{$locus}[0] .
-				'</text>';
+		if ($MAX_PER_CHR >= $chrom_num) {
+		    push @legend, '  <text class="text" style="fill:'.$color.'" x="' . $legend_x . '" y="' . $legend_y . '">' .
+				    $chromosomes{$chrnum}{$locus}[0] .
+				    '</text>';
+		}
 		
 		###
 		
                 $plast = $position; # previous label position (to shift the next one if necessary)
 		
-		$maxlabel = $y_pos if (!defined $maxlabel || $maxlabel < $y_pos);
+		if ($MAX_PER_CHR >= $chrom_num) {
+		    $maxlabel = $y_pos if (!defined $maxlabel || $maxlabel < $y_pos);
+		} else {
+		    $maxlabel = ($y_pos-$shpos) if (!defined $maxlabel || $maxlabel < ($y_pos-$shpos));
+		}
             }
 	    # END OF LOCI LOOP
 	    
