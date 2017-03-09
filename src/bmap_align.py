@@ -25,6 +25,7 @@ from barleymapcore.annotators.GenesAnnotator import AnnotatorsFactory
 from barleymapcore.maps.MapMarkers import MapMarkers
 from barleymapcore.m2p_exception import m2pException
 from barleymapcore.output.OutputFacade import OutputFacade
+from barleymapcore.maps.enrichment.MapEnricher import SHOW_ON_INTERVALS, SHOW_ON_MARKERS
 
 DATABASES_CONF = ConfigBase.DATABASES_CONF
 MAPS_CONF = ConfigBase.MAPS_CONF
@@ -116,6 +117,9 @@ try:
     optParser.add_option('-m', '--markers', action='store_true', dest='show_markers',
                          help='Additional markers at positions of queries will be shown. Ignored if -g.')
     
+    optParser.add_option('-o', '--show-on-markers', action='store_true', dest='show_on_markers',
+                         help='Additional features will shown for each query. By default, they are shown by interval of markers')
+    
     optParser.add_option('-e', '--extend', action='store', dest='extend_window',
                          help='Centimorgans or basepairs (depending on sort) to extend the search of -g or -m.'+\
                          '(default '+str(DEFAULT_EXTEND_WINDOW)+')')
@@ -196,6 +200,9 @@ try:
     ## Show markers
     show_markers = options.show_markers if options.show_markers else False
     
+    ## Show how (on intervals, on markers)
+    show_how = SHOW_ON_MARKERS if options.show_on_markers else SHOW_ON_INTERVALS
+    
     ## Annotation
     load_annot = True#options.load_annot
     
@@ -259,10 +266,11 @@ try:
     # Datasets config
     datasets_conf_file = __app_path+DATASETS_CONF
     datasets_config = DatasetsConfig(datasets_conf_file)
+    datasets_ids = datasets_config.get_datasets().keys()
     
     # Load DatasetsFacade
     datasets_path = paths_config.get_datasets_path() #__app_path+config_path_dict["datasets_path"]
-    datasets_facade = DatasetsFacade(datasets_config, datasets_path, verbose = verbose_param)
+    datasets_facade = DatasetsFacade(datasets_config, datasets_path, maps_path, verbose = verbose_param)
     
     # GenesAnnotator
     if show_genes and load_annot:
@@ -300,8 +308,8 @@ try:
                                     threshold_id, threshold_cov, n_threads,
                                     best_score, sort_by, multiple_param, tmp_files_dir)
         
-        mapMarkers.enrichment(annotator, show_markers, show_genes, show_anchored,
-                              datasets_facade, extend_window, collapsed_view, constrain_fine_mapping = False)
+        mapMarkers.enrichment(annotator, show_markers, show_genes, show_anchored, show_how,
+                              datasets_facade, datasets_ids, extend_window, collapsed_view, constrain_fine_mapping = False)
         mapping_results = mapMarkers.get_mapping_results()
         
         ############################################################ OUTPUT
