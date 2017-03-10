@@ -117,6 +117,9 @@ try:
     optParser.add_option('-m', '--markers', action='store_true', dest='show_markers',
                          help='Additional markers at positions of queries will be shown. Ignored if -g.')
     
+    optParser.add_option('-d', '--show-all-features', action='store_true', dest='show_all',
+                         help='All features will be used to enrich a map. By default, only main datasets of each map are used to enrich.')
+    
     optParser.add_option('-o', '--show-on-markers', action='store_true', dest='show_on_markers',
                          help='Additional features will shown for each query. By default, they are shown by interval of markers')
     
@@ -199,6 +202,9 @@ try:
     
     ## Show markers
     show_markers = options.show_markers if options.show_markers else False
+    
+    ## Show all
+    show_all = True if options.show_all else False
     
     ## Show how (on intervals, on markers)
     show_how = SHOW_ON_MARKERS if options.show_on_markers else SHOW_ON_INTERVALS
@@ -307,6 +313,9 @@ try:
         mapMarkers.perform_mappings(query_fasta_path, databases_ids, databases_config, aligner_list,
                                     threshold_id, threshold_cov, n_threads,
                                     best_score, sort_by, multiple_param, tmp_files_dir)
+        
+        if not show_all:
+            datasets_ids = map_config.get_main_datasets()
         
         mapMarkers.enrichment(annotator, show_markers, show_genes, show_anchored, show_how,
                               datasets_facade, datasets_ids, extend_window, collapsed_view, constrain_fine_mapping = False)
