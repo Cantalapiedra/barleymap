@@ -244,11 +244,13 @@ try:
         mapMarkers.retrieve_mappings(query_ids_path, datasets_ids,
                                     sort_by, multiple_param)
         
-        if not show_all:
-            datasets_ids = map_config.get_main_datasets()
+        if show_all:
+            datasets_enrichment = datasets_ids
+        else:
+            datasets_enrichment = map_config.get_main_datasets()
         
         mapMarkers.enrichment(annotator, show_markers, show_genes, show_anchored, show_how,
-                              datasets_facade, datasets_ids, extend_window, collapsed_view, constrain_fine_mapping = False)
+                              datasets_facade, datasets_enrichment, extend_window, collapsed_view, constrain_fine_mapping = False)
         mapping_results = mapMarkers.get_mapping_results()
         
         ############################################################ OUTPUT
