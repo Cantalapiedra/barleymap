@@ -272,7 +272,7 @@ try:
     # Datasets config
     datasets_conf_file = __app_path+DATASETS_CONF
     datasets_config = DatasetsConfig(datasets_conf_file)
-    datasets_ids = datasets_config.get_datasets().keys()
+    datasets_ids = datasets_config.get_datasets_list() #datasets_config.get_datasets().keys()
     
     # Load DatasetsFacade
     datasets_path = paths_config.get_datasets_path() #__app_path+config_path_dict["datasets_path"]
