@@ -1,0 +1,38 @@
+#################################
+# maps.conf is part of Barleymap web app.
+# Copyright (C) 2017  Carlos P Cantalapiedra.
+# (terms of use can be found within the distributed LICENSE file).
+#################################
+# This file is used to configure the maps which can be used as reference
+# to align sequences or find identifiers.
+#
+# A map usually represents a physical map, either with genetic positions or basepairs positions, or both.
+# In barleymap, a map always have sequences associated to it, and these are from the databases
+# configured in databases.conf.
+#
+# The fields to be configured in this file are:
+# name: to be used in --maps parameters.
+# id: a unique identifier of the map.
+# has_cm: cm_true if the map has genetic positions, cm_false otherwise
+# has_bp: bp_true if the map has basepairs positions, bp_false otherwise
+# default_pos_type: if the map has both cm and bp, which one to use by default as main one (for sorting, etc.)
+# map_type: physical if the map is a sequenced genome, so that map positions will be the same as alignment positions.
+# 	    anchored if the map is a genetic/physical map with sequences associated to it by position, so that a translation
+#			has to be performed from alignment positions, to map positions.
+# search_type: how to perform the search of queries when more than one sequence database is associated to this map.
+#		- greedy: search all the queries in all the databases.
+# 		- hierarchical: search in the next database only those queries lacking a valid alignment to the previous database.
+#		- exhaustive: search in the next database only those queries lacking a valid map position.
+# db_list: list of sequence databases associated to this map.
+# folder: the name of the folder within maps path (from paths.conf) in which data for this map is stored (mainly position of anchored features).
+# 		Usually, this folder name is configured as the map identifier, since it has to be unique also.
+# main_datasets: main datasets (see datasets.conf) for this map. Main datasets are used by default to enrich the corresponding map,
+#			since there is an option to use only these main datasets or all the barleymap datasets for enrichment.
+#
+
+# name id has_cm has_bp default_pos_type map_type search_type db_list folder_name main_datasets
+MapName mapID cm_false bp_true bp physical greedy db_genome mapID_folder dataset1,dataset2,dataset3
+Map2 map2 cm_true bp_false cm genetic hierarchical db_anchored1 map2_dir dataset4
+PhysGenetMap physgenetmap cm_true bp_true cm genetic exhaustive db_anchored1,db_anchored2,db_anchored3 physgenetmap_path dataset3,dataset5
+
+## END

@@ -1,0 +1,31 @@
+#################################
+# databases.conf is part of Barleymap web app.
+# Copyright (C) 2017  Carlos P Cantalapiedra.
+# (terms of use can be found within the distributed LICENSE file).
+#################################
+## In this file, the blastn, gmap and hsblastn databases
+## to be used by barleymap can be configured.
+## Therefore, these databases will be available to
+## be assigned to maps (in maps.conf).
+##
+## Note that barleymap can still be used with 
+## databases which have not been included in this file,
+## but which are located in the corresponding path of
+## databases indicated in paths.conf. However, these
+## non-configured databases could not be associated to maps
+## nor referenced by name, but they can be used only 
+## with bmap_align_to_db script (--databases-ids and --ref-type parameters)
+#
+# The field to be configured are:
+# name: to be displayed and used in the --databases parameter
+# id: unique identifier of the databases, to be used in maps.conf and --databases-ids parameter.
+#	This identifier is also the name of the database created for blastn, gmap or hsblastn.
+#	e.g.: gmap -D path_in_paths.conf -d db_id_in_databases.conf fasta
+#	e.g.: blastn -query fasta -db path_in_paths.conf/db_in_databases.conf
+# type: either std (will use gmap when --aligner=gmap) or big (will use gmapl when --aligner=gmap)
+#
+
+# name unique_id type
+SpeciesAGenome speciesA std
+SpeciesBGenome speciesB std
+PolyploidGenome polyploid big

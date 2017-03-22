@@ -16,16 +16,20 @@
 ## and BLASTN are going to be used.
 ## In principle, genmap_path and split_blast_path should be left unchanged.
 ##
+
 # App absolute path
 app_path PATH_TO_BARLEYMAP_DIR
+
 # Relative paths to auxiliary apps
 genmap_path app_aux/
 split_blast_path app_aux/
+
 # Absolute paths to temporary and datasets folders
 tmp_files_path PATH_TO_BARLEYMAP_DIR/tmp_files
 datasets_path PATH_TO_BARLEYMAP_DIR/datasets/
 annot_path PATH_TO_BARLEYMAP_DIR/datasets_annotation/
 maps_path PATH_TO_BARLEYMAP_DIR/maps/
+
 ########### Aligners
 # Blast
 blastn_app_path PATH_TO_NCBI_BLAST/bin/blastn
@@ -37,7 +41,9 @@ gmapl_app_path PATH_TO_GMAP/bin/gmapl
 # HS-Blastn
 hsblastn_app_path PATH_TO_HSBLASTN/hs-blastn-src/hs-blastn
 hsblastn_dbs_path PATH_TO_HSBLASTN_DATABASES
+
 ########### Other
 citation Cantalapiedra_CP,_Boudiar_R,_Casas_AM,_Igartua_E,_Contreras-Moreira_B._BARLEYMAP:_physical_and_genetic_mapping_of_nucleotide_sequences_and_annotation_of_surrounding_loci_in_barley._Mol_Breeding_(2015)_35:13_DOI_10.1007/s11032-015-0253-1
 stdalone_app http://eead.csic.es/compbio/soft/barleymap/
-## END (leave no space nor weird symbols below this)
+
+## END

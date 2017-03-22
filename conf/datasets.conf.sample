@@ -1,0 +1,19 @@
+#################################
+# datasets.conf is part of Barleymap web app.
+# Copyright (C) 2017  Carlos P Cantalapiedra.
+# (terms of use can be found within the distributed LICENSE file).
+#################################
+# IMPORTANT NOTE: It is highly recommended to leave largest datasets to the end of the file
+# since the search is done according to the ordering in this file and therefore
+# slow down due to searching big datasets will be avoided in most cases, those in which all the
+# queries have been found before need to parse largest datasets
+################################################# GeneticMarkers ######################################################
+#################################################################################################################
+
+#name unique_id type filename file_type db_list synonyms_file records_prefix
+DATASET1 dataset1 genetic_marker dataset1.fasta fna ANY /home/user/dataset1.syns no
+DATASET2 dataset2 gene dataset2.gtf gtf DB1,DB2 no DAT2_
+>DATASET3 dataset3 anchored dataset3.fasta fna ANY no no
+>DATASET4 dataset4 map "maps_path" map DB3 no DAT3_
+
+# END
