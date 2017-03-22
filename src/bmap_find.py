@@ -192,7 +192,9 @@ try:
     else:
         maps_ids = maps_config.get_maps().keys()
         maps_names = ",".join(maps_config.get_maps_names(maps_ids))
-    #(maps_names, maps_ids) = load_data(maps_conf_file, users_list = options.maps_param, verbose = verbose_param)
+    
+    if len(maps_ids)<=0 or len(maps_names)<=0:
+        raise Exception("No valid maps were found. Please, check your --maps parameter or your conf/maps.conf file.")
     
     maps_path = paths_config.get_maps_path() #__app_path+config_path_dict["maps_path"]
     
@@ -270,9 +272,11 @@ try:
 except m2pException as m2pe:
     sys.stderr.write("\nThere was an error.\n")
     sys.stderr.write(m2pe.msg+"\n")
+    #traceback.print_exc(file=sys.stderr)
 except Exception as e:
-    traceback.print_exc(file=sys.stderr)
+    #traceback.print_exc(file=sys.stderr)
     sys.stderr.write("\nThere was an error.\n")
+    sys.stderr.write(str(e)+"\n")
     sys.stderr.write('If you can not solve it please contact compbio@eead.csic.es ('+\
                                    'laboratory of computational biology at EEAD).\n')
 finally:
