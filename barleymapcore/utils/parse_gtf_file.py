@@ -36,7 +36,8 @@ FILE_TYPE_GTF = "gtf"
 FILE_TYPE_GFF3 = "gff3"
 
 def parse_bed_file(bed_path, db_list):
-    features = {}
+    features = []
+    #features = {}
     
     sys.stderr.write("\t\t\tparse_bed_file: start reading "+bed_path+"\n")
     
@@ -46,11 +47,13 @@ def parse_bed_file(bed_path, db_list):
         bed_data = bed_line.strip().split()
         
         alignment_result = __bed_create_alignment_result(bed_data, db_list)
-        query_id = alignment_result.get_query_id()
+        #query_id = alignment_result.get_query_id()
         
-        features[query_id] = alignment_result
+        #features[query_id] = alignment_result
+        features.append(alignment_result)
     
-    return features.values()
+    #return features.values()
+    return features
 
 # Creates the AlignmentResult objects used in parse_gtf_file
 def __bed_create_alignment_result(bed_data, db_list):
