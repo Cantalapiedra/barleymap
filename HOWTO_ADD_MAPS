@@ -2,54 +2,99 @@ HOWTO_ADD_MAPS is part of Barleymap.
 Copyright (C)  2013-2014  Carlos P Cantalapiedra.
 (terms of use can be found within the distributed LICENSE file).
 
-# Carlos P Cantalapiedra 20131227 (updated 20140318)
-# HOWTO_ADD_MAPS in Barleymap standalone application
+# Created 20131227 (updated 20180111)
 
-# 1) Create a directory with MAP_ID under maps/ directory
-# Example:
-maps/newmap
+This document describes how to create and configure new maps, to be used by Barleymap.
+We will start by creating the configuration, to latter explain how to create the map files.
 
-# 2) Add the map data to the new directory.
-# Data must have target identifier and map position in three or four
-# fields (tab separated) depending if the map has centimorgan and/or
-# basepairs information.
-# The format would be:
-# identifier    chromosome    (centimorgan_position)    (basepairs_position)
-#
-# The name of the file must follow the pattern (without extension):
-MAP_ID.DATABASE_ID
+######### CONFIGURING A MAP
 
-# where MAP_ID is the name used in step 1)
-# and DATABASE_ID the one used in HOWTO_ADD_DATABASES
+To configure a map, the file conf/maps.conf must be edited. Such file contains one row for each map. Each row has several blank space-delimited fields.
 
-# Examples of files for 2 maps, one of them with data for 2 databases:
+name -> a name for the map.
 
-maps/newmap/newmap.newdb
-maps/anothermap/anothermap.newdb
-maps/anothermap/anothermap.anotherdb
+unique_id -> a unique identifier for the map. It must be different to all the other map unique_id fields.
+This unique_id must coincide with the prefix used in names of the folders and files of the map (see next section).
+The unique_id will be used in other configuration files to refer to the specific map.
 
-# 3) Add a line in conf/maps.conf, with six space-separated fields.
-#       The first field is the name that will be shown for that Map.
-#       The second field is the MAP_ID used in step 1)
-#       The third field indicates if centimorgan position is available (cm_true)
-#           or not (cm_false) for this map.
-#       The fourth field indicates if basepairs position is available (bp_true)
-#           or not (bp_false) for this map
-#       The fifth field can have "genetic" or "physical" values. The "physical" value
-#           should only be applied for maps with "bp_true". In this case, if "genetic"
-#           the map position shown will be that of the target of the alignment.
-#           If "physical", the map position shown will be the sum of the target of the
-#           alignment plus the local position of the alignment.
-#       The sixth field has a DATABASE_ID or a comma-separated list of DATABASE_IDs
-#           for which data is available for this map.
+has_cm -> whether the map includes cM positions. Values: cm_false, cm_true.
+has_bp -> whether the map includes bp positions. Values: bp_false, bp_true.
+default_pos_type -> whether the map positions will be reported by default in cM or in bp.
 
-#       Examples:
+map_type -> whether the map is a genome or a map with anchored sequences.
+Values:
+physical: the alignment position will be used as map position. This is the one used for standard genomes.
+anchored: the alignment position is used to anchor the query to a final map position. This is the one used for genetic maps with anchored sequences.
 
-My_New_Map newmap cm_false bp_true genetic newdb
-AnotherMap anothermap cm_true bp_false genetic newdb,anotherdb
-PhysicalMap physmap cm_true bp_true physical newdb,anotherdb,thirddb
+search_type -> this field configures how the algorithm searches in the databases associated to this map (see db_list below).
+Thus, it will be effect only when more than one database is associated to the map.
+Values:
+greedy: every query is searched in every database.
+hierarchical: once an alignment of a query is found, it is not searched further, even if it has no map position.
+exhaustive: once an map position of a query is found, it is not searched further.
 
-# 4) If correctly configured, the new maps should be listed under "MAPS" section in "Configured data"
-# when running bmaux_check_config auxiliar script.
+db_list -> a list of unique identifiers (unique_id, see HOWTO_ADD_DATABASES) of the databases associated to this map.
+When the user selects a map to perform the search, barleymap will check this database list to align the query against them.
+
+folder_name -> the actual folder where the files of this map are located, relative to the path indicated in the field maps_path of conf/paths.conf file.
+It is usually identical to the map unique_id.
+
+main_datasets -> a list of unique identifiers (unique_id, see HOWTO_ADD_DEATASETS) of datasets which are considered as "main" for this map.
+All the other datasets will be ignored (not reported in the output) when the "show only main" option is active.
+
+## As an example, the next is the configuration file currently used in the barleymap web application, with 3 maps.
+# The first, MorexGenome map, is a common genome, with a single database.
+# The next 2 are a genetic and a genetic/physical map, both with anchored sequences.
+The first one, POPSEQ, has a single database (morex_ass) associated to it, whereas IBSC_2012 has 5 databases.
+Only for IBSC_2012 there will be a difference when chossing a different search_type (greedy, hierarchical, exhaustive), since it is the only one with several databases.
+
+# name unique_id has_cm has_bp default_pos_type map_type search_type db_list folder_name main_datasets
+MorexGenome morex_genome cm_false bp_true bp physical greedy 150831_barley_pseudomolecules morex_genome ibsc2016_HC,ibsc2016_LC,illumina50k,morex_ass_bmap
+POPSEQ popseq cm_true bp_false cm anchored hierarchical morex_ass popseq ibsc2012_HC,ibsc2012_LC,illumina50k_bmap,morex_ass
+IBSC_2012 ibsc cm_true bp_true cm anchored exhaustive morex_ass,barke_ass,bowman_ass,sBAC,BES_2010_04_12 ibsc ibsc2012_HC,ibsc2012_LC,illumina50k_bmap,morex_ass
+
+######### CREATING A MAP
+
+Once that the map has been configurated, the actual map folder and files could be created.
+
+First, create a directory named with the unique_id field of the map, under the directory indicated by the maps_path of the conf/paths.conf file.
+For the example of the previous section, three folders should be created, one for each of the maps:
+
+morex_genome/
+popseq/
+ibsc/
+
+Then, for each map, we need to do the next steps within its directory.
+1) If the map is going to be used in the web application, a file with prefix equal to the unique_id field of the map and with suffix ".chrom" should be created.
+Such file is used to store the size of the chromosomes of the map, so that it can be plotted proportional to the others.
+
+2) If the map is physical (see the physical field in the previous section) no more actions are needed.
+If the map is anchored, a file for each database associated to this map must be created.
+The name of each file will have prefix equal to the unique_id of the map, a dot ".", and a suffix equal to the unique_id of the database.
+The file should contain the map position of each of the sequences of the database, and some additional fields.
+
+marker: name of the sequence.
+
+chr: chromosome in which the sequence is located.
+
+cM: only for maps with the has_cm field equal to cm_true. The cM position of the sequence.
+
+bp: only for maps with the has_bp field equal to bp_true. The bp position of the sequence.
+
+Any additional field will be ignored.
+
+As an example, the first 10 lines of the ibsc map in the current barleymap web application:
+
+>IBSC_2012
+#Marker	chr	cM	base_pairs
+morex_contig_50815	1	0	0
+morex_contig_49842	1	0	0
+morex_contig_1154643	1	0	251720
+morex_contig_225992	1	0	251720
+morex_contig_2551602	1	0	251720
+morex_contig_2554847	1	0	251720
+morex_contig_53659	1	0	251720
+morex_contig_1902662	1	0	251720
+... etc
 
 ##
