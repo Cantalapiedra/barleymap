@@ -135,6 +135,9 @@ try:
     optParser.add_option('--threads', action='store', dest='n_threads', type='string',
                     help='Number of threads to perform alignments (default '+str(DEFAULT_N_THREADS)+').')
     
+    optParser.add_option('--dataset', action='store', dest='dataset_param', type='string',
+                    help='A single dataset to process. By default all datasets are processed..')
+    
     optParser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='More information printed.')
     
     (options, arguments) = optParser.parse_args()
@@ -146,6 +149,10 @@ try:
     # Num threads
     if options.n_threads: n_threads = int(options.n_threads)
     else: n_threads = DEFAULT_N_THREADS
+    
+    # Dataset to process
+    if options.dataset_param: dataset_param = options.dataset_param
+    else: dataset_param = ""
     
     ## Read conf file
     app_abs_path = os.path.dirname(os.path.abspath(__file__))+"/"
@@ -180,6 +187,10 @@ try:
         if dataset_config.get_ignore_build(): continue
         
         dataset_name = dataset_config.get_dataset_name()
+        
+        if (dataset_name==dataset_param): print dataset_param
+        else: continue
+        
         dataset_type = dataset_config.get_dataset_type()
         dataset_file_path = dataset_config.get_file_path()
         dataset_file_type = dataset_config.get_file_type()
