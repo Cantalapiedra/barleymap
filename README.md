@@ -191,10 +191,10 @@ There are several steps to add a map to barleymap:
 - Choose an identifier to be used as unique ID for this map ("map_ID").
 - Create a folder "map_ID", under the path indicated by the "maps_path" entry in the "paths.conf" file
  (e.g. barleymap/maps/map_ID/).
-- For each database which will be included in such map, create a file with the name "map_ID.database_ID" and put it
+- If the map is of type "anchored" (see below), create a file with the name "map_ID.database_ID",
+ for each database which will be included in such map, and put it
 in the folder created for the map in the previous step (e.g. barleymap/maps/map_ID/map_ID.database_ID).
-Note that this step is needed only when the map is of type "anchored" and
-is not necessary for "physical" maps (e.g. a genome). See format of the map-database files below for details.
+See format of the map-database files below for details.
 - Create a file with the name "map_ID.chrom" and put it in the folder created for the map
 (e.g. barleymap/maps/map_ID/map_ID.chrom). See format of the "chrom" file below for details.
 - Create a row in the conf/maps.conf file, with 10 space-separated fields.
@@ -210,13 +210,41 @@ is not necessary for "physical" maps (e.g. a genome). See format of the map-data
     - An "anchored" map (e.g. a sequence-enriched genetic map) requires files for positions,
   since the positions from the databases, obtained through alignment (e.g. contig_1300 position 12430),
   need to be translated to map positions (e.g. chr1H position 44.1 cM).
-  - Search type: either "greedy", "hierarchical" or "exhaustive".
+  - Search type: it states which type of algorithm will be performed when searching sequences in this map.
+  Either "greedy", "hierarchical" or "exhaustive".
+    - The "greedy" algorithm searches all the queries in all the databases of the current map.
+    - The "hierarchical" algorithm keeps searching in further databases only those queries
+    which have not been aligned to a database yet.
+    - The "exhaustive" algorithm keeps searching in further database only those queries
+    which still lack map position, independently of whether have already been aligned or not.
+  - DB list: a comma-separated list of database IDs which are associated to this map. These are the databases which
+  will be used as sequence references when this map is queried.
+  - Folder: the folder name for this map, usually the same as the map ID.
+  - Main datasets: a comma-separated list of datasets IDs which are associated to this map. These datasets will be always
+  shown when looking for surrounding features, whereas other datasets will be shown only when explicitly requested.
 
 ##### Format of the map-database files
 
+A map-database file contain the map position of the sequences of a database.
+
+Rows starting with ">" or "#" will be ignored, so that it can be used for comments, map name or header fields.
+Data rows have 5 or 6 (depending whether the map has cM, bp or both types of position) tab-delimited fields:
+- Database entry: name of the chromosome, contig, etc. from the database.
+- chr: chromosome identifier, corresponding to the map position of this database entry.
+- cM, bp or both: 1 or 2 fields with numeric position within the chromosome.
+- Multiple positions: either "Yes" or "No", to indicate whether this database entry has more than one
+position in this map.
+- Other alignments: either "Yes" or "No", to indicate whether this database entry has more than one
+alignment in this map, independently of whether has more than one position or not.
+
 ##### Format of the "chrom" file
 
+A "chrom" file has the information about the name and size of the chromosomes of a map.
 
+Each row has 3 or 4 (depending whether the map has cM, bp or both types of position) tab-delimited fields:
+- Chromosome name: an arbitrary name for the chromosome, used for printing purposes.
+- Chromosome ID: a unique identifier for this chromosome in this map.
+- cM, bp or both: 1 or 2 fields with the maximum position of this chromosome (i.e. its length in cM or bp).
 
 Once that at least one database and one map have been correctly configured,
 the following tools can already be used:
