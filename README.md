@@ -155,6 +155,13 @@ PolyploidGenome polyploid big
 Note that the aligner to be used with each database is not specified.
 For a single barleymap database, you could actually have Blast, GMAP and HS-Blastn sequence databases.
 
+Note also that once at least one database has been correctly configured, it can be used to perform
+alignments with FASTA sequences with the "secondary" barleymap tool `bmap_align_to_db`.
+
+#### 3.2.3 Creating and configuring maps: the maps.conf file
+
+#### 3.2.4 Creating and configuring datasets: the datasets.conf file
+
 ## 3) Tools
 
 The main tools that can be used with Barleymap are located in the bin/ directory.
