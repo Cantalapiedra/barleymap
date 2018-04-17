@@ -24,7 +24,7 @@ There are three basic tasks which can be carried out with **barleymap**:
 whose positions have been pre-computed.
 - Inspect the features (markers, genes, etc) in the surroundings of a given map position.
 
-To do this, **barleymap works** with the following resources:
+To do this, **barleymap** works with the following resources:
 
 - Databases: FASTA sequences from sequence-enriched maps, genomes, or any other sequence reference.
 - Maps: tables with positions of every FASTA sequence from the databases.
