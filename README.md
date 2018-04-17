@@ -14,24 +14,14 @@ Copyright (C)  2013-2014  Carlos P Cantalapiedra.
  
 ## 1) Barleymap overview
 
-   Barleymap is a tool that allows to search the position of sequences
+   **Barleymap** is a tool which allows searching the position of sequences
    in sequence-enriched genetic/physical maps.
 
-   Although Barleymap is distributed with resources related to barley data,
-   the application can be used with data from other organisms, if similar
-   data is available and Barleymap is properly configured.
+   There are three basic tasks which can be carried out with **barleymap**:
 
-   There are two main commands to work with Barleymap:
-   barleymap_align_seqs and barleymap_find_markers.
-
-   #) The barleymap_align_seqs tool allows to search FASTA formatted
-   sequences by means of sequence alignments, performed
-   with Blast and/or GMAP, to different databases.
-
-   #) The barleymap_find_markers uses a list of identifiers as input, to retrieve the
-   targets associated to those identifiers, based on alignments performed previously
-   and stored as precalculated datasets. Therefore, barleymap_find_markers does not need
-   to perform any alignment; in other words, there is no need to use Blast or GMAP.
+   - Locate the position of FASTA formatted sequences through sequence alignment.
+   - Retrieve the position of common-use markers of known ID, whose positions have been pre-computed.
+   - Inspect the features in the surroundings of a given map position.
 
    Once Barleymap has obtained a list of targets, either from alignment to databases or
    from precalculated datasets, it will retrieve the position of such targets from
