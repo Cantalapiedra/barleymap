@@ -2,16 +2,17 @@ README is part of Barleymap.
 Copyright (C)  2013-2014  Carlos P Cantalapiedra.
 (terms of use can be found within the distributed LICENSE file).
 
+## Contents
 
- - 0: Barleymap overview
- - 1: Prerequisites
- - 2: Installation and configuration
- - 3: Tools
- - 4: Usage examples
- - 5: Default resources
- - 6: Customization
-#
-# 0) Barleymap overview
+ - 1: Barleymap overview
+ - 2: Prerequisites
+ - 3: Installation and configuration
+ - 4: Tools
+ - 5: Usage examples
+ - 6: Default resources
+ - 7: Customization
+ 
+## 1) Barleymap overview
 #
 #   Barleymap is a tool that allows to search the position of sequences
 #   in sequence-enriched genetic/physical maps.
