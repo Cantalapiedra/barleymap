@@ -65,9 +65,10 @@ To configure barleymap you will need to edit the following files within the barl
 - maps.conf
 - datasets.conf
 
-Note that barleymap is distributed with *.sample files which are examples of the previous configuration
-files. You could just use these as examples after creating your files, or remove the *.sample suffixes
-and use them as your configuration files.
+Note that barleymap is distributed with *.sample files, which are just examples of the previous configuration
+files. You could use them as examples after creating your own files with the filenames shown above,
+or you could remove the *.sample suffixes from the example files 
+and use them to create your own configuration files.
 
 Then, you should update "paths.conf" file with paths in your machine
 (especially those fields indicated with values in capitals). For example,
