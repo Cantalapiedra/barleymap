@@ -20,32 +20,15 @@ Copyright (C)  2013-2014  Carlos P Cantalapiedra.
    There are three basic tasks which can be carried out with **barleymap**:
 
    - Locate the position of FASTA formatted sequences through sequence alignment.
-   - Retrieve the position of common-use markers of known ID, whose positions have been pre-computed.
-   - Inspect the features in the surroundings of a given map position.
+   - Retrieve the position of common-use markers (or other features, like genes) of known ID,
+   whose positions have been pre-computed.
+   - Inspect the features (markers, genes, etc) in the surroundings of a given map position.
 
-   Once Barleymap has obtained a list of targets, either from alignment to databases or
-   from precalculated datasets, it will retrieve the position of such targets from
-   map information. A map is basically a list of targets and their associated positions.
-
-   Hence, Barleymap performs several steps, in which it queries different resources:
-
-   - Databases: in the alignment step, Barleymap needs sequence databases created
-       with Blast and/or GMAP.
-       Therefore, Barleymap can associate the identifier of a
-       query sequence to the identifier of a target in the database.
-
-       FASTA sequences (queries) --> alignment to databases (targets) --> list of query-target
-
-   - Datasets: the barleymap_find_markers tool uses precalculated datasets: lists of
-       tuples query-target, that have been obtained previously from alignments.
-
-       Identifiers (queries) --> find identifier in precalculated datasets (targets) --> list of query-target
-
-   - Maps: once Barleymap has the query-target results from one of the previous steps, the
-       target identifier can be used to retrieve the map position. This information is
-       retrieved from map files.
-
-       List query-target --> find target position on map --> associate position to query --> list of query-position
+   To do this, barleymap works with the following resources:
+   
+   - Databases: FASTA sequences from sequence-enriched maps, genomes, or any other sequence reference.
+   - Maps: tables with positions of every FASTA sequence from the databases.
+   - Datasets: tables which store the result of alignment of a given query to a specific database.
 
    Finally, Barleymap can enrich the resulting maps. This is achieved by either adding
    genes and their annotation to the results, based on position of genes on each
