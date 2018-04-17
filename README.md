@@ -127,6 +127,21 @@ Secondly, barleymap will need also the path to the sequence databases
 (genome, sequence-enriched map, or any other sequence reference), which can be indicated
 by changing the strings PATH_TO_BLAST_DATABASES, PATH_TO_GMAP_DATABASES and/or PATH_TO_HSBLASTN_DATABASES.
 
+#### 3.2.2 Creating and configuring databases: the databases.conf file
+
+Barleymap requires at least one database to work with. To add a database you first need to create it
+with the corresponding tool from Blast, GMAP or HS-Blastn. The database should be stored under the path
+indicated in the "paths.conf" file (fields "blastn_dbs_path", "gmap_dbs_path" or "hsblastn_dbs_path").
+
+Then, the database is added to barleymap in the databases.conf file under the barleymap/conf directory.
+Each database is included in such file as a single row with 3 space-separated fields:
+- Database name: the name of the database for easy referencing it and printing purposes.
+- Database id: a unique identifier of the database. This should match the folder or files where the actual
+database is stored.
+- Database type: either "std" or "big". It just tells GMAP whether to use the gmap or the gmapl binary,
+depending on the size of the input file.
+
+
 ## 3) Tools
 
 The main tools that can be used with Barleymap are located in the bin/ directory.
