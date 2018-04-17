@@ -2,16 +2,14 @@ README is part of Barleymap.
 Copyright (C)  2013-2014  Carlos P Cantalapiedra.
 (terms of use can be found within the distributed LICENSE file).
 
-# Carlos P Cantalapiedra 20131227 (updated 20140318)
-# Barleymap standalone, README
-#
-# 0: Barleymap overview
-# 1: Prerequisites
-# 2: Installation and configuration
-# 3: Tools
-# 4: Usage examples
-# 5: Default resources
-# 6: Customization
+
+ - 0: Barleymap overview
+ - 1: Prerequisites
+ - 2: Installation and configuration
+ - 3: Tools
+ - 4: Usage examples
+ - 5: Default resources
+ - 6: Customization
 #
 # 0) Barleymap overview
 #
