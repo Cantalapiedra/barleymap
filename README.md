@@ -14,29 +14,29 @@ Copyright (C)  2013-2014  Carlos P Cantalapiedra.
  
 ## 1) Barleymap overview
 
-   **Barleymap** is a tool which allows searching the position of sequences
-   in sequence-enriched genetic/physical maps.
+**Barleymap** is a tool which allows searching the position of sequences
+in sequence-enriched genetic/physical maps.
 
-   There are three basic tasks which can be carried out with **barleymap**:
+There are three basic tasks which can be carried out with **barleymap**:
 
-   - Locate the position of FASTA formatted sequences through sequence alignment.
-   - Retrieve the position of common-use markers (or other features, like genes) of known ID,
-   whose positions have been pre-computed.
-   - Inspect the features (markers, genes, etc) in the surroundings of a given map position.
+- Locate the position of FASTA formatted sequences through sequence alignment.
+- Retrieve the position of common-use markers (or other features, like genes) of known ID,
+whose positions have been pre-computed.
+- Inspect the features (markers, genes, etc) in the surroundings of a given map position.
 
-   To do this, barleymap works with the following resources:
-   
-   - Databases: FASTA sequences from sequence-enriched maps, genomes, or any other sequence reference.
-   - Maps: tables with positions of every FASTA sequence from the databases.
-   - Datasets: tables which store the result of alignment of a given query to a specific database.
+To do this, barleymap works with the following resources:
 
-   Finally, Barleymap can enrich the resulting maps. This is achieved by either adding
-   genes and their annotation to the results, based on position of genes on each
-   genetic/physical map; or by adding other markers found in the region.
-   For the enrichment with genes, Barleymap needs a list of gene-position for each map, and a file
-   with gene annotations (see HOWTO_ADD_GENE_INFORMATION).
-   To further relate markers and genes, and a list of marker-gene pairs, obtained by alignment,
-   can be used by Barleymap to ameliorate the report (see HOWTO_ADD_DATASETS 2.1).
+- Databases: FASTA sequences from sequence-enriched maps, genomes, or any other sequence reference.
+- Maps: tables with positions of every FASTA sequence from the databases.
+- Datasets: tables which store the result of alignment of a given query to a specific database.
+
+Finally, Barleymap can enrich the resulting maps. This is achieved by either adding
+genes and their annotation to the results, based on position of genes on each
+genetic/physical map; or by adding other markers found in the region.
+For the enrichment with genes, Barleymap needs a list of gene-position for each map, and a file
+with gene annotations (see HOWTO_ADD_GENE_INFORMATION).
+To further relate markers and genes, and a list of marker-gene pairs, obtained by alignment,
+can be used by Barleymap to ameliorate the report (see HOWTO_ADD_DATASETS 2.1).
 
 # 1) Prerequisites
 #   - Python 2.x.x (Python 2.6 or superior)
