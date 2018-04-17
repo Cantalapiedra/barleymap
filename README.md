@@ -50,11 +50,11 @@ Either:
 
 For example:
 ```
-mkdir apps;
-cd apps;
+mkdir /home/$USER/apps;
+cd /home/$USER/apps;
 tar -zxf barleymap.tar.gz
-export PATH=$PATH:/apps/barleymap/bin/
-export PYTHONPATH=$PYTHONPATH:/apps/barleymap/
+export PATH=$PATH:/home/$USER/apps/barleymap/bin/
+export PYTHONPATH=$PYTHONPATH:/home/$USER/apps/barleymap/
 ```
 
 ### 3.2) Configuration
@@ -70,12 +70,62 @@ files. You could use them as examples after creating your own files with the fil
 or you could remove the *.sample suffixes from the example files 
 and use them to create your own configuration files.
 
-Then, you should update "paths.conf" file with paths in your machine
-(especially those fields indicated with values in capitals). For example,
-change the "app_path" value to the current barleymap directory (absolute path)
-For example: app_path /home/current_user/apps/barleymap_popseq/
+#### 3.2.1 The paths.conf file
 
-To configure the other ".conf" files, read section "6) Customization".
+The very first thing you will need to do is configuring the **paths.conf** file under the barleymap/conf directory.
+The content of the paths.conf file must have the next fields (shown as in paths.conf.sample file):
+
+```
+# App absolute path
+app_path PATH_TO_BARLEYMAP_DIR
+
+# Relative paths to auxiliary apps
+genmap_path app_aux/
+split_blast_path app_aux/
+
+# Absolute paths to temporary and datasets folders
+tmp_files_path PATH_TO_BARLEYMAP_DIR/tmp_files
+datasets_path PATH_TO_BARLEYMAP_DIR/datasets/
+annot_path PATH_TO_BARLEYMAP_DIR/datasets_annotation/
+maps_path PATH_TO_BARLEYMAP_DIR/maps/
+
+########### Aligners
+# Blast
+blastn_app_path PATH_TO_NCBI_BLAST/bin/blastn
+blastn_dbs_path PATH_TO_BLAST_DATABASES
+# GMAP
+gmap_app_path PATH_TO_GMAP/bin/gmap
+gmap_dbs_path PATH_TO_GMAP_DATABASES
+gmapl_app_path PATH_TO_GMAP/bin/gmapl
+# HS-Blastn
+hsblastn_app_path PATH_TO_HSBLASTN/hs-blastn-src/hs-blastn
+hsblastn_dbs_path PATH_TO_HSBLASTN_DATABASES
+
+########### Other
+citation Cantalapiedra_CP,_Boudiar_R,_Casas_AM,_Igartua_E,_Contreras-Moreira_B._BARLEYMAP:_physical_and_genetic_mapping_of_nucleotide_sequences_and_annotation_of_surrounding_loci_in_barley._Mol_Breeding_(2015)_35:13_DOI_10.1007/s11032-015-0253-1
+stdalone_app http://eead.csic.es/compbio/soft/barleymap/
+```
+
+First, you will need to edit the "app_path" field to point
+to the absolute path in which barleymap has been installed.
+
+The fields "genmap_path" and "split_blast_path", and also those under
+the section "Other" ("citation" and "stdalone_app") should be left unmodified.
+
+For the next paths, note that most of them will most likely be empty at the moment.
+Thus, you could configure them already or wait until you know where the data will be stored.
+
+The "tmp_files_path" indicates barleymap where should write temporary files.
+The "datasets_path", "annot_path" and "maps_path" tells barleymap from which path should read
+data from datasets, annotation and maps.
+
+Regarding the section "Aligners", you will need to edit only the fields corresponding to the aligner
+or aligners which will be used by barleymap. First, barleymap needs the location of the binary file
+to run the aligner, so you will need to change the strings
+PATH_TO_NCBI_BLAST, PATH_TO_GMAP and/or PATH_TO_HSBLASTN accordingly.
+Secondly, barleymap will need also the path to the sequence databases
+(genome, sequence-enriched map, or any other sequence reference), which can be indicated
+by changing the strings PATH_TO_BLAST_DATABASES, PATH_TO_GMAP_DATABASES and/or PATH_TO_HSBLASTN_DATABASES.
 
 ## 3) Tools
 
