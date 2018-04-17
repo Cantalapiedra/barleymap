@@ -36,14 +36,14 @@ To do this, **barleymap** works with the following resources:
 of sequences from one or several databases.
 - Datasets: tables which store the result of alignment of a given query to a specific database.
 
-**Barleymap** has 3 different types of tools which are further explained in following sections:
+**Barleymap** has 3 different groups of tools, which are further explained in following sections:
 - Main tools:
-  - bmap_align
-  - bmap_find
-  - bmap_locate.
+  - bmap_align ("Align sequences" in the web version).
+  - bmap_find ("Find markers" in the web version).
+  - bmap_locate ("Locate by position" in the web version).
 - Secondary tools:
-  - bmap_align_to_db
-  - bmap_align_to_map
+  - bmap_align_to_db (only in the standalone version).
+  - bmap_align_to_map (only in the standalone version).
 - Configuration tools:
   - bmap_build_datasets
   - bmap_datasets_index
@@ -160,7 +160,7 @@ Note that the database should be accesible from the corresponding path indicated
 - Secondly: configure the database in barleymap. To do that, the "databases.conf" file,
 under the barleymap/conf directory, must be edited.
 Each database should be added as a single row with 3 space-separated fields:
-  - Database name: the name of the database for easy referencing it and printing purposes.
+  - Database name: an arbitrary name for the database, used by the user for referencing it and for printing purposes.
   - Database unique ID: a unique identifier of the database. This should match the folder or files where the actual
 database is stored, depending on the aligner (see "paths.conf" "Aligners" section).
   - Database type: either "std" or "big". It just tells barleymap whether to use the gmap or the gmapl binary
@@ -183,6 +183,40 @@ the following tools can already be used:
 - bmap_align_to_db
 
 #### 3.2.3 Creating and configuring maps: the maps.conf file
+
+A map stores the positional arrangement of sequences, either physical or genetical, from one or several databases.
+
+There are several steps to add a map to barleymap:
+
+- Choose an identifier to be used as unique ID for this map ("map_ID").
+- Create a folder "map_ID", under the path indicated by the "maps_path" entry in the "paths.conf" file
+ (e.g. barleymap/maps/map_ID/).
+- For each database which will be included in such map, create a file with the name "map_ID.database_ID" and put it
+in the folder created for the map in the previous step (e.g. barleymap/maps/map_ID/map_ID.database_ID).
+Note that this step is needed only when the map is of type "anchored" and
+is not necessary for "physical" maps (e.g. a genome). See format of the map-database files below for details.
+- Create a file with the name "map_ID.chrom" and put it in the folder created for the map
+(e.g. barleymap/maps/map_ID/map_ID.chrom). See format of the "chrom" file below for details.
+- Create a row in the conf/maps.conf file, with 10 space-separated fields.
+  - Map name: an arbitrary name for the map, used by the user for referencing it and for printing purposes.
+  - Map ID: the "map_ID" chosen above.
+  - Has cM positions: either "cm_true" or "cm_false", indicating whether the map has genetic positions or not.
+  - Has bp positions: either "bp_true" or "bp_false", indicating whether the map has physical positions or not.
+  - Default position type: either "cm" or "bp". Used only when a map has both cM and bp positions.
+  - Map type: either "physical" or "anchored".
+    - A "physical" map (e.g. a genome) does not have a file for positions
+  since the positions are those from the database and are already obtained
+  from the alignment result (e.g. chr1H position 133002).
+    - An "anchored" map (e.g. a sequence-enriched genetic map) requires files for positions,
+  since the positions from the databases, obtained through alignment (e.g. contig_1300 position 12430),
+  need to be translated to map positions (e.g. chr1H position 44.1 cM).
+  - Search type: either "greedy", "hierarchical" or "exhaustive".
+
+##### Format of the map-database files
+
+##### Format of the "chrom" file
+
+
 
 Once that at least one database and one map have been correctly configured,
 the following tools can already be used:
