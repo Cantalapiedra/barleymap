@@ -19,7 +19,7 @@ in sequence-enriched genetic/physical maps.
 
 There are three basic tasks which can be carried out with **barleymap**:
 
-- Locate the position of FASTA formatted sequences through sequence alignment.
+- Locate FASTA formatted sequences in a map through sequence alignment.
 - Retrieve the position of common-use markers (or other features, like genes) of known ID,
 whose positions have been pre-computed.
 - Inspect the features (markers, genes, etc) in the surroundings of a given map position.
@@ -30,19 +30,18 @@ To do this, **barleymap** works with the following resources:
 - Maps: tables with positions of every FASTA sequence from the databases.
 - Datasets: tables which store the result of alignment of a given query to a specific database.
 
-# 1) Prerequisites
-#   - Python 2.x.x (Python 2.6 or superior)
-#
-#   - For tools based on sequence alignment (bmaux_align_external, bmaux_align_fasta, barleymap_align_seqs)
-#   to work Blast and/or GMAP are needed.
-#
-#   For the current Barleymap version, the following builds have been tested:
-#   Blast: ncbi-blast-2.2.27+
-#   GMAP: gmap-2013-11-27
-#
-#   For barleymap_find_markers there is no other prerequisite than Python,
-#   so you should be able to query different datasets by using Barleymap alone.
-#
+## 2) Prerequisites
+
+- Python 2.x.x (Python 2.6 or superior)
+- To perform sequence alignments to work Blast and/or GMAP are needed.
+
+For the current barleymap version, the following builds have been tested:
+- Blast: ncbi-blast-2.2.27+
+- GMAP: gmap-2013-11-27
+
+For barleymap_find_markers there is no other prerequisite than Python,
+so you should be able to query different datasets by using Barleymap alone.
+
 # 2) Installation and configuration
 #
 #   First, read INSTALL file.
