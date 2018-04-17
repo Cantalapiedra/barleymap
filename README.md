@@ -32,15 +32,13 @@ To do this, **barleymap** works with the following resources:
 
 ## 2) Prerequisites
 
-- Python 2.x.x (Python 2.6 or superior)
-- To perform sequence alignments to work Blast and/or GMAP are needed.
+- Python 2.6 or superior.
+- To perform sequence alignments barleymap will need either Blast, HS-blastn and/or GMAP.
 
 For the current barleymap version, the following builds have been tested:
 - Blast: ncbi-blast-2.2.27+
-- GMAP: gmap-2013-11-27
-
-For barleymap_find_markers there is no other prerequisite than Python,
-so you should be able to query different datasets by using Barleymap alone.
+- GMAP: gmap-2013-11-27 and gmap-2013-08-31
+- HS-blastn: hs-blastn-0.0.5+
 
 # 2) Installation and configuration
 #
