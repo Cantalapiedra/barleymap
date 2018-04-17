@@ -30,6 +30,19 @@ To do this, **barleymap** works with the following resources:
 - Maps: tables with positions of every FASTA sequence from the databases.
 - Datasets: tables which store the result of alignment of a given query to a specific database.
 
+**Barleymap** has 3 different types of tools which are further explained in following sections:
+- Main tools:
+  - bmap_align
+  - bmap_find
+  - bmap_locate.
+- Secondary tools:
+  - bmap_align_to_db
+  - bmap_align_to_map
+- Configuration tools:
+  - bmap_build_datasets
+  - bmap_datasets_index
+  - bmap_config
+
 ## 2) Prerequisites
 
 - Python 2.6 or superior.
@@ -160,7 +173,21 @@ Once at least one database has been correctly configured, the following tools ca
 
 #### 3.2.3 Creating and configuring maps: the maps.conf file
 
+Once that at least one database and one map have been correctly configured, the following tools can be used:
+- bmap_align_to_db
+- bmap_align_to_map
+- bmap_align
+
+The bmap_find and bmap_locate could be used, but lack interest without having configured datasets.
+
 #### 3.2.4 Creating and configuring datasets: the datasets.conf file
+
+Once that at least one database, one map and one dataset have been correctly configured, the following tools can be used:
+- bmap_align_to_db
+- bmap_align_to_map
+- bmap_align
+- bmap_find
+- bmap_locate
 
 ## 3) Tools
 
