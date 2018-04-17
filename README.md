@@ -135,14 +135,25 @@ Barleymap requires at least one database to work with. There are 2 steps to add 
 Note that the database should be accesible from the corresponding path indicated in the "paths.conf" file
 (fields "blastn_dbs_path", "gmap_dbs_path" or "hsblastn_dbs_path").
 
-- Second, configure the database in barleymap. To do that, you will need to edit the databases.conf
+- Second, configure the database in barleymap. To do that, you will need to edit the "databases.conf"
 file under the barleymap/conf directory, where each database included as a single row with 3 space-separated fields:
   - Database name: the name of the database for easy referencing it and printing purposes.
-  - Database id: a unique identifier of the database. This should match the folder or files where the actual
-database is stored.
-  - Database type: either "std" or "big". It just tells GMAP whether to use the gmap or the gmapl binary,
-depending on the size of the input file.
+  - Database unique ID: a unique identifier of the database. This should match the folder or files where the actual
+database is stored, depending on the aligner (see "paths.conf" "Aligners" section).
+  - Database type: either "std" or "big". It just tells barleymap whether to use the gmap or the gmapl binary
+  when using the GMAP aligner. Check GMAP documentation for size of databases supported with gmap or gmapl.
+  
+The "databases.conf.sample" file shows 3 example databases:
 
+```
+# name unique_id type
+SpeciesAGenome speciesA std
+SpeciesBGenome speciesB std
+PolyploidGenome polyploid big
+```
+
+Note that the aligner to be used with each database is not specified.
+For a single barleymap database, you could actually have Blast, GMAP and HS-Blastn sequence databases.
 
 ## 3) Tools
 
