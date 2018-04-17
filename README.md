@@ -34,7 +34,7 @@ To do this, **barleymap** works with the following resources:
 - Databases: FASTA sequences from sequence-enriched maps, genomes, or any other sequence reference.
 - Maps: tables with positions of every FASTA sequence from the databases. Note that a map can store positions
 of sequences from one or several databases.
-- Datasets: tables which store the result of alignment of a given query to a specific database.
+- Datasets: tables which store the result of alignment of a given query to a specific map.
 
 **Barleymap** has 3 different groups of tools, which are further explained in following sections:
 - Main tools:
@@ -255,6 +255,39 @@ the following tools can already be used:
 The bmap_find and bmap_locate could be used, but lack interest without having configured datasets.
 
 #### 3.2.4 Creating and configuring datasets: the datasets.conf file
+
+Some genes or markers are often searched in sequence databases, genomes or maps.
+Therefore, it is advantageous to search them once and store the result, so that
+this position can be recovered in sucessive searches.
+This is the main purpose of datasets.
+
+The other use of datasets is showing which features (genes, markers, etc) are present in the region
+in which a query of interest (e.g. a QTL) has been found.
+
+Therefore, a dataset contains the map positions of markers, genes or other features, which have been
+previously aligned and mapped. These positions can be retrieved using just the gene or marker identifiers, avoiding
+to repeat demanding processes (specially alignment).
+
+To create a dataset there are several steps to follow:
+- Choose a unique identifier for your dataset ("dataset_ID").
+- Create a folder "dataset_ID" under the path indicated by the "datasets_path" entry in the "paths.conf" file
+ (e.g. barleymap/datasets/dataset_ID/).
+- Create a file with the name "dataset_ID.map_ID",
+ for each map which will be associated to such dataset, and put it
+in the folder created for the dataset in the previous step (e.g. barleymap/datasets/dataset_ID/dataset_ID.map_ID).
+See format of the dataset-map files below for details.
+- Create a row in the conf/datasets.conf file, with 8 space-separated fields.
+  - Dataset name: an arbitrary name for the dataset, used by the user to reference it and for printing purposes.
+  - Dataset ID: a unique identifier for this dataset.
+  - Type: either "genetic_marker", "gene", "map" or "anchored".
+  - Filename: the raw data for the dataset (it is not required to use barleymap, but it is convenient to
+  create the dataset automatically, as explained later).
+  - File type: either "fna", "bed", "gtf", or "map". The file type of the previous filename.
+  - Database list: either "ANY" or a database ID to which this dataset will be associated.
+  - Synonyms file: path to the file of synonyms. This file can be used to store more than one name for each
+  feature in this dataset.
+  - Prefix for indexing: if all the features of the dataset are expected to start their names with the same characteres,
+  this can be used to create and retrieve data from indexes.
 
 Once that at least one database, one map and one dataset have been correctly configured,
 the following tools can already be used:
