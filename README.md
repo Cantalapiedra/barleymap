@@ -40,36 +40,54 @@ For the current barleymap version, the following builds have been tested:
 - GMAP: gmap-2013-11-27 and gmap-2013-08-31
 - HS-blastn: hs-blastn-0.0.5+
 
-# 2) Installation and configuration
-#
-#   First, read INSTALL file.
-#
-#   After installing Barleymap you should be able to see a conf/ directory under
-#   the main barleymap directory (eg.: barleymap/conf/).
-#   In the conf/ directory, Barleymap has several configuration files.
-#
-#   You should first create working files by coping the ".example" files
-#   to files without such suffix (eg.: barleymap/conf/paths.conf).
-#   
-#   Then, you should update "paths.conf" file with paths in your machine
-#   (especially those fields indicated with values in capitals). For example,
-#   change the "app_path" value to the current barleymap directory (absolute path)
-#   For example: app_path /home/current_user/apps/barleymap_popseq/
-#
-#   To configure the other ".conf" files, read section "6) Customization".
-#
-# 3) Tools
-#
-#   The main tools that can be used with Barleymap are located in the bin/ directory.
-#   There are two main tools: barleymap_align_seqs and barleymap_find_markers;
-#   and others that are secondary or auxiliar, prefixed with "bmaux" (BarleyMapAUXiliar tools):
-#   bmaux_check_config, bmaux_align_fasta, bmaux_align_external, bmaux_retrieve_datasets
-#   and bmaux_obtain_positions.
-#
-#   Usage and info about any script can be obtained by typing "-h/--help" as command parameter. Example:
-#
-#   barleymap_find_markers -help
-#
+## 3) Installation and configuration
+
+### 3.1) Installation
+
+Either:
+- clone barleymap github repository.
+- download a release, uncompress it and configure PATH and PYTHONPATH as needed.
+
+For example:
+```
+mkdir apps;
+cd apps;
+tar -zxf barleymap.tar.gz
+export PATH=$PATH:/apps/barleymap/bin/
+export PYTHONPATH=$PYTHONPATH:/apps/barleymap/
+```
+
+### 3.2) Configuration
+
+To configure barleymap you will need to edit the following files within the barleymap/conf directory:
+- paths.conf
+- databases.conf
+- maps.conf
+- datasets.conf
+
+Note that barleymap is distributed with *.sample files which are examples of the previous configuration
+files. You could just use these as examples after creating your files, or remove the *.sample suffixes
+and use them as your configuration files.
+
+Then, you should update "paths.conf" file with paths in your machine
+(especially those fields indicated with values in capitals). For example,
+change the "app_path" value to the current barleymap directory (absolute path)
+For example: app_path /home/current_user/apps/barleymap_popseq/
+
+To configure the other ".conf" files, read section "6) Customization".
+
+## 3) Tools
+
+The main tools that can be used with Barleymap are located in the bin/ directory.
+There are two main tools: barleymap_align_seqs and barleymap_find_markers;
+and others that are secondary or auxiliar, prefixed with "bmaux" (BarleyMapAUXiliar tools):
+bmaux_check_config, bmaux_align_fasta, bmaux_align_external, bmaux_retrieve_datasets
+and bmaux_obtain_positions.
+
+Usage and info about any script can be obtained by typing "-h/--help" as command parameter. Example:
+
+barleymap_find_markers -help
+
 # 3.1) Auxiliar scripts
 #
 # - bmaux_check_config: allows to check the content of the config files and directories of the application.
