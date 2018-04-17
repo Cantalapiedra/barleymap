@@ -17,7 +17,12 @@ Copyright (C)  2013-2014  Carlos P Cantalapiedra.
 **Barleymap** is a tool which allows searching the position of sequences
 in sequence-enriched genetic/physical maps.
 
-There are three basic tasks which can be carried out with **barleymap**:
+**Barleymap** was designed with 3 main goals in mind:
+- Provide the position of sequences in a map, hiding from the user the details of the alignment and mapping steps.
+- Facilitate inspecting the region surrounding the queried sequence.
+- Perform alignments in a multi-reference or pan-genome fashion, allowing to query several databases at a time.
+
+Therefore, there are three basic tasks which can be carried out with **barleymap**:
 
 - Locate FASTA formatted sequences in a map through sequence alignment.
 - Retrieve the position of common-use markers (or other features, like genes) of known ID,
@@ -27,7 +32,8 @@ whose positions have been pre-computed.
 To do this, **barleymap** works with the following resources:
 
 - Databases: FASTA sequences from sequence-enriched maps, genomes, or any other sequence reference.
-- Maps: tables with positions of every FASTA sequence from the databases.
+- Maps: tables with positions of every FASTA sequence from the databases. Note that a map can store positions
+of sequences from one or several databases.
 - Datasets: tables which store the result of alignment of a given query to a specific database.
 
 **Barleymap** has 3 different types of tools which are further explained in following sections:
@@ -142,21 +148,25 @@ by changing the strings PATH_TO_BLAST_DATABASES, PATH_TO_GMAP_DATABASES and/or P
 
 #### 3.2.2 Creating and configuring databases: the databases.conf file
 
+A database represents a sequence reference (a genome, a WGS assembly, or similar), which can be queried
+with an alignment tool (Blastn, GMAP or HS-Blastn in the current version of barleymap).
+
 Barleymap requires at least one database to work with. There are 2 steps to add a database to barleymap:
 
-- First, create the database (with the corresponding tool from Blast, GMAP or HS-Blastn).
+- First: create the database (with the corresponding tool from Blast, GMAP or HS-Blastn).
 Note that the database should be accesible from the corresponding path indicated in the "paths.conf" file
 (fields "blastn_dbs_path", "gmap_dbs_path" or "hsblastn_dbs_path").
 
-- Second, configure the database in barleymap. To do that, you will need to edit the "databases.conf"
-file under the barleymap/conf directory, where each database included as a single row with 3 space-separated fields:
+- Secondly: configure the database in barleymap. To do that, the "databases.conf" file,
+under the barleymap/conf directory, must be edited.
+Each database should be added as a single row with 3 space-separated fields:
   - Database name: the name of the database for easy referencing it and printing purposes.
   - Database unique ID: a unique identifier of the database. This should match the folder or files where the actual
 database is stored, depending on the aligner (see "paths.conf" "Aligners" section).
   - Database type: either "std" or "big". It just tells barleymap whether to use the gmap or the gmapl binary
   when using the GMAP aligner. Check GMAP documentation for size of databases supported with gmap or gmapl.
   
-The "databases.conf.sample" file shows 3 example databases:
+The "databases.conf.sample" file shows 3 databases as examples:
 
 ```
 # name unique_id type
@@ -168,12 +178,14 @@ PolyploidGenome polyploid big
 Note that the aligner to be used with each database is not specified.
 For a single barleymap database, you could actually have Blast, GMAP and HS-Blastn sequence databases.
 
-Once at least one database has been correctly configured, the following tools can be used:
+Once at least one database has been correctly configured,
+the following tools can already be used:
 - bmap_align_to_db
 
 #### 3.2.3 Creating and configuring maps: the maps.conf file
 
-Once that at least one database and one map have been correctly configured, the following tools can be used:
+Once that at least one database and one map have been correctly configured,
+the following tools can already be used:
 - bmap_align_to_db
 - bmap_align_to_map
 - bmap_align
@@ -182,7 +194,8 @@ The bmap_find and bmap_locate could be used, but lack interest without having co
 
 #### 3.2.4 Creating and configuring datasets: the datasets.conf file
 
-Once that at least one database, one map and one dataset have been correctly configured, the following tools can be used:
+Once that at least one database, one map and one dataset have been correctly configured,
+the following tools can already be used:
 - bmap_align_to_db
 - bmap_align_to_map
 - bmap_align
