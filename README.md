@@ -13,58 +13,58 @@ Copyright (C)  2013-2014  Carlos P Cantalapiedra.
  - 7: Customization
  
 ## 1) Barleymap overview
-#
-#   Barleymap is a tool that allows to search the position of sequences
-#   in sequence-enriched genetic/physical maps.
-#
-#   Although Barleymap is distributed with resources related to barley data,
-#   the application can be used with data from other organisms, if similar
-#   data is available and Barleymap is properly configured.
-#
-#   There are two main commands to work with Barleymap:
-#   barleymap_align_seqs and barleymap_find_markers.
-#
-#   #) The barleymap_align_seqs tool allows to search FASTA formatted
-#   sequences by means of sequence alignments, performed
-#   with Blast and/or GMAP, to different databases.
-#
-#   #) The barleymap_find_markers uses a list of identifiers as input, to retrieve the
-#   targets associated to those identifiers, based on alignments performed previously
-#   and stored as precalculated datasets. Therefore, barleymap_find_markers does not need
-#   to perform any alignment; in other words, there is no need to use Blast or GMAP.
-#
-#   Once Barleymap has obtained a list of targets, either from alignment to databases or
-#   from precalculated datasets, it will retrieve the position of such targets from
-#   map information. A map is basically a list of targets and their associated positions.
-#
-#   Hence, Barleymap performs several steps, in which it queries different resources:
-#
-#   - Databases: in the alignment step, Barleymap needs sequence databases created
-#       with Blast and/or GMAP.
-#       Therefore, Barleymap can associate the identifier of a
-#       query sequence to the identifier of a target in the database.
-#
-#       FASTA sequences (queries) --> alignment to databases (targets) --> list of query-target
-#
-#   - Datasets: the barleymap_find_markers tool uses precalculated datasets: lists of
-#       tuples query-target, that have been obtained previously from alignments.
-#
-#       Identifiers (queries) --> find identifier in precalculated datasets (targets) --> list of query-target
-#
-#   - Maps: once Barleymap has the query-target results from one of the previous steps, the
-#       target identifier can be used to retrieve the map position. This information is
-#       retrieved from map files.
-#
-#       List query-target --> find target position on map --> associate position to query --> list of query-position
-#
-#   Finally, Barleymap can enrich the resulting maps. This is achieved by either adding
-#   genes and their annotation to the results, based on position of genes on each
-#   genetic/physical map; or by adding other markers found in the region.
-#   For the enrichment with genes, Barleymap needs a list of gene-position for each map, and a file
-#   with gene annotations (see HOWTO_ADD_GENE_INFORMATION).
-#   To further relate markers and genes, and a list of marker-gene pairs, obtained by alignment,
-#   can be used by Barleymap to ameliorate the report (see HOWTO_ADD_DATASETS 2.1).
-#
+
+   Barleymap is a tool that allows to search the position of sequences
+   in sequence-enriched genetic/physical maps.
+
+   Although Barleymap is distributed with resources related to barley data,
+   the application can be used with data from other organisms, if similar
+   data is available and Barleymap is properly configured.
+
+   There are two main commands to work with Barleymap:
+   barleymap_align_seqs and barleymap_find_markers.
+
+   #) The barleymap_align_seqs tool allows to search FASTA formatted
+   sequences by means of sequence alignments, performed
+   with Blast and/or GMAP, to different databases.
+
+   #) The barleymap_find_markers uses a list of identifiers as input, to retrieve the
+   targets associated to those identifiers, based on alignments performed previously
+   and stored as precalculated datasets. Therefore, barleymap_find_markers does not need
+   to perform any alignment; in other words, there is no need to use Blast or GMAP.
+
+   Once Barleymap has obtained a list of targets, either from alignment to databases or
+   from precalculated datasets, it will retrieve the position of such targets from
+   map information. A map is basically a list of targets and their associated positions.
+
+   Hence, Barleymap performs several steps, in which it queries different resources:
+
+   - Databases: in the alignment step, Barleymap needs sequence databases created
+       with Blast and/or GMAP.
+       Therefore, Barleymap can associate the identifier of a
+       query sequence to the identifier of a target in the database.
+
+       FASTA sequences (queries) --> alignment to databases (targets) --> list of query-target
+
+   - Datasets: the barleymap_find_markers tool uses precalculated datasets: lists of
+       tuples query-target, that have been obtained previously from alignments.
+
+       Identifiers (queries) --> find identifier in precalculated datasets (targets) --> list of query-target
+
+   - Maps: once Barleymap has the query-target results from one of the previous steps, the
+       target identifier can be used to retrieve the map position. This information is
+       retrieved from map files.
+
+       List query-target --> find target position on map --> associate position to query --> list of query-position
+
+   Finally, Barleymap can enrich the resulting maps. This is achieved by either adding
+   genes and their annotation to the results, based on position of genes on each
+   genetic/physical map; or by adding other markers found in the region.
+   For the enrichment with genes, Barleymap needs a list of gene-position for each map, and a file
+   with gene annotations (see HOWTO_ADD_GENE_INFORMATION).
+   To further relate markers and genes, and a list of marker-gene pairs, obtained by alignment,
+   can be used by Barleymap to ameliorate the report (see HOWTO_ADD_DATASETS 2.1).
+
 # 1) Prerequisites
 #   - Python 2.x.x (Python 2.6 or superior)
 #
