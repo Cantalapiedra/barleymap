@@ -1,6 +1,3 @@
-README is part of Barleymap.
-Copyright (C)  2013-2014  Carlos P Cantalapiedra.
-(terms of use can be found within the distributed LICENSE file).
 
 ## Contents
 
@@ -633,3 +630,7 @@ barleymap_find_markers -help
 # HOWTO_ADD_MAPS
 # HOWTO_ADD_GENE_INFORMATION
 ##
+
+README is part of Barleymap.
+Copyright (C)  2013-2014  Carlos P Cantalapiedra.
+(terms of use can be found within the distributed LICENSE file).
