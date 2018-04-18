@@ -14,19 +14,20 @@
 **Barleymap** is a tool which allows searching the position of sequences
 in sequence-enriched genetic/physical maps.
 
-**Barleymap** was designed with 3 main goals in mind:
+Barleymap was designed with **3 main goals** in mind:
 - Provide the position of sequences in a map, hiding from the user the details of the alignment and mapping steps.
 - Facilitate inspecting the region surrounding the queried sequence.
 - Perform alignments in a multi-reference or pan-genome fashion, allowing to query several databases at a time.
 
-Therefore, there are three basic tasks which can be carried out with **barleymap**:
+Therefore, there are three basic **tasks** which can be carried out with barleymap,
+depending on the input data to be used:
 
-- Locate FASTA formatted sequences in a map through sequence alignment.
-- Retrieve the position of common-use markers (or other features, like genes) of known ID,
+- Locate FASTA formatted __sequences__ in a map through sequence alignment.
+- Retrieve the position of common-use __markers__ (or other features, like genes) of known ID,
 whose positions have been pre-computed.
-- Inspect the features (markers, genes, etc) in the surroundings of a given map position.
+- Inspect the features (markers, genes, etc) in the surroundings of a given map __position__.
 
-To do this, **barleymap** works with the following resources:
+To do this, barleymap works with the following resources:
 
 - Databases: FASTA sequences from sequence-enriched maps, genomes, or any other sequence reference.
 - Maps: tables with positions of every FASTA sequence from the databases. Note that a map can store positions
