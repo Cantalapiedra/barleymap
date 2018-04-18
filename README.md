@@ -27,14 +27,14 @@ depending on the input data to be used:
 whose positions have been pre-computed.
 - Inspect the features (markers, genes, etc) in the surroundings of a given map position.
 
-To do this, barleymap works with the following resources:
+To do this, barleymap works with the following **resources**:
 
 - Databases: FASTA sequences from sequence-enriched maps, genomes, or any other sequence reference.
 - Maps: tables with positions of every FASTA sequence from the databases. Note that a map can store positions
 of sequences from one or several databases.
 - Datasets: tables which store the result of alignment of a given query to a specific map.
 
-**Barleymap** has 3 different groups of tools, which are further explained in following sections:
+Barleymap has 3 different groups of **tools**, which are further explained in following sections:
 - Main tools:
   - bmap_align ("Align sequences" in the web version).
   - bmap_find ("Find markers" in the web version).
@@ -63,7 +63,9 @@ For the current barleymap version, the following builds have been tested:
 
 Either:
 - clone barleymap github repository.
-- download a release, uncompress it and configure PATH and PYTHONPATH as needed.
+- download a release, uncompress it.
+
+Configure PATH and PYTHONPATH as needed.
 
 For example:
 ```
@@ -76,20 +78,21 @@ export PYTHONPATH=$PYTHONPATH:/home/$USER/apps/barleymap/
 
 ### 3.2) Configuration
 
-To configure barleymap you will need to edit the following files within the barleymap/conf directory:
+To configure barleymap you will need to edit the following **configuration files**
+under the barleymap/conf directory:
+
 - paths.conf
 - databases.conf
 - maps.conf
 - datasets.conf
 
 Note that barleymap is distributed with *.sample files, which are just examples of the previous configuration
-files. You could use them as examples after creating your own files with the filenames shown above,
-or you could remove the *.sample suffixes from the example files 
-and use them to create your own configuration files.
+files. You could use them as templates to create you own configuration files.
+Just remember that the "good" ones must not have the ".sample" suffix.
 
 #### 3.2.1 The paths.conf file
 
-The very first thing you will need to do is configuring the **paths.conf** file under the barleymap/conf directory.
+The first thing you will need to do is configuring the **paths.conf** file under the barleymap/conf directory.
 The content of the paths.conf file must have the next fields (shown as in paths.conf.sample file):
 
 ```
@@ -123,26 +126,28 @@ citation Cantalapiedra_CP,_Boudiar_R,_Casas_AM,_Igartua_E,_Contreras-Moreira_B._
 stdalone_app http://eead.csic.es/compbio/soft/barleymap/
 ```
 
-First, you will need to edit the "app_path" field to point
-to the absolute path in which barleymap has been installed.
+First, you will need to edit the *app_path* field to point
+to the **absolute path** in which barleymap has been installed.
 
-The fields "genmap_path" and "split_blast_path", and also those under
-the section "Other" ("citation" and "stdalone_app") should be left unmodified.
+The fields *genmap_path* and *split_blast_path*, and also those under
+the section *Other* ("citation" and "stdalone_app") should be left **unmodified**.
 
-For the next paths, note that most of them will most likely be empty at the moment.
-Thus, you could configure them already or wait until you know where the data will be stored.
+For most of the other fields, the directories they reference will most likely be empty at the moment.
+Thus, you could configure them already or wait until you decide where the data will be stored.
 
-The "tmp_files_path" indicates barleymap where should write temporary files.
-The "datasets_path", "annot_path" and "maps_path" tells barleymap from which path should read
-data from datasets, annotation and maps.
+The *tmp_files_path* indicates barleymap where should write temporary files to.
+The *datasets_path*, *annot_path* and *maps_path* tells barleymap from which directories
+should read data from datasets, annotation and maps.
 
-Regarding the section "Aligners", you will need to edit only the fields corresponding to the aligner
-or aligners which will be used by barleymap. First, barleymap needs the location of the binary file
-to run the aligner, so you will need to change the strings
-PATH_TO_NCBI_BLAST, PATH_TO_GMAP and/or PATH_TO_HSBLASTN accordingly.
-Secondly, barleymap will need also the path to the sequence databases
-(genome, sequence-enriched map, or any other sequence reference), which can be indicated
-by changing the strings PATH_TO_BLAST_DATABASES, PATH_TO_GMAP_DATABASES and/or PATH_TO_HSBLASTN_DATABASES.
+Regarding the section *Aligners*, you will need to edit only the fields corresponding to the aligner
+or aligners which will be used by barleymap. For each aligner to be used, barleymap needs:
+
+- The **path to the binary** file of the aligner. You will need to change the corresponding strings 
+(PATH_TO_NCBI_BLAST, PATH_TO_GMAP and/or PATH_TO_HSBLASTN).
+
+- The **path to the sequence databases** (genome, sequence-enriched map, or any other sequence reference).
+You will need to change the corresponding strings
+(PATH_TO_BLAST_DATABASES, PATH_TO_GMAP_DATABASES and/or PATH_TO_HSBLASTN_DATABASES).
 
 #### 3.2.2 Creating and configuring databases: the databases.conf file
 
