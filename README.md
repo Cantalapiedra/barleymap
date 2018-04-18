@@ -22,10 +22,10 @@ Barleymap was designed with **3 main goals** in mind:
 Therefore, there are three basic **tasks** which can be carried out with barleymap,
 depending on the input data to be used:
 
-- Locate FASTA formatted __sequences__ in a map through sequence alignment.
-- Retrieve the position of common-use __markers__ (or other features, like genes) of known ID,
+- Locate FASTA formatted sequences in a map through sequence alignment.
+- Retrieve the position of common-use markers (or other features, like genes) of known ID,
 whose positions have been pre-computed.
-- Inspect the features (markers, genes, etc) in the surroundings of a given map __position__.
+- Inspect the features (markers, genes, etc) in the surroundings of a given map position.
 
 To do this, barleymap works with the following resources:
 
