@@ -2,8 +2,12 @@
 ## Contents
 
  - 1: [Barleymap overview](https://github.com/Cantalapiedra/barleymap#1-barleymap-overview)
- - 2: Prerequisites
- - 3: Installation and configuration
+ - 2: [Prerequisites](https://github.com/Cantalapiedra/barleymap#2-prerequisites)
+ - 3: [Installation and configuration](https://github.com/Cantalapiedra/barleymap#3-installation-and-configuration)
+   - 3.2.1: [App configuration](https://github.com/Cantalapiedra/barleymap#321-the-pathsconf-file)
+   - 3.2.2: [Databases](https://github.com/Cantalapiedra/barleymap#322-creating-and-configuring-databases-the-databasesconf-file)
+   - 3.2.3: [Maps](https://github.com/Cantalapiedra/barleymap#323-creating-and-configuring-maps-the-mapsconf-file)
+   - 3.2.4: [Datasetes](https://github.com/Cantalapiedra/barleymap#324-creating-and-configuring-datasets-the-datasetsconf-file)
  - 4: Tools
  - 5: Usage examples
  - 6: Default resources
