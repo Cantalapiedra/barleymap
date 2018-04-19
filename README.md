@@ -1,7 +1,7 @@
 
 ## Contents
 
- - 1: Barleymap overview
+ - 1: [Barleymap overview](https://github.com/Cantalapiedra/barleymap#1-barleymap-overview)
  - 2: Prerequisites
  - 3: Installation and configuration
  - 4: Tools
@@ -137,10 +137,10 @@ Thus, you could configure them already or wait until you decide where the data w
 
 The *tmp_files_path* indicates barleymap where should write temporary files to.
 The *datasets_path*, *annot_path* and *maps_path* tells barleymap from which directories
-should read data from datasets, annotation and maps.
+should read data corresponding to datasets, annotation and maps.
 
 Regarding the section *Aligners*, you will need to edit only the fields corresponding to the aligner
-or aligners which will be used by barleymap. For each aligner to be used, barleymap needs:
+or aligners which will be used by your barleymap. For each aligner to be used, barleymap needs:
 
 - The **path to the binary** file of the aligner. You will need to change the corresponding strings 
 (PATH_TO_NCBI_BLAST, PATH_TO_GMAP and/or PATH_TO_HSBLASTN).
