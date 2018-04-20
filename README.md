@@ -58,7 +58,7 @@ For the current barleymap version, the following builds have been tested:
 
 ### 3.1) Installation
 
-#### 3.1.2) Standalone version
+#### 3.1.1) Standalone version
 
 Either:
 - clone barleymap github repository.
@@ -76,6 +76,24 @@ export PYTHONPATH=$PYTHONPATH:/home/$USER/apps/barleymap/
 ```
 
 #### 3.1.2) Web version
+
+The barleymap web interface was designed to be used with a [CherryPy server](http://cherrypy.org/),
+which should be installed and configured independently.
+
+Those interested on running their own barleymap web servers should check the CherryPy documentation
+to setup the server with their own infrastructure.
+For example, when using CherryPy after an Apache server you could need to add to its configuration
+files a reverse proxy, like:
+
+```
+ProxyPass /barleymap http://127.0.0.1:$CHERRYPYPORT/barleymap/
+ProxyPassReverse /barleymap http://127.0.0.1:$CHERRYPYPORT/barleymap/
+```
+
+Besides that, it is recommendable to include the path to the web application
+in the PYTHONPATH environmental variable of the system,
+and also some routine (e.g. crontab) to clean the temporary files
+(the directory indicated in the tmp_files_path entry in the paths.conf file) regularly.
 
 ### 3.2) Configuration
 
@@ -155,6 +173,10 @@ or aligners which will be used by your barleymap. For each aligner to be used, b
 - The **path to the sequence databases** (genome, sequence-enriched map, or any other sequence reference).
 You will need to change the corresponding strings
 (PATH_TO_BLAST_DATABASES, PATH_TO_GMAP_DATABASES and/or PATH_TO_HSBLASTN_DATABASES).
+
+Note that although both the standalone and the web versions need their own configuration files,
+the actual files for databases, datasets and maps can be shared by both applications by configuring
+the previous fields.
 
 #### 3.2.2 Creating and configuring databases: the databases.conf file
 
@@ -887,7 +909,9 @@ i_11_10030	chr1H	98.30	100.00	235.92	+	1	241	13590814	13591054	150831_barley_pse
 
 These are several tools which are included with barleymap, but do not perform searches in the
 barleymap configured resources. These are intended to help in the configuration of the application,
-specially when dealing with datasets.
+specially when dealing with datasets. Note that these tools use the barleymap main tools from the standalone version,
+and therefore are included only in the standalone version. These tools could be used
+with the standalone version to check or create resources to be used with barleymap web version though.
 
 ***
 
