@@ -443,36 +443,52 @@ To create the annotation of a genes dataset there are several steps to follow:
 - Choose a unique identifier for your annoation ("dataset_annot_ID").
 - Create a folder "dataset_annot_ID" under the path indicated by the "annot_path" entry in the "paths.conf" file
  (e.g. barleymap/datasets_annotation/dataset_ID/).
-- Create a file with the name "dataset_annot_ID.annot_field.tab",
- for each "annot_field" which will be annotated for that dataset, among
- "desc", "class", "go", "pfam", "ipr", and put it
-in the folder created for the dataset annotation in the previous step
+- Create a file for each "annot_field" which will be annotated for that dataset,
+and put it in the folder created for the dataset annotation in the previous step
 (e.g. barleymap/datasets_annotation/dataset_ID.desc.tab).
 See format of the dataset annotation files below for details.
 
-- Create a row in the conf/datasets.conf file, with 8 space-separated fields.
+- Create a row in the conf/datasets_annotation.conf file, with 5 space-separated fields.
 
-  - Dataset name: an arbitrary name for the dataset, used by the user to reference it and for printing purposes.
-  Note that you could prefix the dataset name with a ">". This annotates the dataset to be ignored by the barleymap
-  tool *bmap_build_datasets*, which is explained in following sections.
-  - Dataset ID: a unique identifier for this dataset.
-  - Type: either "genetic_marker", "gene", "map" or "anchored". This type is generally used only to filter the results
-  so that the user can request to obtain only genes, or only genetic markers, for example, in the output.
-  The "map" type is used when the dataset is also a map, so that when the data for the dataset is requested,
-  it is obtained from the data of the map.
-  - Filename: the raw data for the dataset (it is not required to use barleymap, but it is convenient to
-  create the dataset automatically, as explained later).
-  - File type: either "fna", "bed", "gtf", or "map". The file type of the previous filename.
-  - Database list: either "ANY" or a database ID to which this dataset will be associated.
-  - Synonyms file: path to the file of synonyms. This file can be used to store more than one name for each
-  feature in this dataset.
-  - Prefix for indexing: if all the features of the dataset are expected to start their names with the same characteres,
-  this can be used to create and retrieve data from indexes with the barleymap tool *bmap_datasets_index*, which is
-  explained in following sections.
+  - Dataset annotation name: an arbitrary name for the dataset annotation.
+  - Dataset annotation ID: a unique identifier for this dataset annotation.
+  - Dataset ID: the ID of the dataset to which this annotation is associated.
+  - Filename: the name of the file with the dataset annotation, as chosen in the previous step.
+  - Type: either "txt", "class", "go", "pfam", "ipr"; depending on the type of annotation.
+  Note that there is another configuration file, *annotation_types.conf*,
+  which has information about those types, and it is intended to be used to create custom annotation fields.
+  However, currently that file should be left unmodified, and its implementation is pending.
 
-The "datasets.conf.sample" file shows 4 datasets as examples:
+The "datasets.conf.sample" file shows the annotation of a single dataset:
 
+```
+# name unique_id dataset_unique_id filename type
+DT2_DESC dt2_desc dataset2 dt2.desc.tab txt
+DT2_CLASS dt2_class dataset2 dt2.class.tab class
+DT2_GO dt2_go dataset2 dt2.go.tab go
+DT2_PFAM dt2_pfam dataset2 dt2.pfam.tab	pfam
+DT2_IPR	dt2_ipr	dataset2 dt2.ipr.tab ipr
+```
 
+All the 5 annotation fields have been annotated for *dataset2*. Note that you could leave some fields
+without annotation if desired. The ".tab" files have the actual annotation tables, and would be stored
+under the path indicated in the *paths.conf* file, "annot_path" field.
+
+##### Format of the dataset annotation files
+
+A dataset annotation file contain the identifier of the gene and the annotation field,
+which will be a text (description and class) or an identifier (GO, PFAM, IPR).
+For example:
+
+```
+Gene000010	GO:0008270
+Gene000040	GO:0006412
+Gene000040	GO:0003735
+Gene000040	GO:0005622
+Gene000040	GO:0005840
+Gene000090	GO:0004672
+Gene000090	GO:0005524
+```
 
 ## 3) Tools
 
