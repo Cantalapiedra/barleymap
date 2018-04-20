@@ -503,12 +503,151 @@ Barleymap has 3 different groups of **tools**, which are further explained in fo
   - bmap_build_datasets
   - bmap_datasets_index
   - bmap_config
-  
-The main tools that can be used with Barleymap are located in the bin/ directory.
-There are two main tools: barleymap_align_seqs and barleymap_find_markers;
-and others that are secondary or auxiliar, prefixed with "bmaux" (BarleyMapAUXiliar tools):
-bmaux_check_config, bmaux_align_fasta, bmaux_align_external, bmaux_retrieve_datasets
-and bmaux_obtain_positions.
+
+### 4.1) Main tools
+
+The main tools which barleymap provides, both in the standalone and in the web version,
+are for alignment of sequences, finding markers, genes, etc, or locate features in a given position.
+
+#### 4.2) Alignment of sequences
+
+##### 4.2.3) Alignment parameters
+
+The alignment of sequences can be performed from the "Align sequences" button in barleymap web,
+or using bmap_align in the standalone version.
+
+In the latter, info and a full list of
+parameters can be obtained running the tool with the "-h/--help" options:
+
+```
+Usage: bmap_align.py [OPTIONS] [FASTA_FILE]
+
+typical: bmap_align.py --maps=map queries.fasta
+
+Options:
+  -h, --help            show this help message and exit
+  --aligner=ALIGNER     Alignment software to use (default "gmap"). The "gmap"
+                        option means to use only GMAP. The "blastn" option
+                        means to use only Blastn. The "hsblastn" option means
+                        to use only HS-Blastn. The order and aligners can be
+                        explicitly specified by separating the names by ","
+                        (e.g.: blastn,gmap --> First Blastn, then GMAP).
+  --thres-id=THRES_ID   Minimum identity for valid alignments. Float between
+                        0-100 (default 98.0).
+  --thres-cov=THRES_COV
+                        Minimum coverage for valid alignments. Float between
+                        0-100 (default 95.0).
+  --threads=N_THREADS   Number of threads to perform alignments (default 1).
+  --maps=MAPS_PARAM     Comma delimited list of Maps to show.
+  -b, --best-score      Will return only best score hits.
+  --sort=SORT_PARAM     Sort results by centimorgan (cm) or basepairs (bp)
+                        (default: defined for each map in maps configuration.
+  -k, --show-multiples  Queries with multiple positions will be shown (are
+                        obviated by default).
+  -a, --anchored        Show anchored features at positions of queries.
+  -g, --genes           Genes at positions of queries will be shown.
+  -m, --markers         Additional markers at positions of queries will be
+                        shown. Ignored if -g.
+  -d, --show-all-features
+                        All features will be used to enrich a map. By default,
+                        only main datasets of each map are used to enrich.
+  -o, --show-on-markers
+                        Additional features will shown for each query. By
+                        default, they are shown by interval of markers
+  -e EXTEND_WINDOW, --extend=EXTEND_WINDOW
+                        Centimorgans or basepairs (depending on sort) to
+                        extend the search of -g or -m.(default 0.0)
+  -u, --show-unmapped   Not found (unaligned, unmapped), will be shown.
+  -c, --collapse        Mapping results and features (markers, genes) will be
+                        shown at the same level.
+  -f                    cM positions will be output with all decimals
+                        (default, 2 decimals).
+  -v, --verbose         More information printed.
+```
+
+In both cases, the user provides one or more FASTA formatted sequences, which are the queries.
+The user will choose also one or more maps (--maps), from which to obtain the position of the queries.
+
+*Note that with this tool the user does not choose one or more sequence databases.
+In fact, when he chooses a map, he is implicitly chosing the databases associated to that map
+in the configuration to be used as sequence references (check the alignment algorithm below).*
+
+The user can choose alignment thresholds: minimum alignment identity (--thres-id)
+and minimum query coverage (--thres-cov).
+He can also choose whether to obtain also a list of unmapped sequences (-u, --show-unmapped),
+and whether to include or not as mapped those queries with more
+than one position as result (-k, --show-multiples), or instead report them as unmapped.
+In the case of maps which are both genetical and physical, the user can choose whether the results
+will be sorted by cM or by bp (--sort).
+
+The user may also choose whether to show only the resulting map, or also information about datasets, 
+including genes (-g, --genes), markers (-m, --markers) or anchored (-a, --anchored) features in the region.
+Note that these data can be shown only when they are in the
+same position as each query (-o, --show-on-markers), or all data which can be found between each two queries.
+In addition, in both cases, the user can choose to extend the search of datasets up- and down-stream
+of the features positions (-e, --extend). Note that if the search is not extended (by default is 0.0) no information
+will be shown between markers, even without the "-o, --show-on-markers" option.
+Also, the user can choose whether to show information about main datasets
+only (those associated to the map in the configuration file),
+or about all the datasets with information for this map (-d, --show-all-features).
+
+There are several parameters which can be only changed in the standalone version, and which are fixed
+in the web version. The user can choose to obtain results only from those alignments with the best score (-b, --best-score),
+not only those over the alignment thresholds. This is active by default in the web version.
+
+Also, the user of the standalone version can choose the number of threads (--threads) to be used during alignment.
+Note that these number of threads is actually given as parameter to the actual aligner (blastn, GMAP, hsblastn, etc.)
+and the actual barleymap process runs in a single core.
+
+In the standalone version, the user can also change the verbosity which will be output to stderr (-v, --verbose),
+and also whether the cM positions will be output with full decimals (-f) or formatted with 2 decimals (by default).
+Finally, in the standalone version the information about datasets can be shown as additional columns in the results table,
+or can be shown "inline" with the map results (-c, --collapse), using the same columns from the results table.
+
+One important parameter is the aligner chosen, which can be changed in both the standalone (--aligner) and
+in the web version. In the latter, there are some fixed options, using blastn only, gmap only, or gmap followed by blastn.
+In the standalone version, one or a comma-separated list of aligners can be specified, and the aligners will
+be used in that order (check the alignment algorithm below).
+
+##### 4.2.3) Alignment algorithm
+
+For all the databases of a given map,
+barleymap searches all the queries in the first database, using the first aligner.
+If there are queries which have not been found, it uses the next aligner in the same database.
+If all the aligners have been used in this database, try with the next database, starting with the first aligner.
+Repeat until all the queries have been found or there are no more databases and aligners to use.
+With each query for which alignment targets have been found, search the position of those targets in the map data,
+and associate that position to the query.
+
+In sort:
+Given a list of queries *U*, a list of databases *D* from a map *m*, and a list of aligners *A*:
+For each *d*c*D*,
+for each *a*c*A*,
+search a target *t* in *d*, for *q*c*U*, using *a*.
+Update *U*.
+Break if *U* is empty.
+End of loop.
+For each *q*!c*U*, that is, each *q* associated to one or more *t*, f
+ind a position *p* in *m* for *t*, and report *p* as the position of *q*.
+
+In addition there are three versions of the algorithm: "greedy", "hierarchical" and "exhaustive".
+These versions cannot be specified as parameter of the application.
+Instead, have to be associated to each of the maps in the configuration (see Configuration of maps).
+
+- In the "greedy" version, the list of unaligned queries is only updated for each database.
+Therefore, every query is searched in every database.
+
+- In the "hierarchical" version, a query is removed from the list of unaligned queries when an alignment
+hit has been found for the query, regardless of whether the query has map position or not.
+
+- In the "exhaustive" version, a query is removed from the list of unaligned queries when the query an alignment
+hit has been found for the query, and a map position has been associated to it.
+
+
+
+
+#### 4.3) Finding markers
+
 
 Usage and info about any script can be obtained by typing "-h/--help" as command parameter. Example:
 
