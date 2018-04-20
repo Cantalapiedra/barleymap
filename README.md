@@ -185,13 +185,15 @@ PolyploidGenome polyploid big
 Note that the aligner to be used with each database is not specified.
 For a single barleymap database, you could actually have Blast, GMAP and HS-Blastn sequence databases.
 
+***
+
 Once at least one database has been correctly configured,
 the following tools can already be used:
 - bmap_align_to_db
 
 #### 3.2.3 Creating and configuring maps: the maps.conf file
 
-A map stores the positional arrangement of sequences, either physical or genetical, from one or several databases.
+A map stores the positional arrangement, either physical or genetical, of sequences from one or several databases.
 
 There are several steps to add a map to barleymap:
 
@@ -211,34 +213,75 @@ See format of the map-database files below for details.
   - Has bp positions: either "bp_true" or "bp_false", indicating whether the map has physical positions or not.
   - Default position type: either "cm" or "bp". Used only when a map has both cM and bp positions.
   - Map type: either "physical" or "anchored".
-    - A "physical" map (e.g. a genome) does not have a file for positions
+    - A "physical" map (e.g. a genome) has not files for positions
   since the positions are those from the database and are already obtained
   from the alignment result (e.g. chr1H position 133002).
     - An "anchored" map (e.g. a sequence-enriched genetic map) requires files for positions,
   since the positions from the databases, obtained through alignment (e.g. contig_1300 position 12430),
   need to be translated to map positions (e.g. chr1H position 44.1 cM).
-  - Search type: it states which type of algorithm will be performed when searching sequences in this map.
-  Either "greedy", "hierarchical" or "exhaustive".
+  - Search type: it states which type of algorithm will be performed when searching sequences
+  in the databases associated to this map. Can be either "greedy", "hierarchical" or "exhaustive".
+  
     - The "greedy" algorithm searches all the queries in all the databases of the current map.
     - The "hierarchical" algorithm keeps searching in further databases only those queries
     which have not been aligned to a database yet.
     - The "exhaustive" algorithm keeps searching in further database only those queries
-    which still lack map position, independently of whether have already been aligned or not.
+    which still lack map position, independently of whether have already a hit from alignment or not.
+    
   - DB list: a comma-separated list of database IDs which are associated to this map. These are the databases which
   will be used as sequence references when this map is queried.
   - Folder: the folder name for this map, usually the same as the map ID.
   - Main datasets: a comma-separated list of datasets IDs which are associated to this map. These datasets will be always
   shown when looking for surrounding features, whereas other datasets will be shown only when explicitly requested.
+  
+The "maps.conf.sample" file shows 3 maps as examples:
+
+```
+# name id has_cm has_bp default_pos_type map_type search_type db_list folder_name main_datasets
+MapName mapID cm_false bp_true bp physical greedy db_genome mapID_folder dataset1,dataset2,dataset3
+Map2 map2 cm_true bp_false cm genetic hierarchical db_anchored1 map2_dir dataset4
+PhysGenetMap physgenetmap cm_true bp_true cm genetic exhaustive db_anchored1,db_anchored2,db_anchored3 physgenetmap_path dataset3,dataset5
+```
+
+The first map (MapName), with ID (mapID) and stored in its folder (mapID_folder),
+would be a physical map (cm_false, bp_true, bp, physical),
+with a single database of sequences associated to it (db_genome). Having a single database makes irrelevant
+the search_type (which has been configured to "greedy", arbitrarily). This map has 3 datasets associated to this
+map as "main datasets".
+
+The second map (Map2) is a genetic map (cm_true, bp_false, cm, genetic)
+with a single database of sequences associated to it (db_anchored1). Again, the search_type will be irrelevant
+having only one database (and thus has been configured to "hierarchical", arbitrarily).
+
+The third map (PhysGenetMap) is a genetic and physical map (cm_true, bp_true, cm, genetic), with
+3 databases associated to it (db_anchored1, 2 and 3). Here, the search_type is relevant, and queries
+will be searched differently depending on the algorithm chosen. In this case, the algorithm chosen
+(exhaustive) will keep search each query in the next database, until a map position has been found for the query.
 
 ##### Format of the map-database files
 
-A map-database file contain the map position of the sequences of a database.
+A map-database file contain the map position of the sequences of a database. For example:
+
+```
+>Map2
+#Marker	chr	cM	multiple_positions	other_alignments
+contig_1011389	1	0.106232294617565	No	No
+contig_1029771	1	0.106232294617565	No	No
+contig_110298	1	0.106232294617565	No	No
+contig_111381	1	0.106232294617565	No	No
+contig_1170672	1	0.106232294617565	No	No
+contig_1269062	1	0.106232294617565	No	No
+contig_13304	1	0.106232294617565	No	No
+contig_13532	1	0.106232294617565	No	No
+```
 
 Rows starting with ">" or "#" will be ignored, so that it can be used for comments, map name or header fields.
+
 Data rows have 5 or 6 (depending whether the map has cM, bp or both types of position) tab-delimited fields:
-- Database entry: name of the chromosome, contig, etc. from the database.
-- chr: chromosome identifier, corresponding to the map position of this database entry.
-- cM, bp or both: 1 or 2 fields with numeric position within the chromosome.
+
+- Database entry: ID of the contig, chromosome, etc. from the database.
+- chr: ID of the chromosome from the map.
+- cM, bp or both: 1 or 2 fields with numeric position within the map chromosome.
 - Multiple positions: either "Yes" or "No", to indicate whether this database entry has more than one
 position in this map.
 - Other alignments: either "Yes" or "No", to indicate whether this database entry has more than one
@@ -246,12 +289,27 @@ alignment in this map, independently of whether has more than one position or no
 
 ##### Format of the "chrom" file
 
-A "chrom" file has the information about the name and size of the chromosomes of a map.
+A "chrom" file has the information about the name and size of the chromosomes of a map. For example:
+
+```
+chr1H	1	558535432
+chr2H	2	768075024
+chr3H	3	699711114
+chr4H	4	647060158
+chr5H	5	670030160
+chr6H	6	583380513
+chr7H	7	657224000
+chrUn	8	249774706
+```
 
 Each row has 3 or 4 (depending whether the map has cM, bp or both types of position) tab-delimited fields:
 - Chromosome name: an arbitrary name for the chromosome, used for printing purposes.
 - Chromosome ID: a unique identifier for this chromosome in this map.
-- cM, bp or both: 1 or 2 fields with the maximum position of this chromosome (i.e. its length in cM or bp).
+- cM, bp or both: 1 or 2 fields with the maximum position of this chromosome (i.e. its size or length in cM or bp).
+This is actually only needed for the web version of barleymap, where it is used to print the graphical chromosomes.
+For the standalone version you could just leave it to any value.
+
+***
 
 Once that at least one database and one map have been correctly configured,
 the following tools can already be used:
@@ -259,7 +317,8 @@ the following tools can already be used:
 - bmap_align_to_map
 - bmap_align
 
-The bmap_find and bmap_locate could be used, but lack interest without having configured datasets.
+The bmap_find and bmap_locate could be used, but there is no interest in running them
+without having configured datasets previously.
 
 #### 3.2.4 Creating and configuring datasets: the datasets.conf file
 
@@ -272,7 +331,7 @@ The other use of datasets is showing which features (genes, markers, etc) are pr
 in which a query of interest (e.g. a QTL) has been found.
 
 Therefore, a dataset contains the map positions of markers, genes or other features, which have been
-previously aligned and mapped. These positions can be retrieved using just the gene or marker identifiers, avoiding
+previously aligned and mapped. Their positions can be retrieved using just their identifiers, avoiding
 to repeat demanding processes (specially alignment).
 
 To create a dataset there are several steps to follow:
@@ -282,11 +341,19 @@ To create a dataset there are several steps to follow:
 - Create a file with the name "dataset_ID.map_ID",
  for each map which will be associated to such dataset, and put it
 in the folder created for the dataset in the previous step (e.g. barleymap/datasets/dataset_ID/dataset_ID.map_ID).
-See format of the dataset-map files below for details.
+Note that these files could be created using *bmap_build_datasets*, as explained in following sections.
+However, if it is desired to create the files manuall, see format of the dataset-map files below for details.
+
 - Create a row in the conf/datasets.conf file, with 8 space-separated fields.
+
   - Dataset name: an arbitrary name for the dataset, used by the user to reference it and for printing purposes.
+  Note that you could prefix the dataset name with a ">". This annotates the dataset to be ignored by the barleymap
+  tool *bmap_build_datasets*, which is explained in following sections.
   - Dataset ID: a unique identifier for this dataset.
-  - Type: either "genetic_marker", "gene", "map" or "anchored".
+  - Type: either "genetic_marker", "gene", "map" or "anchored". This type is generally used only to filter the results
+  so that the user can request to obtain only genes, or only genetic markers, for example, in the output.
+  The "map" type is used when the dataset is also a map, so that when the data for the dataset is requested,
+  it is obtained from the data of the map.
   - Filename: the raw data for the dataset (it is not required to use barleymap, but it is convenient to
   create the dataset automatically, as explained later).
   - File type: either "fna", "bed", "gtf", or "map". The file type of the previous filename.
@@ -294,7 +361,64 @@ See format of the dataset-map files below for details.
   - Synonyms file: path to the file of synonyms. This file can be used to store more than one name for each
   feature in this dataset.
   - Prefix for indexing: if all the features of the dataset are expected to start their names with the same characteres,
-  this can be used to create and retrieve data from indexes.
+  this can be used to create and retrieve data from indexes with the barleymap tool *bmap_datasets_index*, which is
+  explained in following sections.
+
+The "datasets.conf.sample" file shows 4 datasets as examples:
+
+```
+#name unique_id type filename file_type db_list synonyms_file records_prefix
+DATASET1 dataset1 genetic_marker dataset1.fasta fna ANY /home/user/dataset1.syns no
+DATASET2 dataset2 gene dataset2.gtf gtf DB1,DB2 no DAT2_
+>DATASET3 dataset3 anchored dataset3.fasta fna ANY no no
+>DATASET4 dataset4 map "maps_path" map DB3 no DAT3_
+```
+
+The first dataset (DATASET1), with ID (dataset1), is of type genetic marker (genetic_marker),
+and its source are FASTA formatted sequences (dataset1.fasta, fna). It is associated to
+any database (ANY), it has a list of synonyms (/home/user/dataset1.syns) and there is no prefix
+which can be used for indexing.
+
+The fourth dataset (DATASET4), has the ">" symbol to mark the dataset as ignored by bmap_build_datasets
+(explained in following sections), and it is a dataset used to create a map (map).
+Note that its filename is indicated as "maps_path", and thus the data for this dataset corresponds to the
+same file as the one used as map. It is associated to a single database (DB3), it has no synonyms
+and it can be indexed with the prefix (DAT3_).
+
+##### Format of the dataset-map files
+
+A dataset-map file contain the map position of a set of commonly used markers, genes, etc. For example:
+
+```
+>Map2
+#Marker	chr	cM	multiple_positions	other_alignments
+S_180989	1	0.106232294617565	No	No
+S_35790	1	0.21246458923513	No	No
+i_30945	1	3.64730878186969	No	No
+S_165910	1	3.68361907676158	No	No
+S_161137	1	4.10764872521246	No	No
+S_193700	1	4.10764872521246	No	No
+S_206684	1	4.10764872521246	No	No
+i_66630	1	4.95750708215297	No	No
+```
+
+Note that this file has the same format as that of files for maps, and, as explained above, a map
+can also be configured as a dataset.
+
+As with files for maps, rows starting with ">" or "#" will be ignored,
+so that it can be used for comments, map name or header fields.
+
+Data rows have 5 or 6 (depending whether the map has cM, bp or both types of position) tab-delimited fields:
+
+- Dataset entry: ID of the marker, gene, etc. from the dataset.
+- chr: ID of the chromosome from the map.
+- cM, bp or both: 1 or 2 fields with numeric position within the map chromosome.
+- Multiple positions: either "Yes" or "No", to indicate whether this dataset entry has more than one
+position in this map.
+- Other alignments: either "Yes" or "No", to indicate whether this dataset entry has more than one
+alignment in this map, independently of whether has more than one position or not.
+
+***
 
 Once that at least one database, one map and one dataset have been correctly configured,
 the following tools can already be used:
@@ -303,6 +427,11 @@ the following tools can already be used:
 - bmap_align
 - bmap_find
 - bmap_locate
+
+#### 3.2.5 Creating and configuring datasets annotations: the datasets_annotation.conf and the
+annotation_types.conf files
+
+
 
 ## 3) Tools
 
