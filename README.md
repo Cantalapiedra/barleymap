@@ -4,15 +4,7 @@
  - 1: [Barleymap overview](https://github.com/Cantalapiedra/barleymap#1-barleymap-overview)
  - 2: [Prerequisites](https://github.com/Cantalapiedra/barleymap#2-prerequisites)
  - 3: [Installation and configuration](https://github.com/Cantalapiedra/barleymap#3-installation-and-configuration)
-   - 3.2.1: [App configuration](https://github.com/Cantalapiedra/barleymap#321-the-pathsconf-file)
-   - 3.2.2: [Databases](https://github.com/Cantalapiedra/barleymap#322-creating-and-configuring-databases-the-databasesconf-file)
-   - 3.2.3: [Maps](https://github.com/Cantalapiedra/barleymap#323-creating-and-configuring-maps-the-mapsconf-file)
-   - 3.2.4: [Datasets](https://github.com/Cantalapiedra/barleymap#324-creating-and-configuring-datasets-the-datasetsconf-file)
-   - 3.2.5: [Datasets annotation](https://github.com/Cantalapiedra/barleymap#325-creating-and-configuring-datasets-annotations-the-datasets_annotationconf-and-the-annotation_typesconf-files)
  - 4: [Tools and algorithms](https://github.com/Cantalapiedra/barleymap#4-tools-and-algorithms)
- - 5: Usage examples of the standalone version
- - 6: Resources used by the web version
- - 7: Citation, contact, etc.
  
 ## 1) Barleymap overview
 
@@ -66,6 +58,8 @@ For the current barleymap version, the following builds have been tested:
 
 ### 3.1) Installation
 
+#### 3.1.2) Standalone version
+
 Either:
 - clone barleymap github repository.
 - download a release, uncompress it.
@@ -81,8 +75,16 @@ export PATH=$PATH:/home/$USER/apps/barleymap/bin/
 export PYTHONPATH=$PYTHONPATH:/home/$USER/apps/barleymap/
 ```
 
+#### 3.1.2) Web version
+
 ### 3.2) Configuration
 
+- 3.2.1: [App configuration](https://github.com/Cantalapiedra/barleymap#321-the-pathsconf-file)
+- 3.2.2: [Databases](https://github.com/Cantalapiedra/barleymap#322-creating-and-configuring-databases-the-databasesconf-file)
+- 3.2.3: [Maps](https://github.com/Cantalapiedra/barleymap#323-creating-and-configuring-maps-the-mapsconf-file)
+- 3.2.4: [Datasets](https://github.com/Cantalapiedra/barleymap#324-creating-and-configuring-datasets-the-datasetsconf-file)
+- 3.2.5: [Datasets annotation](https://github.com/Cantalapiedra/barleymap#325-creating-and-configuring-datasets-annotations-the-datasets_annotationconf-and-the-annotation_typesconf-files)
+   
 To configure barleymap you will need to edit the following **configuration files**
 under the barleymap/conf directory:
 
@@ -954,141 +956,6 @@ directory in which the current_dataset file is located and read by barleymap.
 
 Note that for large dataset files, using index files will make the retrieval of markers, genes, etc. faster,
 whereas for small dataset files is likely better to not use index files.
-
-## 5) Usage examples of the standalone version
-
- 4.1) bmaux_check_config
-
-   #) Show help
-
-       ./bmaux_check_config -h
-
-   #) Show Barleymap configuration
-
-       ./bmaux_check_config
-
- 4.2) bmaux_align_fasta
-
-   #) Perform a hierarchical alignment of test_align.fa against all configured databases
-
-       ./bmaux_align_fasta --hierarchical=yes test_align.fa
-
-   #) Align hierarchically test_align.fa against MorexWGS and BACs databases, using only Blast,
-       with 2 threads, and changing identity and coverage thresholds
-
-       ./bmaux_align_fasta --hierarchical=yes --databases=MorexWGS,SequencedBACs --query-mode=genomic --thres-id=96 --thres-cov=94 --threads=2 test_align.fa
-
- 4.3) bmaux_retrieve_datasets
-
-   #) Obtain targets from a non-hierarchical alignment of test_find.ids to three databases.
-
-       ./bmaux_retrieve_datasets --hierarchical=no --databases=MorexWGS,SequencedBACs,BACEndSequences test_find.ids
-
- 4.4) bmaux_obtain_positions
-
-   #) Obtain positions for test_map.ids, from both IBSC_2012 and POPSEQ maps
-
-       ./bmaux_obtain_positions --maps=IBSC_2012,POPSEQ test_map.ids
-
- 4.5) barleymap_align_seqs
-
-   #) Align test_align.fa against all databases, showing all mapped results
-
-       ./barleymap_align_seqs --show-multiples=yes --show-unmapped=no test_align.fa
-
-   #) Obtain alignment against MorexWGS, using only GMAP database (--query-mode=cdna), with genes and annotation data
-
-       ./barleymap_align_seqs --databases=MorexWGS --query-mode=cdna --show-multiples=no --show-unmapped=no --genes=between --annot=yes test_align.fa
-
-   #) As the previous example, but reporting unmapped queries as well.
-
-       ./barleymap_align_seqs --databases=MorexWGS --query-mode=cdna --show-multiples=no --show-unmapped=yes --genes=between --annot=yes test_align.fa
-
-   #) Retrieve only best hits from each database
-
-       ./barleymap_align_seqs --best-score=db --show-multiples=yes --show-unmapped=no test_align.fa
-
-   #) Retrieve only the best hits for each query
-
-       ./barleymap_align_seqs --best-score=yes --show-multiples=yes --show-unmapped=no test_align.fa
-
- 4.6) barleymap_find_markers
-
-   #) Analog to barley_align_seqs, without alignment parameters (--databases, --query-mode, --threads, --thres-id, --thres-cov)
-
-       ./barleymap_find_markers --show-multiples=no --show-unmapped=yes --genes=between --annot=yes test_find.ids
-
-   #) Show map with markers in the region, and extend search to 1.0 cM upstream and downstream for each chromosome bin.
-
-       ./barleymap_find_markers --markers=yes --extend=yes --genes-window=1.0 test_find.ids
-       
-
- 6) Resources used in the web version
-
- Although Barleymap can be configured to be used with data from other projects and organisms,
- it is distributed with a series of default resources and configuration files ready to use with barley genomics data.
-
- You can use Barleymap to retrieve positions from precalculated datasets directly.
- However, in the case of databases, being huge resources, you will need to download the original FASTA
- sequences and create the Blast and GMAP databases (see 5.1 and the file HOWTO_ADD_DATABASES).
-
- However, several sample databases are already included so that the user should:
-
-   - Update paths.conf file (see above), "blastn_app_path" and "gmap_app_path",
-     to point to the directory where blastn and gmap binaries reside.
-   - Extract the fasta sequences that are compressed under app_std/db_samples/fasta_samples.tar.gz
-     (e.g.: tar -zxf fasta_samples.tar.gz)
-   - Create the indexes with either Blast, GMAP or both.
-     Please, see app_std/db_samples/README file for further information.
-
- Next, the different barley datasets used by default by Barleymap are explained.
-
- 5.1) Databases
-
-   IBSC generated sequences are used as default sequence databases, and can be downloaded from:
-   ftp://ftpmips.helmholtz-muenchen.de/plants/barley/public_data/
-
-   #) Three Whole Genome Shotgun datasets from three cultivars: Morex, Bowman and Barke.
-   #) BAC End Sequences.
-   #) Sequenced BACs.
-
-   Both Blast and GMAP databases were created for those resources (see HOWTO_ADD_DATABASES for further info).
-
- 5.2) Datasets
-
-   These are mainly sets of genetic markers that are commonly used to genotype barley mapping populations.
-   flcDNAs and ESTs are mRNA derived sequences. Alignment data for each dataset has been calculated
-   separatedly for each database, so that data can be queried independently, or through hierarchical method.
-
-   #) Illumina Infinium iSelect 9K: array platform of barley SNPs
-   #) DArTs: Diversity Arrays presence/absence (PAVs) markers obtained after enzymatic digestion.
-   #) DArTseq SNPs and PAVs: Diversity Arrays' GBS markers (both SNPs and PAVs).
-       * NOTE that some SNPs and PAVs are in fact the same sequence, so that the identifier is the same
-           for both markers and the alignment results should be equal.
-   #) Oregon Wolfe Barley population GBS data. 
-   #) flcDNA from cultivar Haruna nijo.
-   #) HarvEST assembly 36
-
-   You can find further information about these datasets
-   and the identifiers to use at
-   http://floresta.eead.csic.es/barleymap/help/
-
-   These datasets were created as shown in HOWTO_ADD_DATASETS.
-
- 5.3) Genetic/Physical maps
-
-   #) IBSC 2012 map: positions for all the databases. ftp://ftpmips.helmholtz-muenchen.de/plants/barley/public_data/
-   #) POPSEQ map (2013): positions only for Morex WGS database. ftp://ftp.ipk-gatersleben.de/barley-popseq/
-
-   These maps were configured as explained in HOWTO_ADD_MAPS.
-
- 5.4) Genes information and annotation
-
-   #) IBSC high confidence (HC) and low confidence (LC) genes from IBSC transcriptome (see IBSC 2012 map reference above).
-   #) Functional annotation of genes from the same IBSC 2012 source.
-
-   These resources were added as shown in HOWTO_ADD_GENE_INFORMATION.
-
 
 README is part of Barleymap.
 Copyright (C)  2013-2014  Carlos P Cantalapiedra.
