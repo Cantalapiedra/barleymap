@@ -633,7 +633,7 @@ For the "greedy" algorithm all the query sequences are aligned to next database,
 instead of just unaligned ones. For the "exhaustive" algorithm, the "align to next database"
 should be moved to the box "Retrieve map positions" and change "unaligned" by "unmapped".*
 <p align="center">
-  <img width="250" height="263" src="http://floresta.eead.csic.es/barleymap/img/barleymap_popseq.pipeline_2.png">
+  <img width="400" height="413" src="http://floresta.eead.csic.es/barleymap/img/barleymap_popseq.pipeline_2.png">
 </p>
 
 In addition there are three versions of the algorithm: "greedy", "hierarchical" and "exhaustive".
