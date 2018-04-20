@@ -1,0 +1,11 @@
+#################################
+# datasets_annotation.conf is part of Barleymap web app.
+# Copyright (C) 2017  Carlos P Cantalapiedra.
+# (terms of use can be found within the distributed LICENSE file).
+#################################
+# name unique_id dataset_unique_id filename type
+DT2_DESC dt2_desc dataset2 dt2.desc.tab txt
+DT2_CLASS dt2_class dataset2 dt2.class.tab class
+DT2_GO dt2_go dataset2 dt2.go.tab go
+DT2_PFAM dt2_pfam dataset2 dt2.pfam.tab pfam
+DT2_IPR dt2_ipr dataset2 dt2.ipr.tab ipr

@@ -7,6 +7,7 @@ conf/*
 !conf/.gitkeep
 !conf/*.sample
 !conf/references*
+!conf/annotation_types.conf
 
 datasets/*
 !datasets/.gitkeep

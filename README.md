@@ -343,7 +343,7 @@ To create a dataset there are several steps to follow:
  for each map which will be associated to such dataset, and put it
 in the folder created for the dataset in the previous step (e.g. barleymap/datasets/dataset_ID/dataset_ID.map_ID).
 Note that these files could be created using *bmap_build_datasets*, as explained in following sections.
-However, if it is desired to create the files manuall, see format of the dataset-map files below for details.
+However, if it is desired to create the files manually, see format of the dataset-map files below for details.
 
 - Create a row in the conf/datasets.conf file, with 8 space-separated fields.
 
@@ -429,7 +429,48 @@ the following tools can already be used:
 - bmap_find
 - bmap_locate
 
-#### 3.2.5 Creating and configuring datasets annotations: the datasets_annotation.conf and the annotation_types.conf files
+#### 3.2.5 Creating and configuring genes annotations: the datasets_annotation.conf and the annotation_types.conf files
+
+Besides the map information, barleymap allows to retrieve the genes, markers, etc. in the region of the obtained position.
+Those genes, markers, etc. belong to different datasets. In the case of datasets of type "gene",
+more information about each gene can be added,
+including a description text, a class of feature, and lists of Gene Ontologies (GO),
+protein families (PFAM) and InterPro (IPR) identifiers. Note that in fact you can use those fields freely:
+the only limitation is that the header of the table will always show those names for each column
+(Class, Description, InterPro, GeneOntologies, PFAM).
+
+To create the annotation of a genes dataset there are several steps to follow:
+- Choose a unique identifier for your annoation ("dataset_annot_ID").
+- Create a folder "dataset_annot_ID" under the path indicated by the "annot_path" entry in the "paths.conf" file
+ (e.g. barleymap/datasets_annotation/dataset_ID/).
+- Create a file with the name "dataset_annot_ID.annot_field.tab",
+ for each "annot_field" which will be annotated for that dataset, among
+ "desc", "class", "go", "pfam", "ipr", and put it
+in the folder created for the dataset annotation in the previous step
+(e.g. barleymap/datasets_annotation/dataset_ID.desc.tab).
+See format of the dataset annotation files below for details.
+
+- Create a row in the conf/datasets.conf file, with 8 space-separated fields.
+
+  - Dataset name: an arbitrary name for the dataset, used by the user to reference it and for printing purposes.
+  Note that you could prefix the dataset name with a ">". This annotates the dataset to be ignored by the barleymap
+  tool *bmap_build_datasets*, which is explained in following sections.
+  - Dataset ID: a unique identifier for this dataset.
+  - Type: either "genetic_marker", "gene", "map" or "anchored". This type is generally used only to filter the results
+  so that the user can request to obtain only genes, or only genetic markers, for example, in the output.
+  The "map" type is used when the dataset is also a map, so that when the data for the dataset is requested,
+  it is obtained from the data of the map.
+  - Filename: the raw data for the dataset (it is not required to use barleymap, but it is convenient to
+  create the dataset automatically, as explained later).
+  - File type: either "fna", "bed", "gtf", or "map". The file type of the previous filename.
+  - Database list: either "ANY" or a database ID to which this dataset will be associated.
+  - Synonyms file: path to the file of synonyms. This file can be used to store more than one name for each
+  feature in this dataset.
+  - Prefix for indexing: if all the features of the dataset are expected to start their names with the same characteres,
+  this can be used to create and retrieve data from indexes with the barleymap tool *bmap_datasets_index*, which is
+  explained in following sections.
+
+The "datasets.conf.sample" file shows 4 datasets as examples:
 
 
 
