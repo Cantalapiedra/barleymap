@@ -628,7 +628,13 @@ End of loop.
 For each *q*!c*U*, that is, each *q* associated to one or more *t*, f
 ind a position *p* in *m* for *t*, and report *p* as the position of *q*.
 
-![Image of algorithm](http://floresta.eead.csic.es/barleymap/img/barleymap_popseq.pipeline_2.png)
+Figure. Schematic representation of the barleymap "hierarchical" algorithm.
+For the "greedy" algorithm all the query sequences are aligned to next database,
+instead of just unaligned ones. For the "exhaustive" algorithm, the "align to next database"
+should be moved to the box "Retrieve map positions" and change "unaligned" by "unmapped".
+<p align="center">
+  <img width="460" height="300" src="http://floresta.eead.csic.es/barleymap/img/barleymap_popseq.pipeline_2.png">
+</p>
 
 In addition there are three versions of the algorithm: "greedy", "hierarchical" and "exhaustive".
 These versions cannot be specified as parameter of the application.
