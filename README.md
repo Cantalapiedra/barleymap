@@ -429,8 +429,7 @@ the following tools can already be used:
 - bmap_find
 - bmap_locate
 
-#### 3.2.5 Creating and configuring datasets annotations: the datasets_annotation.conf and the
-annotation_types.conf files
+#### 3.2.5 Creating and configuring datasets annotations: the datasets_annotation.conf and the annotation_types.conf files
 
 
 
