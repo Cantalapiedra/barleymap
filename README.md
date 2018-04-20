@@ -8,7 +8,7 @@
    - 3.2.2: [Databases](https://github.com/Cantalapiedra/barleymap#322-creating-and-configuring-databases-the-databasesconf-file)
    - 3.2.3: [Maps](https://github.com/Cantalapiedra/barleymap#323-creating-and-configuring-maps-the-mapsconf-file)
    - 3.2.4: [Datasets](https://github.com/Cantalapiedra/barleymap#324-creating-and-configuring-datasets-the-datasetsconf-file)
-   - 3.2.5: [Datasets annotation](https://github.com/Cantalapiedra/barleymap#325-creating-and-configuring-datasets-annotations-the-datasets_annotationconf-and-the)
+   - 3.2.5: [Datasets annotation](https://github.com/Cantalapiedra/barleymap#325-creating-and-configuring-datasets-annotations-the-datasets_annotationconf-and-the-annotation_typesconf-files)
  - 4: Tools
  - 5: Usage examples
  - 6: Default resources
