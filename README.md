@@ -492,15 +492,6 @@ Gene000090	GO:0005524
 
 ## 4) Tools and algorithms
 
-  - bmap_locate ("Locate by position" in the web version).
-- Secondary tools:
-  - bmap_align_to_db (only in the standalone version).
-  - bmap_align_to_map (only in the standalone version).
-- Configuration tools:
-  - bmap_build_datasets
-  - bmap_datasets_index
-  - bmap_config
-
 ### 4.1) Main tools
 
 The main tools which barleymap provides, both in the standalone and in the web version,
@@ -703,191 +694,268 @@ were obtained with a specific set of parameters. This includes also the list of 
 for a given map when the positions were obtained by alignment. Check the section Resources used in the web version
 for details on the way the datasets used in the web version were obtained.
 
+#### 4.4) Locating features in region
 
+Locating features (markers, genes, etc.) in a region can be performed from the *Locate by position*
+button in barleymap web, or using the command *bmap_locate* in the standalone version.
 
-Usage and info about any script can be obtained by typing "-h/--help" as command parameter. Example:
+##### 4.2.3) Locate features parameters
 
-barleymap_find_markers -help
+In the standalone version, info and a full list of
+parameters can be obtained running the tool with the "-h/--help" options:
 
- 3.1) Auxiliar scripts
+```
+Usage: bmap_locate.py [OPTIONS] [IDs_FILE]
 
- - bmaux_check_config: allows to check the content of the config files and directories of the application.
+typical: bmap_locate.py --maps=map queries.tab
 
-   It is run without parameters.
-   Output: paths, databases, datasets, maps, genes and annotation configured.
+Options:
+  -h, --help            show this help message and exit
+  --maps=MAPS_PARAM     Comma delimited list of Maps to show.
+  --sort=SORT_PARAM     Sort results by centimorgan (cm) or basepairs (bp)
+                        (default: defined for each map in maps configuration.
+  -k, --show-multiples  Queries with multiple positions will be shown (are
+                        obviated by default).
+  -a, --anchored        Show anchored features at positions of queries.
+  -g, --genes           Genes at positions of queries will be shown. Ignored
+                        if -a
+  -m, --markers         Additional markers at positions of queries will be
+                        shown. Ignored if -g or -a.
+  -d, --show-all-features
+                        All features will be used to enrich a map. By default,
+                        only main datasets of each map are used to enrich.
+  -o, --show-on-markers
+                        Additional features will shown for each query. By
+                        default, they are shown by interval of markers
+  -e EXTEND_WINDOW, --extend=EXTEND_WINDOW
+                        Centimorgans or basepairs (depending on sort) to
+                        extend the search of -g or -m.(default 0.0)
+  -u, --show-unmapped   Not found (unaligned, unmapped), will be shown.
+  -c, --collapse        Mapping results and features (markers, genes) will be
+                        shown at the same level.
+  -f                    cM positions will be output with all decimals
+                        (default, 2 decimals).
+  -v, --verbose         More information printed.
+```
 
- - bmaux_align_fasta: intended to align fasta sequences to references and obtain the identifier of targets.
+In this case each query is a map position, instead of a sequence or a marker identifier,
+and it has 2 tab-separated fields:
+- Chromosome or contig name.
+- Position within that chromosome or contig.
 
-   input: sequences in FASTA format.
-   resource: Blast and/or GMAP databases configured in the application.
-   output: list of query-target.
+The user input is a list of such map positions.
 
-           The alignment pipeline is explained at http://floresta.eead.csic.es/barleymap/help/
+For example, for a physical map:
 
-           Some major parameters are "--hierarchical" and "--best-score".
+```
+chr2	711398163
+chr6	376635036
+chr7	4184387
+chr7	227367117
+```
 
-           "--hierarchical" is important when several databases are queried.
+### 4.2) Secondary tools
 
-           With "--hierarchical=no", each database results (if any) are reported separatedly
-           after a line with the database name prefixed with ">DB:".
+As explained above, the main barleymap tools, including those in the web version,
+return as result map positions for the queries. The hits from the alignment step remain
+hidden for the user. However, in some cases alignment results are preferred.
+These can be obtained with the secondary tools, which are available only in the standalone version.
 
-           When "--hierarchical=yes" is used, the sequence references are queried in the order
-           specified in the "--databases" parameter or, if not specified, configured in conf/references.conf.
-           When a query is found in one database, it is not further aligned againt the remaining
-           databases.
+***
 
-           The "--best-score" parameter can be used to obtain all the alignments for every database
-           ("--best-score=no"), to obtain only the best alignment for every database ("--best-score=db"),
-           or to obtain only the best alignment for each query ("--best-score=yes").
+The bmap_align_to_db command allows obtaining the alignment results from FASTA formatted queries
+to one or more databases. The parameters of bmap_align_to_db can be obtained running it with "-h/--help":
 
-           Note that the score used is the bit score, for Blast results, and a function of query aligned
-           segment length and identity, in the case of GMAP alignments.
+```
+Usage: bmap_align_to_db.py [OPTIONS] [FASTA_FILE]
 
-   A simple example to execute the command would be:
+typical: bmap_align_to_db.py --databases=MorexGenome queries.fasta
 
-   ./bmaux_align_fasta --align-info=yes test_align.fa
+Options:
+  -h, --help            show this help message and exit
+  --databases=DATABASES_PARAM
+                        Comma delimited list of database names to align to
+                        (default all).
+  --databases-ids=DATABASES_IDS_PARAM
+                        Comma delimited list of database IDs to align to
+                        (default all).
+  --aligner=ALIGNER     Alignment software to use (default "gmap"). The "gmap"
+                        option means to use only GMAP. The "blastn" option
+                        means to use only Blastn. The "hsblastn" option means
+                        to use only HS-Blastn. The order and aligners can be
+                        explicitly specified by separating the names by ","
+                        (e.g.: blastn,gmap --> First Blastn, then GMAP).
+  --thres-id=THRES_ID   Minimum identity for valid alignments. Float between
+                        0-100 (default 98.0).
+  --thres-cov=THRES_COV
+                        Minimum coverage for valid alignments. Float between
+                        0-100 (default 95.0).
+  --threads=N_THREADS   Number of threads to perform alignments (default 1).
+  --search=SEARCH_TYPE  Whether obtain the hits from all DBs (greedy), only
+                        best score hits (best_score), or first hit found
+                        (hierarchical); (default greedy).
+  --ref-type=REF_TYPE   Whether use GMAP (std) or GMAPL (big), when using
+                        --databases-ids only.
+  -v, --verbose         More information printed.
+```
 
-   IMPORTANT: remember that this script will work only if some sequence database has been previously configured.
+Most of the parameters are the same used in the bmap_align command, and have already been explained above.
+The --databases (or --databases-ids), --search and --ref-type parameters are the same as some of the
+fields used to configure a map, and have also been explained (see Configuration of maps).
 
-   NOTE: this tool can be used to create precalculated datasets with queries that are commonly used,
-   so that alignments are performed only once with this tool, and the data could be used
-   afterwards with barleymap_find_markers (see HOWTO_ADD_DATASETS).
+The result of bmap_align_to_db is a table with 12 fields:
+- query_id: the name of the FASTA query.
+- subject_id: the chromosome or contig from the alignment hit.
+- identity: the percentage of identity from the alignment.
+- query_coverage: the percentage of coverage of the query in the alignment.
+- score: a score which corresponds to the bit score from blastn and to barleymap specific score for
+GMAP alignments, which takes into account both identity and query coverage.
+- strand: to which strand of the subject was aligned the query.
+- qstart: first position of the query in the alignment.
+- qend: last position of the query in the alignment.
+- sstart: first position of the subject in the alignment.
+- send: last position of the subject in the alignment.
+- database: to which database belongs the subject.
+- algorithm: which algorithm was used to perform the alignment.
 
- - bmaux_align_external: allows to align fasta sequences to any sequence dataset,
-                         obtaining the results as with bmaux_align_fasta.
+Note that rows starting with ">" or "#" are for database name and column headers, respectively.
+An example of the output file from bmap_align_to_db:
 
-   input: sequences in FASTA format.
-   resource: Blast and/or GMAP databases. There is no need to have these databases configured in the application,
-             so they can be "external" to Barleymap, BUT THEY MUST reside under the path specified in
-             "blastn_dbs_path" entry in paths.conf file under conf/ directory.
-             NOTE that in this case, --databases parameter MUST be specified with a database or comma-separated
-             list of databases. In addition, as it is thought to be used with non-configured databases,
-             database identifier must be supplied instead of the database names that are used with bmaux_align_fasta,
-             even if the database to query has been already configured.
-   output: the same as align_fasta.
+```
+>DB:150831_barley_pseudomolecules
+#query_id	subject_id	identity	query_coverage	score	strand	qstart	qend	sstart	send	database	algorithm
+m_10235	chr1	100.00	100.00	120.0	-	1	121	80265474	80265594	genome2.0	gmap
+m_19	chr7	100.00	100.00	196.0	-	1	197	17091119	17091315	genome2.0	gmap
+m_10	chr1	100.00	100.00	210.0	+	1	211	71173958	71174168	genome2.0	gmap
+m_1100	chr5	100.00	100.00	178.0	+	1	179	434303690	434303868	genome2.0	gmap
+m_1012	chr2	100.00	100.00	226.0	+	1	227	29125654	29125880	genome2.0	gmap
+```
 
-   The algorithm steps and parameters are analog to those in bmaux_align_fasta.
-   This tool can be used, for example, to create the markers-genes datasets, so that genes that are hit by each marker
-   will be shown in the marker enriched map.
-   In general, it can be used to align FASTA sequences to any FASTA database using the Barleymap pipeline.
+***
 
-   ./bmaux_align_external --hierarchical=yes --databases=genes_HC,genes_LC test_align.fa
+The bmap_align_to_map command allows obtaining the alignment results from FASTA formatted queries
+to one or more maps, i.e. to the databases which have been configured in barleymap for those maps
+(see configuration of maps). The parameters of bmap_align_to_map can be obtained running it with "-h/--help":
 
-   IMPORTANT: remember that this script will work only if the sequence database resides under "blastn_dbs_path".
+```
+Usage: bmap_align_to_map.py [OPTIONS] [FASTA_FILE]
 
- - bmaux_retrieve_datasets: can be used to check the target of the alignment of sequences
-                            by using only the query ID, without need to realign the sequence
+typical: bmap_align_to_map.py --maps=MorexGenome queries.fasta
 
-   input: list of query identifiers.
-   resource: precalculated datasets.
-   output: list of query-target.
+Options:
+  -h, --help            show this help message and exit
+  --maps=MAPS_PARAM     Comma delimited list of Maps to show (default all).
+  --aligner=ALIGNER     Alignment software to use (default "gmap"). The "gmap"
+                        option means to use only GMAP. The "blastn" option
+                        means to use only Blastn. The "hsblastn" option means
+                        to use only HS-Blastn. The order and aligners can be
+                        explicitly specified by separating the names by ","
+                        (e.g.: blastn,gmap --> First Blastn, then GMAP).
+  --thres-id=THRES_ID   Minimum identity for valid alignments. Float between
+                        0-100 (default 98.0).
+  --thres-cov=THRES_COV
+                        Minimum coverage for valid alignments. Float between
+                        0-100 (default 95.0).
+  --threads=N_THREADS   Number of threads to perform alignments (default 1).
+  --search=SEARCH_TYPE  Whether obtain the hits from all DBs (greedy), only
+                        best score hits (best_score), or first hit found
+                        (hierarchical); (default greedy).
+  -v, --verbose         More information printed.
+```
 
-   Regarding the behaviour of parameters and output format this script is analog to bmaux_align_fasta.
+Most of the parameters are the same used in the bmap_align command, and have already been explained above.
+The --search parameter would override the algorithm configured as default for the map.
 
-   Can be used to check the data from a precalculated dataset.
+The result of bmap_align_to_map is a table with the same format as that of bmap_align_to_db (see above).
 
-   A simple example:
+Note that rows starting with ">" correspond to maps names.
+An example of the output file from bmap_align_to_map:
 
-   ./bmaux_retrieve_datasets test_find.ids
+```
+>>Map:morex_genome
+#query_id	subject_id	identity	query_coverage	score	strand	qstart	qend	sstart	send	database	algorithm
+i_11_20855	chr1H	99.20	100.00	238.08	+	1	241	81133442	81133992	150831_barley_pseudomolecules	gmap
+i_12_10235	chr1H	100.00	100.00	120.0	-	1	121	80265474	80265594	150831_barley_pseudomolecules	gmap
+i_BK_19	chr7H	100.00	100.00	196.0	-	1	197	17091119	17091315	150831_barley_pseudomolecules	gmap
+i_BK_10	chr1H	100.00	100.00	210.0	+	1	211	71173958	71174168	150831_barley_pseudomolecules	gmap
+i_11_10030	chr1H	98.30	100.00	235.92	+	1	241	13590814	13591054	150831_barley_pseudomolecules	gmap
+```
 
- - bmaux_obtain_positions: to check the position of a target in a genetic/physical map
+### 4.3) Configuration tools
 
-   input: list of target identifiers.
-   resource: genetic/physical map.
-   output: list of target-position.
-           If several maps are queried, each map results begin after a line with the map name
-           prefixed with ">". If there are no results for a map, only that line will appear.
+These are several tools which are included with barleymap, but do not perform searches in the
+barleymap configured resources. These are intended to help in the configuration of the application,
+specially when dealing with datasets.
 
-   Can be used to check the results that can be obtained from a map.
+***
 
-   An example:
+The bmap_config command returns a report including all the resources which have been configured with
+the app, including:
+- Paths (from paths.conf).
+- Databases (from databases.conf).
+- External databases: these are databases not included in the databases.conf file but which are found in the same
+folder as configured databases. These databases can be used with the bmap_align_to_db tool
+by means of the --databases-ids parameter.
+- Maps (from maps.conf).
+- Datasets and their annotations (from datasets.conf and datasets_annotation.conf).
 
-   ./bmaux_obtain_positions test_map.ids
+***
 
- 3.2) Main tools
+The bmap_build_datasets is a script which uses the datasets.conf file as input, and tries to generate
+the files for those datasets (markers, genes, maps, etc.), to be included as resources in barleymap.
 
- - barleymap_align_seqs: main program to obtain map positions from FASTA sequences.
+Lets say that the user has a number of files from markers of genes which he wants to use as datasets in barleymap.
+The user must configure the datasets.conf file, in which the files with the data for those datasets will be referenced
+(see Configuration of datasets above). Then, the user could need to generate the files with the actual positions of those
+datasets to the maps, so that they can be retrieved by barleymap. Basically, we would need to perform alignments with
+FASTA sequences, reformat gtf or bed files, etc. In turn, the user can use the bmap_build_datasets, which will
+run bmap_align for datasets of type FASTA, and will reformat gtf and bed files, etc. Then the user just will need
+to put those files under the appropiate directory where barleymap has been configured to read datasets.
 
-   input: sequences in FASTA format.
-   resources: Blast and/or GMAP databases, and genetic/physical maps.
-   output: list of query-position, which can be enriched with genes or markers.
-           See 3.3) section for output format specification.
+When there are datasets which the user wants to keep in the configuration file, but must not be processed
+by bmap_build_datasets, the user can "comment" those datasets in the datasets.conf file with the prefix ">".
+Note that if he uses "#" the dataset will be fully commented, even to be used as dataset by barleymap.
 
-   Can be used to obtain the position of sequences,
-   and the information of genes or markers associated to such positions.
+The parameters of bmap_build_datasets are:
 
-   The alignment step and parameters are analog to those of bmaux_align_fasta,
-   while the mapping parameters are similar to those of bmaux_obtain_positions.
+```
+Usage: bmap_build_datasets
 
-   IMPORTANT: remember that this script will work if some sequence database
-         has been previously configured, and its contigs have position
-         associated to a reference map.
+Options:
+  -h, --help            show this help message and exit
+  --threads=N_THREADS   Number of threads to perform alignments (default 1).
+  --dataset=DATASET_PARAM
+                        A single dataset to process. By default all datasets
+                        are processed..
+  -v, --verbose         More information printed.
+```
 
- - barleymap_find_markers: main program to obtain map positions from marker IDs.
+The --threads parameter will be used as input for datasets of type FASTA (to perform the alignments).
 
-   input: list of query identifiers.
-   resources: precalculated datasets, and genetic/physical maps.
-   output: list of query-position, which can be enriched with genes or markers.
-           See 3.3) section for output format specification.
+Also the user can run the bmap_build_datasets for a single dataset (--dataset parameter),
+for example when a new dataset is to be added to a barleymap application for which the other datasets
+had already been created previously.
 
-   Can be used to obtain the position of identifiers that have been previously aligned and stored in precalculated datasets,
-   and the information of genes or markers associated to such positions.
+***
 
-   The retrieval step and parameters are analog to those of bmaux_retrieve_datasets,
-   while the mapping parameters are similar to those of bmaux_obtain_positions.
+The bmap_datasets_index is used to create an index file for the datasets.
+Currently, the script can be run for only a single dataset. For example, to process
+the datasets.conf file the user would need to loop over the file externally and run
+bmap_datasets_index for each of the iteration steps with:
 
- 3.3) Main tools output
+```
+bmap_datasets_index current_dataset
+```
 
-   Results for each map are preceded by a line with map name prefixed with ">".
-   When only the main map is requested, output includes a line of headers prefixed with "#" (see below the format).
-   When the unmapped and unaligned results are requested too, three different tables of results
-   are reported, each starting with a line prefixed with "##":
+Note that the current_dataset is the file which barleymap uses to read the dataset (i.e. the one which could
+be generated with bmap_build_datasets).
+As a result, bmap_datasets_index returns a file "current_dataset.idx", which should be placed in the same
+directory in which the current_dataset file is located and read by barleymap.
 
-           - "##Map", "##Map with genes" or "##Map with markers" data, followed by usual mapping positions in the format explained below.
+Note that for large dataset files, using index files will make the retrieval of markers, genes, etc. faster,
+whereas for small dataset files is likely better to not use index files.
 
-           - "##Hits without pos", for query-target pairs without position. A third field indicates
-           whether the query has other alignments with map position.
-
-           - "##Unmapped": queries without both position and alignment data. That is, not target
-           was found when aligning with Blast and/or GMAP.
-   
-   Format of header (without genes info, tab separated) ("##Map" table):
-               ·Marker: marker identifier (ID).
-               ·chr: chromosome.
-               ·cM: centimorgan position. Shown only for maps with cM information available.
-               ·base pairs: basepairs position. Shown only for maps with base pairs information available.
-               ·multiple positions: whether the marker has more than one position. Only shown when "--show-multiples=yes".
-               ·other alignments: if marker has alignments without map position.
-
-   Fields that are added when genes info is requested (without annotation) ("##Map with genes" table):
-               ·Gene: gene identifier.
-               ·HC/LC: whether are High Confidence or Low Confidence genes.
-               ·chr: chromosome assigned to gene.
-               ·cM: centimorgan position associated to gene. Only shown for those maps with cM information available.
-               ·bp: basepairs position of gene. Only shown for those maps with base pairs information available.
-
-   Fields that are added when annotation for genes is requested  ("##Map with genes" table):
-               ·Description: human readable description.
-               ·InterPro: annotation results from InterPro.
-               ·Signatures: annotation results from family annotation databases (NOT only PFAM).
-               ·GO terms: Gene Ontology results.
-
-   Fields that are added when markers info is requested ("##Map with markers" table):
-               ·Marker: marker found in the interval.
-               ·Dataset: dataset source of the marker.
-               ·chr: chromosome assigned to such marker.
-               ·cM: centimorgan position associated to the marker. Only shown for those maps with cM information available.
-               ·bp: base pairs position of marker. Only shown for those maps with base pairs information available.
-               ·genes: a comma-separated list of genes to which this marker hit by sequence alignment. This data is optional
-                      and is shown only if Barleymap detects a "'dataset'.genes.hits" file in the directory of the marker's dataset.
-                       See HOWTO_ADD_DATASETS for details.
-
-   For other details about how Barleymap works, go to:
-   http://floresta.eead.csic.es/barleymap/help/
-   check the "-h/--help" option of commands
-   or contact the authors.
-
- 5) Usage examples of the standalone version
+## 5) Usage examples of the standalone version
 
  4.1) bmaux_check_config
 
