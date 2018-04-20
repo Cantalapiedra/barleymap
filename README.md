@@ -9,9 +9,10 @@
    - 3.2.3: [Maps](https://github.com/Cantalapiedra/barleymap#323-creating-and-configuring-maps-the-mapsconf-file)
    - 3.2.4: [Datasets](https://github.com/Cantalapiedra/barleymap#324-creating-and-configuring-datasets-the-datasetsconf-file)
    - 3.2.5: [Datasets annotation](https://github.com/Cantalapiedra/barleymap#325-creating-and-configuring-datasets-annotations-the-datasets_annotationconf-and-the-annotation_typesconf-files)
- - 4: Tools and algorithms
+ - 4: [Tools and algorithms](https://github.com/Cantalapiedra/barleymap#4-tools-and-algorithms)
  - 5: Usage examples of the standalone version
  - 6: Resources used by the web version
+ - 7: Citation, contact, etc.
  
 ## 1) Barleymap overview
 
