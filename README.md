@@ -492,10 +492,6 @@ Gene000090	GO:0005524
 
 ## 4) Tools and algorithms
 
-Barleymap has 3 different groups of **tools**, which are further explained in following sections:
-- Main tools:
-  - bmap_align ("Align sequences" in the web version).
-  - bmap_find ("Find markers" in the web version).
   - bmap_locate ("Locate by position" in the web version).
 - Secondary tools:
   - bmap_align_to_db (only in the standalone version).
@@ -508,16 +504,16 @@ Barleymap has 3 different groups of **tools**, which are further explained in fo
 ### 4.1) Main tools
 
 The main tools which barleymap provides, both in the standalone and in the web version,
-are for alignment of sequences, finding markers, genes, etc, or locate features in a given position.
+are for **alignment** of sequences, **finding** markers, genes, etc, or **locate** features in a given position.
 
 #### 4.2) Alignment of sequences
 
+The alignment of sequences can be performed from the *Align sequences* button in barleymap web,
+or using the command *bmap_align* in the standalone version.
+
 ##### 4.2.3) Alignment parameters
 
-The alignment of sequences can be performed from the "Align sequences" button in barleymap web,
-or using bmap_align in the standalone version.
-
-In the latter, info and a full list of
+In the standalone version, info and a full list of
 parameters can be obtained running the tool with the "-h/--help" options:
 
 ```
@@ -566,12 +562,13 @@ Options:
   -v, --verbose         More information printed.
 ```
 
-In both cases, the user provides one or more FASTA formatted sequences, which are the queries.
-The user will choose also one or more maps (--maps), from which to obtain the position of the queries.
+The user provides one or more **FASTA formatted sequences** to be searched, which are the **queries**.
+The user will choose also one or more **maps** (--maps), from which to obtain the position of the queries.
 
-*Note that with this tool the user does not choose one or more sequence databases.
+*Note that the user does not choose one or more sequence databases.
 In fact, when he chooses a map, he is implicitly chosing the databases associated to that map
-in the configuration to be used as sequence references (check the alignment algorithm below).*
+in the configuration to be used as sequence references
+(check configuration of maps and the alignment algorithm below).*
 
 The user can choose alignment thresholds: minimum alignment identity (--thres-id)
 and minimum query coverage (--thres-cov).
@@ -631,6 +628,8 @@ End of loop.
 For each *q*!c*U*, that is, each *q* associated to one or more *t*, f
 ind a position *p* in *m* for *t*, and report *p* as the position of *q*.
 
+![Image of algorithm](http://floresta.eead.csic.es/barleymap/img/barleymap_popseq.pipeline_2.png)
+
 In addition there are three versions of the algorithm: "greedy", "hierarchical" and "exhaustive".
 These versions cannot be specified as parameter of the application.
 Instead, have to be associated to each of the maps in the configuration (see Configuration of maps).
@@ -644,10 +643,58 @@ hit has been found for the query, regardless of whether the query has map positi
 - In the "exhaustive" version, a query is removed from the list of unaligned queries when the query an alignment
 hit has been found for the query, and a map position has been associated to it.
 
-
-
-
 #### 4.3) Finding markers
+
+Finding markers (or other datasets features, like genes, etc.) can be performed from the *Find markers*
+button in barleymap web, or using the command *bmap_find* in the standalone version.
+
+##### 4.2.3) Find markers parameters
+
+In the standalone version, info and a full list of
+parameters can be obtained running the tool with the "-h/--help" options:
+
+```
+Usage: bmap_find.py [OPTIONS] [IDs_FILE]
+
+typical: bmap_find.py --maps=map queries.ids
+
+Options:
+  -h, --help            show this help message and exit
+  --maps=MAPS_PARAM     Comma delimited list of Maps to show.
+  --sort=SORT_PARAM     Sort results by centimorgan (cm) or basepairs (bp)
+                        (default: defined for each map in maps configuration.
+  -k, --show-multiples  Queries with multiple positions will be shown (are
+                        obviated by default).
+  -a, --anchored        Show anchored features at positions of queries.
+  -g, --genes           Genes at positions of queries will be shown. Ignored
+                        if -a
+  -m, --markers         Additional markers at positions of queries will be
+                        shown. Ignored if -g or -a.
+  -d, --show-all-features
+                        All features will be used to enrich a map. By default,
+                        only main datasets of each map are used to enrich.
+  -o, --show-on-markers
+                        Additional features will shown for each query. By
+                        default, they are shown by interval of markers
+  -e EXTEND_WINDOW, --extend=EXTEND_WINDOW
+                        Centimorgans or basepairs (depending on sort) to
+                        extend the search of -g or -m.(default 0.0)
+  -u, --show-unmapped   Not found (unaligned, unmapped), will be shown.
+  -c, --collapse        Mapping results and features (markers, genes) will be
+                        shown at the same level.
+  -f                    cM positions will be output with all decimals
+                        (default, 2 decimals).
+  -v, --verbose         More information printed.
+```
+
+Most of the parameters work the same as in the bmap_align command or the "Align sequences" web application.
+Instead of FASTA formatted sequences, the input in this tool are identifiers of features (markers names, for example).
+Therefore, there are some parameters not present in this tool, like the aligner choice or the alignment thresholds.
+Note that, because of this, the positions stored and returned as output by this tool
+were obtained with a specific set of parameters. This includes also the list of databases and the algorithm configured
+for a given map when the positions were obtained by alignment. Check the section Resources used in the web version
+for details on the way the datasets used in the web version were obtained.
+
 
 
 Usage and info about any script can be obtained by typing "-h/--help" as command parameter. Example:
