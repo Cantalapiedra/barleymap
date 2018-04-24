@@ -17,12 +17,12 @@ Barleymap was designed with **3 main goals** in mind:
 - Perform alignments in a multi-reference or pan-genome fashion, allowing to query several databases at a time.
 
 Therefore, there are three basic **tasks** which can be carried out with barleymap,
-depending on the input data to be used:
+depending on the input data used:
 
 - Obtain the map position of FASTA formatted sequences by alignment.
-- Find the map position of common-use features (like markers, genes, etc.) of known ID,
+- Find the map position of common-use loci (like markers, genes, etc.) of known ID,
 whose positions have been pre-computed.
-- Locate the features (markers, genes, etc) in the surroundings of a given map position.
+- Locate other loci (markers, genes, etc) in the surroundings of a given map position.
 
 To do this, barleymap works with the following **resources**:
 
@@ -30,8 +30,8 @@ To do this, barleymap works with the following **resources**:
 in FASTA format.
 - Maps: tables with map positions of the FASTA sequences from the databases.
 Note that a map can store positions of sequences from one or more databases.
-- Datasets: tables which store the map position of a query (a commonly queried marker, gene, etc.)
-to a specific map, so that it can be queried repeteadly without repeating the alignment step.
+- Datasets: tables which store the map position of loci often used as queries (markers, genes, etc.)
+to a specific map, so that it can be queried without repeating the alignment step.
 
 Barleymap has 3 different groups of **tools**, which are further explained in following sections:
 - Main tools:
@@ -57,8 +57,8 @@ The following builds have been tested:
 - GMAP: gmap-2013-11-27 and gmap-2013-08-31
 - HS-blastn: hs-blastn-0.0.5+
 
-Other versions could work with barleymap, as long as the aligner
-parameters or output format remains as in the versions above.
+Other versions of the previous aligners could also work with barleymap,
+as long as the aligner parameters or its output format remain as in the versions above.
 
 ## 3) Installation and configuration
 
@@ -106,7 +106,7 @@ start, restart and stop the application server.
 
 Note that besides the configuration steps detailed in the next sections,
 for the barleymap web application it could be required, depending on the environment,
-to configure the *src/bmap.conf* and the *src/server.conf*.
+to configure the *src/bmap.conf* and *src/server.conf* files.
 
 ### 3.2) Configuration
 
@@ -117,22 +117,22 @@ to configure the *src/bmap.conf* and the *src/server.conf*.
 - 3.2.5: [Datasets annotation](https://github.com/Cantalapiedra/barleymap#325-creating-and-configuring-datasets-annotations-the-datasets_annotationconf-and-the-annotation_typesconf-files)
    
 To configure barleymap you will need to edit the following **configuration files**
-are in the *barleymap/conf* directory:
+under the *barleymap/conf* directory:
 
-- paths.conf
-- databases.conf
-- maps.conf
-- datasets.conf
-- datasets_annotation.conf
+- *paths.conf*
+- *databases.conf*
+- *maps.conf*
+- *datasets.conf*
+- *datasets_annotation.conf*
 
-Note that barleymap is distributed with *.sample files, which are just examples of the previous configuration
+Note that barleymap is distributed with *.sample* files, which are just examples of the previous configuration
 files. You could use them as templates to create you own configuration files.
-Just remember that the "good" ones must not have the ".sample" suffix.
+Just remember that the ones actually used by barleymap must not have the *.sample* suffix.
 
-#### 3.2.1 The paths.conf file
+#### 3.2.1 Global configuration: the *paths.conf* file
 
-The first thing you will need to do is configuring the **paths.conf** file under the barleymap/conf directory.
-The content of the paths.conf file must have the next fields (shown as in paths.conf.sample file):
+The first thing you will need to do is configuring the ***paths.conf*** file under the *barleymap/conf* directory.
+The content of the *paths.conf* file must have the next fields (shown as in *paths.conf.sample* file):
 
 ```
 # App absolute path
