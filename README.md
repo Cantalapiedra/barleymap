@@ -113,7 +113,7 @@ to configure the *src/bmap.conf* and *src/server.conf* files.
 - 3.2.1: [Global configuration: the *paths.conf* file](https://github.com/Cantalapiedra/barleymap#321-global-configuration-the-pathsconf-file)
 - 3.2.2: [Databases: the *databases.conf* file](https://github.com/Cantalapiedra/barleymap#322-databases-the-databasesconf-file)
 - 3.2.3: [Maps: the *maps.conf* file](https://github.com/Cantalapiedra/barleymap#323-maps-the-mapsconf-file)
-- 3.2.4: [Datasets](https://github.com/Cantalapiedra/barleymap#324-creating-and-configuring-datasets-the-datasetsconf-file)
+- 3.2.4: [Datasets: the *datasets.conf* file](https://github.com/Cantalapiedra/barleymap#324-datasets-the-datasetsconf-file)
 - 3.2.5: [Datasets annotation](https://github.com/Cantalapiedra/barleymap#325-creating-and-configuring-datasets-annotations-the-datasets_annotationconf-and-the-annotation_typesconf-files)
    
 To configure barleymap you will need to edit the following **configuration files**
@@ -379,31 +379,33 @@ the following tools can be used:
 The bmap_find and bmap_locate could be used, but there is no interest in running them
 without having configured datasets previously.
 
-#### 3.2.4 Datasets: the datasets.conf file
+#### 3.2.4 Datasets: the *datasets.conf* file
 
-Some genes or markers are often searched in sequence databases, genomes or maps.
+Some genes or markers are searched in sequence databases, genomes or maps very often.
 Therefore, it is advantageous to search them once and store the result, so that
-this position can be recovered in sucessive searches.
-This is the main purpose of datasets.
+this position can be retrieved in sucessive searches without repeating the alignment process.
+This is the main purpose of **datasets**.
 
-The other use of datasets is showing which features (genes, markers, etc) are present in the region
-in which a query of interest (e.g. a QTL) has been found.
+The other use of datasets is showing which other loci (genes, markers, etc)
+are present in the region in which a query of interest
+(e.g. a marker associated to a QTL) has been found.
 
-Therefore, a dataset contains the map positions of markers, genes or other features, which have been
-previously aligned and mapped. Their positions can be retrieved using just their identifiers, avoiding
-to repeat demanding processes (specially alignment).
+Therefore, a dataset contains the map positions of markers, genes or other loci, which have been
+previously aligned and mapped. These positions can be retrieved using just the loci identifiers.
 
-To create a dataset there are several steps to follow:
-- Choose a unique identifier for your dataset ("dataset_ID").
-- Create a folder "dataset_ID" under the path indicated by the "datasets_path" entry in the "paths.conf" file
- (e.g. barleymap/datasets/dataset_ID/).
-- Create a file with the name "dataset_ID.map_ID",
+Creating a dataset takes 4 steps:
+1. Choose a unique identifier for your dataset (*dataset_ID*).
+1. Create a folder called *dataset_ID* under the path indicated by the *datasets_path*
+entry in the *paths.conf* file (e.g. *barleymap/datasets/dataset_ID/*).
+1. Create a file called *dataset_ID.map_ID*,
  for each map which will be associated to such dataset, and put it
-in the folder created for the dataset in the previous step (e.g. barleymap/datasets/dataset_ID/dataset_ID.map_ID).
+in the folder created for the dataset in the previous step (e.g. *barleymap/datasets/dataset_ID/dataset_ID.map_ID*).
 Note that these files could be created using *bmap_build_datasets*, as explained in following sections.
-However, if it is desired to create the files manually, see format of the dataset-map files below for details.
+However, if it is desired to create the files manually,
+see [format of the dataset-map files](https://github.com/Cantalapiedra/barleymap#format-of-the-dataset-map-files)
+below for details.
 
-- Create a row in the conf/datasets.conf file, with 8 space-separated fields.
+1. Create a row in the conf/datasets.conf file, with 8 space-separated fields.
 
   - Dataset name: an arbitrary name for the dataset, used by the user to reference it and for printing purposes.
   Note that you could prefix the dataset name with a ">". This annotates the dataset to be ignored by the barleymap
@@ -426,11 +428,11 @@ However, if it is desired to create the files manually, see format of the datase
 The "datasets.conf.sample" file shows 4 datasets as examples:
 
 ```
-#name unique_id type filename file_type db_list synonyms_file records_prefix
-DATASET1 dataset1 genetic_marker dataset1.fasta fna ANY /home/user/dataset1.syns no
-DATASET2 dataset2 gene dataset2.gtf gtf DB1,DB2 no DAT2_
->DATASET3 dataset3 anchored dataset3.fasta fna ANY no no
->DATASET4 dataset4 map "maps_path" map DB3 no DAT3_
+#name      unique_id  type            filename        file_type  db_list  synonyms_file             records_prefix
+DATASET1   dataset1   genetic_marker  dataset1.fasta  fna        ANY      /home/user/dataset1.syns  no
+DATASET2   dataset2   gene            dataset2.gtf    gtf        DB1,DB2  no                        DAT2_
+>DATASET3  dataset3   anchored        dataset3.fasta  fna        ANY      no                        no
+>DATASET4  dataset4   map             "maps_path"     map        DB3      no                        DAT3_
 ```
 
 The first dataset (DATASET1), with ID (dataset1), is of type genetic marker (genetic_marker),
@@ -450,15 +452,15 @@ A dataset-map file contain the map position of a set of commonly used markers, g
 
 ```
 >Map2
-#Marker	chr	cM	multiple_positions	other_alignments
-S_180989	1	0.106232294617565	No	No
-S_35790	1	0.21246458923513	No	No
-i_30945	1	3.64730878186969	No	No
-S_165910	1	3.68361907676158	No	No
-S_161137	1	4.10764872521246	No	No
-S_193700	1	4.10764872521246	No	No
-S_206684	1	4.10764872521246	No	No
-i_66630	1	4.95750708215297	No	No
+#Marker   chr  cM                 multiple_positions  other_alignments
+S_180989  1    0.106232294617565  No                  No
+S_35790   1    0.21246458923513   No                  No
+i_30945   1    3.64730878186969   No                  No
+S_165910  1    3.68361907676158   No                  No
+S_161137  1    4.10764872521246   No                  No
+S_193700  1    4.10764872521246   No                  No
+S_206684  1    4.10764872521246   No                  No
+i_66630   1    4.95750708215297   No                  No
 ```
 
 Note that this file has the same format as that of files for maps, and, as explained above, a map
