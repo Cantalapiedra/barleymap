@@ -222,10 +222,10 @@ Each database should be added as a single row with **3 space-separated fields**:
 The *databases.conf.sample* file shows 3 databases as **examples**:
 
 ```
-# name unique_id type
-SpeciesAGenome speciesA std
-SpeciesBGenome speciesB std
-PolyploidGenome polyploid big
+#name            unique_id  type
+SpeciesAGenome   speciesA   std
+SpeciesBGenome   speciesB   std
+PolyploidGenome  polyploid  big
 ```
 
 Note that the aligner to be used with each database is not specified:
@@ -293,10 +293,10 @@ See [format of the "chrom" file](https://github.com/Cantalapiedra/barleymap#form
 The *maps.conf.sample* file shows 3 maps as **examples**:
 
 ```
-# name id has_cm has_bp default_pos_type map_type search_type db_list folder_name main_datasets
-MapName mapID cm_false bp_true bp physical greedy db_genome mapID_folder dataset1,dataset2,dataset3
-Map2 map2 cm_true bp_false cm genetic hierarchical db_anchored1 map2_dir dataset4
-PhysGenetMap physgenetmap cm_true bp_true cm genetic exhaustive db_anchored1,db_anchored2,db_anchored3 physgenetmap_path dataset3,dataset5
+#name         id            has_cm    has_bp    default_pos_type  map_type  search_type   db_list                                 folder_name        main_datasets
+MapName       mapID         cm_false  bp_true   bp                physical  greedy        db_genome                               mapID_folder       dataset1,dataset2,dataset3
+Map2          map2          cm_true   bp_false  cm                genetic   hierarchical  db_anchored1                            map2_dir           dataset4
+PhysGenetMap  physgenetmap  cm_true   bp_true   cm                genetic   exhaustive    db_anchored1,db_anchored2,db_anchored3  physgenetmap_path  dataset3,dataset5
 ```
 
 The first map, called "MapName", with ID "mapID", and stored in the folder *mapID_folder*,
@@ -323,40 +323,15 @@ For example, a file called *map2.contigs_database" could have:
 
 ```
 >Map2
-#Marker chr	cM	multiple_positions	other_alignments
-contig_1011389	1	0.106232294617565	No	No
-contig_1029771	1	0.106232294617565	No	No
-contig_110298	1	0.106232294617565	No	No
-contig_111381	1	0.106232294617565	No	No
-contig_1170672	1	0.106232294617565	No	No
-contig_1269062	1	0.106232294617565	No	No
-contig_13304	1	0.106232294617565	No	No
-contig_13532	1	0.106232294617565	No	No
-```
-
-#Marker|chr|cM|multiple_positions|other_alignments
--------|---|--|------------------|----------------
-contig_1011389|1|0.106232294617565|No|No
-contig_1029771	1	0.106232294617565	No	No
-contig_110298	1	0.106232294617565	No	No
-contig_111381	1	0.106232294617565	No	No
-contig_1170672	1	0.106232294617565	No	No
-contig_1269062	1	0.106232294617565	No	No
-contig_13304	1	0.106232294617565	No	No
-contig_13532	1	0.106232294617565	No	No
-
-```
->Map2
-#Marker|chr|cM|multiple_positions|other_alignments
--------|---|--|------------------|----------------
-contig_1011389|1|0.106232294617565|No|No
-contig_1029771	1	0.106232294617565	No	No
-contig_110298	1	0.106232294617565	No	No
-contig_111381	1	0.106232294617565	No	No
-contig_1170672	1	0.106232294617565	No	No
-contig_1269062	1	0.106232294617565	No	No
-contig_13304	1	0.106232294617565	No	No
-contig_13532	1	0.106232294617565	No	No
+#Marker         chr  cM                 multiple_positions  other_alignments
+contig_1011389  1    0.106232294617565  No                  No
+contig_1029771  1    0.106232294617565  No                  No
+contig_110298   1    0.106232294617565  No                  No
+contig_111381   1    0.106232294617565  No                  No
+contig_1170672  1    0.106232294617565  No                  No
+contig_1269062  1    0.106232294617565  No                  No
+contig_13304    1    0.106232294617565  No                  No
+contig_13532    1    0.106232294617565  No                  No
 ```
 
 Rows starting with ">" or "#" will be ignored, so that it can be used for comments, map name or header fields.
