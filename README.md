@@ -207,12 +207,12 @@ To look for position of sequences through alignment,
 barleymap requires at least one database to work with.
 There are 3 steps to add a database to barleymap:
 
-- 1) Create the files of the database (with the corresponding tool from BLASTN, GMAP and/or HS-BLASTN).
+1) Create the files of the database (with the corresponding tool from BLASTN, GMAP and/or HS-BLASTN).
 
-- 2) Put the database files under the path indicated in the *paths.conf* file
+2) Put the database files under the path indicated in the *paths.conf* file
 for the corresponding aligner.
 
-- 3) Configure the database in barleymap. To do that, edit *databases.conf* file.
+3) Configure the database in barleymap. To do that, edit *databases.conf* file.
 Each database should be added as a single row with **3 space-separated fields**:
   - Name: an arbitrary name for the database, used by the user for referencing it and for printing purposes.
   - Unique identifier (ID): a unique ID for the database. This should match the folder (GMAP)
