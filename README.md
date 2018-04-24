@@ -242,7 +242,7 @@ we should move the "speciesA" folder created by GMAP so that the database will b
 ***
 
 Once at least one database has been correctly configured,
-the following tools can already be used:
+the following tools can be used:
 - bmap_align_to_db
 
 #### 3.2.3 Maps: the *maps.conf* file
@@ -336,7 +336,7 @@ contig_13532    1    0.106232294617565  No                  No
 
 Rows starting with ">" or "#" will be ignored, so that it can be used for comments, map name or header fields.
 
-Data rows have 5 or 6 (depending whether the map has cM, bp or both types of position) tab-delimited fields:
+Data rows have 5 or 6 (depending whether the map has cM, bp or both types of position) **tab-delimited fields**:
 
 - Database entry: ID of the contig, chromosome, etc. from the database.
 - chr: ID of the chromosome from the map.
@@ -361,7 +361,7 @@ chr7H	7	657224000
 chrUn	8	249774706
 ```
 
-Each row has 3 or 4 (depending whether the map has cM, bp or both types of position) tab-delimited fields:
+Each row has 3 or 4 (depending whether the map has cM, bp or both types of position) **tab-delimited fields**:
 - Chromosome name: an arbitrary name for the chromosome, used for printing purposes.
 - Chromosome ID: a unique identifier for this chromosome in this map.
 - cM, bp or both: 1 or 2 fields with the maximum position of this chromosome (i.e. its size or length in cM or bp).
@@ -371,7 +371,7 @@ For the standalone version you could just leave it to any value.
 ***
 
 Once that at least one database and one map have been correctly configured,
-the following tools can already be used:
+the following tools can be used:
 - bmap_align_to_db
 - bmap_align_to_map
 - bmap_align
@@ -379,7 +379,7 @@ the following tools can already be used:
 The bmap_find and bmap_locate could be used, but there is no interest in running them
 without having configured datasets previously.
 
-#### 3.2.4 Creating and configuring datasets: the datasets.conf file
+#### 3.2.4 Datasets: the datasets.conf file
 
 Some genes or markers are often searched in sequence databases, genomes or maps.
 Therefore, it is advantageous to search them once and store the result, so that
