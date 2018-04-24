@@ -13,33 +13,35 @@ in sequence-enriched genetic/physical maps.
 
 Barleymap was designed with **3 main goals** in mind:
 - Provide the position of sequences in a map, hiding from the user the details of the alignment and mapping steps.
-- Facilitate inspecting the region surrounding the queried sequence.
+- Facilitate inspecting the region surrounding the queried sequence. ¿Which other markers, genes, etc are in the region?
 - Perform alignments in a multi-reference or pan-genome fashion, allowing to query several databases at a time.
 
 Therefore, there are three basic **tasks** which can be carried out with barleymap,
 depending on the input data to be used:
 
-- Locate FASTA formatted sequences in a map through sequence alignment.
-- Retrieve the position of common-use markers (or other features, like genes) of known ID,
+- Obtain the map position of FASTA formatted sequences by alignment.
+- Find the map position of common-use features (like markers, genes, etc.) of known ID,
 whose positions have been pre-computed.
-- Inspect the features (markers, genes, etc) in the surroundings of a given map position.
+- Locate the features (markers, genes, etc) in the surroundings of a given map position.
 
 To do this, barleymap works with the following **resources**:
 
-- Databases: FASTA sequences from sequence-enriched maps, genomes, or any other sequence reference.
-- Maps: tables with positions of every FASTA sequence from the databases. Note that a map can store positions
-of sequences from one or several databases.
-- Datasets: tables which store the result of alignment of a given query to a specific map.
+- Databases: sequences from genomes, sequence-enriched maps, or any other sequence reference,
+in FASTA format.
+- Maps: tables with map positions of the FASTA sequences from the databases.
+Note that a map can store positions of sequences from one or more databases.
+- Datasets: tables which store the map position of a query (a commonly queried marker, gene, etc.)
+to a specific map, so that it can be queried repeteadly without repeating the alignment step.
 
 Barleymap has 3 different groups of **tools**, which are further explained in following sections:
 - Main tools:
   - bmap_align ("Align sequences" in the web version).
   - bmap_find ("Find markers" in the web version).
   - bmap_locate ("Locate by position" in the web version).
-- Secondary tools:
-  - bmap_align_to_db (only in the standalone version).
-  - bmap_align_to_map (only in the standalone version).
-- Configuration tools:
+- Secondary tools (only in the standalone version):
+  - bmap_align_to_db 
+  - bmap_align_to_map
+- Configuration tools (only in the standalone version):
   - bmap_build_datasets
   - bmap_datasets_index
   - bmap_config
@@ -47,12 +49,16 @@ Barleymap has 3 different groups of **tools**, which are further explained in fo
 ## 2) Prerequisites
 
 - Python 2.6 or superior.
-- To perform sequence alignments barleymap will need either Blast, HS-blastn and/or GMAP.
+- To perform sequence alignments barleymap will need
+either BLASTN, HS-BLASTN and/or GMAP sequence aligners.
 
-For the current barleymap version, the following builds have been tested:
+The following builds have been tested:
 - Blast: ncbi-blast-2.2.27+
 - GMAP: gmap-2013-11-27 and gmap-2013-08-31
 - HS-blastn: hs-blastn-0.0.5+
+
+Other versions could work with barleymap, as long as the aligner
+parameters or output format remains as in the versions above.
 
 ## 3) Installation and configuration
 
@@ -61,16 +67,20 @@ For the current barleymap version, the following builds have been tested:
 #### 3.1.1) Standalone version
 
 Either:
-- clone barleymap github repository.
-- download a release, uncompress it.
+- clone the barleymap github repository.
+- download a [release](https://github.com/Cantalapiedra/barleymap/releases),
+and uncompress it.
 
-Configure PATH and PYTHONPATH as needed.
+Configure environmental variables (e.g. PATH and PYTHONPATH in linux) as needed.
 
 For example:
 ```
 mkdir /home/$USER/apps;
 cd /home/$USER/apps;
-tar -zxf barleymap.tar.gz
+curl -O https://github.com/Cantalapiedra/barleymap/archive/barleymap-3.0.tar.gz
+tar -zxf barleymap-3.0.tar.gz
+rm barleymap-3.0.tar.gz
+mv barleymap-3.0 barleymap
 export PATH=$PATH:/home/$USER/apps/barleymap/bin/
 export PYTHONPATH=$PYTHONPATH:/home/$USER/apps/barleymap/
 ```
@@ -90,26 +100,30 @@ ProxyPass /barleymap http://127.0.0.1:$CHERRYPYPORT/barleymap/
 ProxyPassReverse /barleymap http://127.0.0.1:$CHERRYPYPORT/barleymap/
 ```
 
-Besides that, it is recommendable to include the path to the web application
-in the PYTHONPATH environmental variable of the system,
-and also some routine (e.g. crontab) to clean the temporary files
-(the directory indicated in the tmp_files_path entry in the paths.conf file) regularly.
+Barleymap web versions includes three shell scripts
+(_START, _RESTART and _STOP) to make it easier to
+start, restart and stop the application server.
+
+Note that besides the configuration steps detailed in the next sections,
+for the barleymap web application it could be required, depending on the environment,
+to configure the *src/bmap.conf* and the *src/server.conf*.
 
 ### 3.2) Configuration
 
-- 3.2.1: [App configuration](https://github.com/Cantalapiedra/barleymap#321-the-pathsconf-file)
+- 3.2.1: [Global configuration: the *paths.conf* file](https://github.com/Cantalapiedra/barleymap#321-the-pathsconf-file)
 - 3.2.2: [Databases](https://github.com/Cantalapiedra/barleymap#322-creating-and-configuring-databases-the-databasesconf-file)
 - 3.2.3: [Maps](https://github.com/Cantalapiedra/barleymap#323-creating-and-configuring-maps-the-mapsconf-file)
 - 3.2.4: [Datasets](https://github.com/Cantalapiedra/barleymap#324-creating-and-configuring-datasets-the-datasetsconf-file)
 - 3.2.5: [Datasets annotation](https://github.com/Cantalapiedra/barleymap#325-creating-and-configuring-datasets-annotations-the-datasets_annotationconf-and-the-annotation_typesconf-files)
    
 To configure barleymap you will need to edit the following **configuration files**
-under the barleymap/conf directory:
+are in the *barleymap/conf* directory:
 
 - paths.conf
 - databases.conf
 - maps.conf
 - datasets.conf
+- datasets_annotation.conf
 
 Note that barleymap is distributed with *.sample files, which are just examples of the previous configuration
 files. You could use them as templates to create you own configuration files.
