@@ -205,7 +205,7 @@ with one or more alignment tools (BLASTN, GMAP or HS-BLASTN in the current versi
 
 To look for position of sequences through alignment,
 barleymap requires at least one database to work with.
-There are 3 steps to add a database to barleymap:
+It takes 3 steps to add a database to barleymap:
 
 1.  Create the files of the database with the corresponding tool from BLASTN, GMAP and/or HS-BLASTN
 (e.g. *makeblastdb* for BLASTN, *gmap_build* for GMAP).
@@ -219,7 +219,7 @@ Each database should be added as a single row with **3 space-separated fields**:
   - Type: either "std" or "big". It just tells barleymap whether to use the *gmap* or the *gmapl* binary
   when using the GMAP aligner. Check GMAP documentation for size of databases supported with *gmap* or *gmapl*.
   
-The "databases.conf.sample" file shows 3 databases as **examples**:
+The *databases.conf.sample* file shows 3 databases as **examples**:
 
 ```
 # name unique_id type
@@ -247,26 +247,26 @@ the following tools can already be used:
 
 #### 3.2.3 Maps: the *maps.conf* file
 
-A map stores the positional arrangement, either physical or genetical, of sequences from one or several databases.
+A **map** stores the positional arrangement, either physical or genetical, of sequences from one or several databases.
 
-There are several steps to add a map to barleymap:
+It takes 5 steps to add a map to barleymap:
 
-- Choose an identifier to be used as unique ID for this map ("map_ID").
-- Create a folder "map_ID", under the path indicated by the "maps_path" entry in the "paths.conf" file
- (e.g. barleymap/maps/map_ID/).
-- If the map is of type "anchored" (see below), create a file with the name "map_ID.database_ID",
+1. Choose an identifier to be used as unique ID for this map (*map_ID*).
+1. Create a *map_ID* folder, under the path indicated by the *maps_path* entry in the *paths.conf* file
+ (e.g. *barleymap/maps/map_ID/*).
+1. If the map is of type *anchored* (see below), create a file with the name *map_ID.database_ID*,
  for each database which will be included in such map, and put it
-in the folder created for the map in the previous step (e.g. barleymap/maps/map_ID/map_ID.database_ID).
+in the folder created for the map in the previous step (e.g. *barleymap/maps/map_ID/map_ID.database_ID*).
 See format of the map-database files below for details.
-- Create a file with the name "map_ID.chrom" and put it in the folder created for the map
-(e.g. barleymap/maps/map_ID/map_ID.chrom). See format of the "chrom" file below for details.
-- Create a row in the conf/maps.conf file, with 10 space-separated fields.
-  - Map name: an arbitrary name for the map, used by the user for referencing it and for printing purposes.
-  - Map ID: the "map_ID" chosen above.
-  - Has cM positions: either "cm_true" or "cm_false", indicating whether the map has genetic positions or not.
-  - Has bp positions: either "bp_true" or "bp_false", indicating whether the map has physical positions or not.
+1. Create a file with the name *map_ID.chrom* and put it in the folder created for the map
+(e.g. *barleymap/maps/map_ID/map_ID.chrom*). See format of the "chrom" file below for details.
+1. Create a row in the *conf/maps.conf* file, with **10 space-separated fields**:
+  - Name: an arbitrary name for the map, used by the user for referencing it and for printing purposes.
+  - ID: the *map_ID* chosen above.
+  - It has cM positions: either "cm_true" or "cm_false", indicating whether the map has genetic positions or not.
+  - It has bp positions: either "bp_true" or "bp_false", indicating whether the map has physical positions or not.
   - Default position type: either "cm" or "bp". Used only when a map has both cM and bp positions.
-  - Map type: either "physical" or "anchored".
+  - Type: either "physical" or "anchored".
     - A "physical" map (e.g. a genome) has not files for positions
   since the positions are those from the database and are already obtained
   from the alignment result (e.g. chr1H position 133002).
@@ -282,13 +282,13 @@ See format of the map-database files below for details.
     - The "exhaustive" algorithm keeps searching in further database only those queries
     which still lack map position, independently of whether have already a hit from alignment or not.
     
-  - DB list: a comma-separated list of database IDs which are associated to this map. These are the databases which
-  will be used as sequence references when this map is queried.
+  - Database list: a comma-separated list of database IDs which are associated to this map.
+  These are the databases which will be used as sequence references when this map is queried.
   - Folder: the folder name for this map, usually the same as the map ID.
   - Main datasets: a comma-separated list of datasets IDs which are associated to this map. These datasets will be always
   shown when looking for surrounding features, whereas other datasets will be shown only when explicitly requested.
   
-The "maps.conf.sample" file shows 3 maps as examples:
+The *maps.conf.sample* file shows 3 maps as **examples**:
 
 ```
 # name id has_cm has_bp default_pos_type map_type search_type db_list folder_name main_datasets
