@@ -111,8 +111,8 @@ to configure the *src/bmap.conf* and *src/server.conf* files.
 ### 3.2) Configuration
 
 - 3.2.1: [Global configuration: the *paths.conf* file](https://github.com/Cantalapiedra/barleymap#321-global-configuration-the-pathsconf-file)
-- 3.2.2: [Databases](https://github.com/Cantalapiedra/barleymap#322-creating-and-configuring-databases-the-databasesconf-file)
-- 3.2.3: [Maps](https://github.com/Cantalapiedra/barleymap#323-creating-and-configuring-maps-the-mapsconf-file)
+- 3.2.2: [Databases: the *databases.conf* file](https://github.com/Cantalapiedra/barleymap#322-creating-and-configuring-databases-the-databasesconf-file)
+- 3.2.3: [Maps: the *maps.conf* file](https://github.com/Cantalapiedra/barleymap#323-creating-and-configuring-maps-the-mapsconf-file)
 - 3.2.4: [Datasets](https://github.com/Cantalapiedra/barleymap#324-creating-and-configuring-datasets-the-datasetsconf-file)
 - 3.2.5: [Datasets annotation](https://github.com/Cantalapiedra/barleymap#325-creating-and-configuring-datasets-annotations-the-datasets_annotationconf-and-the-annotation_typesconf-files)
    
@@ -198,27 +198,29 @@ Note that although both the standalone and the web versions need their own confi
 the actual resources (databases, datasets and maps) can be shared by both applications by configuring
 the previous fields to point to the same directories.
 
-#### 3.2.2 Creating and configuring databases: the databases.conf file
+#### 3.2.2 Databases: the *databases.conf* file
 
-A database represents a sequence reference (a genome, a WGS assembly, or similar), which can be queried
-with an alignment tool (Blastn, GMAP or HS-Blastn in the current version of barleymap).
+A **database** represents a sequence reference (a genome or similar), which can be queried
+with one or more alignment tools (BLASTN, GMAP or HS-BLASTN in the current version of barleymap).
 
-Barleymap requires at least one database to work with. There are 2 steps to add a database to barleymap:
+To look for position of sequences through alignment,
+barleymap requires at least one database to work with.
+There are 3 steps to add a database to barleymap:
 
-- First: create the database (with the corresponding tool from Blast, GMAP or HS-Blastn).
-Note that the database should be accesible from the corresponding path indicated in the "paths.conf" file
-(fields "blastn_dbs_path", "gmap_dbs_path" or "hsblastn_dbs_path").
+- 1) Create the files of the database (with the corresponding tool from BLASTN, GMAP and/or HS-BLASTN).
 
-- Secondly: configure the database in barleymap. To do that, the "databases.conf" file,
-under the barleymap/conf directory, must be edited.
-Each database should be added as a single row with 3 space-separated fields:
-  - Database name: an arbitrary name for the database, used by the user for referencing it and for printing purposes.
-  - Database unique ID: a unique identifier of the database. This should match the folder or files where the actual
-database is stored, depending on the aligner (see "paths.conf" "Aligners" section).
-  - Database type: either "std" or "big". It just tells barleymap whether to use the gmap or the gmapl binary
-  when using the GMAP aligner. Check GMAP documentation for size of databases supported with gmap or gmapl.
+- 2) Put the database files under the path indicated in the *paths.conf* file
+for the corresponding aligner.
+
+- 3) Configure the database in barleymap. To do that, edit *databases.conf* file.
+Each database should be added as a single row with **3 space-separated fields**:
+  - Name: an arbitrary name for the database, used by the user for referencing it and for printing purposes.
+  - Unique identifier (ID): a unique ID for the database. This should match the folder (GMAP)
+  or prefix of files (BLASTN, HS-BLASTN) where the actual database is stored.
+  - Type: either "std" or "big". It just tells barleymap whether to use the *gmap* or the *gmapl* binary
+  when using the GMAP aligner. Check GMAP documentation for size of databases supported with *gmap* or *gmapl*.
   
-The "databases.conf.sample" file shows 3 databases as examples:
+The "databases.conf.sample" file shows 3 databases as **examples**:
 
 ```
 # name unique_id type
@@ -227,8 +229,16 @@ SpeciesBGenome speciesB std
 PolyploidGenome polyploid big
 ```
 
-Note that the aligner to be used with each database is not specified.
-For a single barleymap database, you could actually have Blast, GMAP and HS-Blastn sequence databases.
+Note that the aligner to be used with each database is not specified:
+for a single barleymap database, you could actually have BLASTN, GMAP and HS-BLASTN sequence databases.
+
+The first database, called "SpaciesAGenome" has the ID "speciesA", and thus its actual
+files (e.g. from BLASTN) and folders (e.g. from GMAP) should be prefixed "speciesA" and placed under the
+directory indicated for that aligner in the *paths.conf* file.
+For example, if we created a GMAP index for this "speciesA" database, and the path for
+GMAP databases was configured as */home/user/barleymap/databases/gmap/* in *paths.conf*,
+we should move the "speciesA" folder created by GMAP so that the database will be at
+*/home/user/barleymap/databases/gmap/speciesA*.
 
 ***
 
@@ -236,7 +246,7 @@ Once at least one database has been correctly configured,
 the following tools can already be used:
 - bmap_align_to_db
 
-#### 3.2.3 Creating and configuring maps: the maps.conf file
+#### 3.2.3 Maps: the *maps.conf* file
 
 A map stores the positional arrangement, either physical or genetical, of sequences from one or several databases.
 
