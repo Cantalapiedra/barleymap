@@ -252,14 +252,16 @@ A **map** stores the positional arrangement, either physical or genetical, of se
 It takes 5 steps to add a map to barleymap:
 
 1. Choose an identifier to be used as unique ID for this map (*map_ID*).
-1. Create a *map_ID* folder, under the path indicated by the *maps_path* entry in the *paths.conf* file
+1. Create a folder called *map_ID*, under the path indicated by the *maps_path* entry in the *paths.conf* file
  (e.g. *barleymap/maps/map_ID/*).
-1. If the map is of type *anchored* (see below), create a file with the name *map_ID.database_ID*,
- for each database which will be included in such map, and put it
-in the folder created for the map in the previous step (e.g. *barleymap/maps/map_ID/map_ID.database_ID*).
-See format of the map-database files below for details.
+1. If the map is of type "anchored" (see below), create a file called *map_ID.database_ID*,
+ for each database to be associated to this map, and put it
+under the folder created for the map in the previous step (e.g. *barleymap/maps/map_ID/map_ID.database_ID*).
+See [format of the map-database files](https://github.com/Cantalapiedra/barleymap#format-of-the-map-database-files)
+below for details.
 1. Create a file with the name *map_ID.chrom* and put it in the folder created for the map
-(e.g. *barleymap/maps/map_ID/map_ID.chrom*). See format of the "chrom" file below for details.
+(e.g. *barleymap/maps/map_ID/map_ID.chrom*).
+See [format of the "chrom" file](https://github.com/Cantalapiedra/barleymap#format-of-the-chrom-file) below for details.
 1. Create a row in the *conf/maps.conf* file, with **10 space-separated fields**:
   - Name: an arbitrary name for the map, used by the user for referencing it and for printing purposes.
   - ID: the *map_ID* chosen above.
@@ -297,29 +299,46 @@ Map2 map2 cm_true bp_false cm genetic hierarchical db_anchored1 map2_dir dataset
 PhysGenetMap physgenetmap cm_true bp_true cm genetic exhaustive db_anchored1,db_anchored2,db_anchored3 physgenetmap_path dataset3,dataset5
 ```
 
-The first map (MapName), with ID (mapID) and stored in its folder (mapID_folder),
-would be a physical map (cm_false, bp_true, bp, physical),
-with a single database of sequences associated to it (db_genome). Having a single database makes irrelevant
-the search_type (which has been configured to "greedy", arbitrarily). This map has 3 datasets associated to this
-map as "main datasets".
+The first map, called "MapName", with ID "mapID", and stored in the folder *mapID_folder*,
+is a physical map ("cm_false", "bp_true", "bp", "physical"),
+with a single database (with ID *db_genome*) of sequences associated to it.
+Having a single database makes irrelevant the "Search type" field
+(which has been set to "greedy", arbitrarily).
+The map has 3 datasets associated as main datasets.
 
-The second map (Map2) is a genetic map (cm_true, bp_false, cm, genetic)
-with a single database of sequences associated to it (db_anchored1). Again, the search_type will be irrelevant
+The second map ("Map2") is a genetic map ("cm_true", "bp_false", "cm", "genetic")
+with a single database of sequences associated to it (*db_anchored1*).
+Again, the "Search type" will be irrelevant
 having only one database (and thus has been configured to "hierarchical", arbitrarily).
 
-The third map (PhysGenetMap) is a genetic and physical map (cm_true, bp_true, cm, genetic), with
-3 databases associated to it (db_anchored1, 2 and 3). Here, the search_type is relevant, and queries
-will be searched differently depending on the algorithm chosen. In this case, the algorithm chosen
-(exhaustive) will keep search each query in the next database, until a map position has been found for the query.
+The third map ("PhysGenetMap") is a genetical and physical map ("cm_true", "bp_true", "cm", "genetic"),
+with 3 databases associated to it (*db_anchored1*, *db_anchored2* and *db_anchored3*).
+Here, the "Search type" algorithm was set to "exhaustive", to keep searching each query in the next database,
+until a map position has been found for the it.
 
 ##### Format of the map-database files
 
-A map-database file contain the map position of the sequences of a database. For example:
+A map-database file contains the map position of the sequences of a database.
+For example, a file called *map2.contigs_database" could have:
 
 ```
 >Map2
-#Marker	chr	cM	multiple_positions	other_alignments
+#Marker chr	cM	multiple_positions	other_alignments
 contig_1011389	1	0.106232294617565	No	No
+contig_1029771	1	0.106232294617565	No	No
+contig_110298	1	0.106232294617565	No	No
+contig_111381	1	0.106232294617565	No	No
+contig_1170672	1	0.106232294617565	No	No
+contig_1269062	1	0.106232294617565	No	No
+contig_13304	1	0.106232294617565	No	No
+contig_13532	1	0.106232294617565	No	No
+```
+
+```
+>Map2
+#Marker|chr|cM|multiple_positions|other_alignments
+-------|---|--|------------------|----------------
+contig_1011389|1|0.106232294617565|No|No
 contig_1029771	1	0.106232294617565	No	No
 contig_110298	1	0.106232294617565	No	No
 contig_111381	1	0.106232294617565	No	No
