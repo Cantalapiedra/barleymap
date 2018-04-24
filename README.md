@@ -110,7 +110,7 @@ to configure the *src/bmap.conf* and *src/server.conf* files.
 
 ### 3.2) Configuration
 
-- 3.2.1: [Global configuration: the *paths.conf* file](https://github.com/Cantalapiedra/barleymap#321-the-pathsconf-file)
+- 3.2.1: [Global configuration: the *paths.conf* file](https://github.com/Cantalapiedra/barleymap#321-global-configuration-the-pathsconf-file)
 - 3.2.2: [Databases](https://github.com/Cantalapiedra/barleymap#322-creating-and-configuring-databases-the-databasesconf-file)
 - 3.2.3: [Maps](https://github.com/Cantalapiedra/barleymap#323-creating-and-configuring-maps-the-mapsconf-file)
 - 3.2.4: [Datasets](https://github.com/Cantalapiedra/barleymap#324-creating-and-configuring-datasets-the-datasetsconf-file)
@@ -128,6 +128,10 @@ under the *barleymap/conf* directory:
 Note that barleymap is distributed with *.sample* files, which are just examples of the previous configuration
 files. You could use them as templates to create you own configuration files.
 Just remember that the ones actually used by barleymap must not have the *.sample* suffix.
+
+All barleymap **configuration** files have one **field** per row. Each row has 2 space-separated columns:
+the *field name* and the *field value*.
+To a edit a field, edit its value. Field names should be left unmodified.
 
 #### 3.2.1 Global configuration: the *paths.conf* file
 
@@ -168,29 +172,31 @@ stdalone_app http://eead.csic.es/compbio/soft/barleymap/
 First, you will need to edit the *app_path* field to point
 to the **absolute path** in which barleymap has been installed.
 
-The fields *genmap_path* and *split_blast_path*, and also those under
-the section *Other* ("citation" and "stdalone_app") should be left **unmodified**.
+The values of fields *genmap_path* and *split_blast_path*, and also those under
+the section *Other* (*citation* and *stdalone_app*) should be left **unmodified**.
 
 For most of the other fields, the directories they reference will most likely be empty at the moment.
 Thus, you could configure them already or wait until you decide where the data will be stored.
 
-The *tmp_files_path* indicates barleymap where should write temporary files to.
-The *datasets_path*, *annot_path* and *maps_path* tells barleymap from which directories
-should read data corresponding to datasets, annotation and maps.
+The *tmp_files_path* field indicates to barleymap where it should write temporary files to.
+The *datasets_path*, *annot_path* and *maps_path* fields tell barleymap from which directories
+should read data corresponding to datasets, annotation and maps, respectively.
+To be sure that barleymap is reading those paths correctly, using absolute paths are recommended.
 
-Regarding the section *Aligners*, you will need to edit only the fields corresponding to the aligner
-or aligners which will be used by your barleymap. For each aligner to be used, barleymap needs:
+Regarding the section *Aligners*, only the fields corresponding to the aligner
+or aligners which will be used by the current barleymap instance will need to be edited.
+For each aligner to be used, barleymap needs:
 
-- The **path to the binary** file of the aligner. You will need to change the corresponding strings 
-(PATH_TO_NCBI_BLAST, PATH_TO_GMAP and/or PATH_TO_HSBLASTN).
+- The **absolute path to the binary** file of the aligner.
+You will need to change the values of *blastn_app_path*, *gmap_app_path*, *gmapl_app_path*,
+and *hsblastn_app_path* fields.
 
-- The **path to the sequence databases** (genome, sequence-enriched map, or any other sequence reference).
-You will need to change the corresponding strings
-(PATH_TO_BLAST_DATABASES, PATH_TO_GMAP_DATABASES and/or PATH_TO_HSBLASTN_DATABASES).
+- The **absolute path to the sequence databases** (genome, sequence-enriched map, or any other sequence reference).
+You will need to change the values of *blastn_dbs_path*, *gmap_dbs_path*, and *hsblastn_dbs_path*.
 
 Note that although both the standalone and the web versions need their own configuration files,
-the actual files for databases, datasets and maps can be shared by both applications by configuring
-the previous fields.
+the actual resources (databases, datasets and maps) can be shared by both applications by configuring
+the previous fields to point to the same directories.
 
 #### 3.2.2 Creating and configuring databases: the databases.conf file
 
