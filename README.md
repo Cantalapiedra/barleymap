@@ -114,7 +114,7 @@ to configure the *src/bmap.conf* and *src/server.conf* files.
 - 3.2.2: [Databases: the *databases.conf* file](https://github.com/Cantalapiedra/barleymap#322-databases-the-databasesconf-file)
 - 3.2.3: [Maps: the *maps.conf* file](https://github.com/Cantalapiedra/barleymap#323-maps-the-mapsconf-file)
 - 3.2.4: [Datasets: the *datasets.conf* file](https://github.com/Cantalapiedra/barleymap#324-datasets-the-datasetsconf-file)
-- 3.2.5: [Datasets annotation](https://github.com/Cantalapiedra/barleymap#325-creating-and-configuring-datasets-annotations-the-datasets_annotationconf-and-the-annotation_typesconf-files)
+- 3.2.5: [Annotations: the *datasets_annotation.conf*](https://github.com/Cantalapiedra/barleymap#325-creating-and-configuring-datasets-annotations-the-datasets_annotationconf-and-the-annotation_typesconf-files)
    
 To configure barleymap you will need to edit the following **configuration files**
 under the *barleymap/conf* directory:
@@ -405,7 +405,7 @@ However, if it is desired to create the files manually,
 see [format of the dataset-map files](https://github.com/Cantalapiedra/barleymap#format-of-the-dataset-map-files)
 below for details.
 
-1. Create a row in the conf/datasets.conf file, with **8 space-separated fields**.
+1. Create a row in the conf/datasets.conf file, with **8 space-separated fields**:
 
   - Name: an arbitrary name for the dataset, used by the user to reference it and for printing purposes.
   Note that you could prefix the dataset name with a ">". This annotates the dataset to be ignored by the barleymap
@@ -415,13 +415,14 @@ below for details.
   so that the user can request to obtain only genes, or only genetic markers, for example, in the output.
   The "map" type is used when the dataset is also a map, so that when the data for the dataset is requested,
   it is obtained from the data of the map.
-  - Filename: the raw data for the dataset (it is not required, it is used by *bmap_build_datasets*, as explained later).
-  - File type: either "fna", "bed", "gtf", or "map". The file type of the previous filename.
+  - Filename: the raw data for the dataset (it is only required by the *bmap_build_datasets* tool, as explained later).
+  - File type: either "fna", "bed", "gtf", or "map". The file type of the previous file.
   - Database list: either "ANY" or a database ID to which this dataset will be associated.
   - Synonyms file: path to the file of synonyms. This file can be used to store more than one name for each
-  feature in this dataset.
-  - Prefix: if all the names of the loci of the dataset start with the same characters,
-  this "prefix" can be included here to make searches of loci of this dataset faster than without it.
+  element of this dataset, so that the user can use any of the synonyms as query.
+  - Prefix: if all the names of the loci of the dataset start with the same prefix and no other dataset contains
+  elements with this prefix,
+  specifying here such prefix will make searches on this dataset faster than without it.
   Note that by default a query (a locus ID) is searched in all the datasets. However, if the prefix of the query
   matches the prefix of one of the datasets, this query will be searched only in such dataset.
 
@@ -447,7 +448,7 @@ and all its loci have the prefix "DAT3_".
 
 ##### Format of the dataset-map files
 
-A dataset-map file contain the map position of a set of commonly used markers, genes, etc. For example:
+A dataset-map file contains the map position of a set of commonly used markers, genes, etc. For example:
 
 ```
 >Map2
@@ -470,7 +471,7 @@ so that it can be used for comments, map name or header fields.
 
 Data rows have 5 or 6 (depending whether the map has cM, bp or both types of position) tab-delimited fields:
 
-- Dataset entry: ID of the marker, gene, etc. from the dataset.
+- Element identifier: ID of the marker, gene, etc.
 - chr: ID of the chromosome from the map.
 - cM, bp or both: 1 or 2 fields with numeric position within the map chromosome.
 - Multiple positions: either "Yes" or "No", to indicate whether this dataset entry has more than one
@@ -481,14 +482,14 @@ alignment in this map, independently of whether has more than one position or no
 ***
 
 Once that at least one database, one map and one dataset have been correctly configured,
-the following tools can already be used:
+the following tools can be used:
 - bmap_align_to_db
 - bmap_align_to_map
 - bmap_align
 - bmap_find
 - bmap_locate
 
-#### 3.2.5 Creating and configuring genes annotations: the datasets_annotation.conf and the annotation_types.conf files
+#### 3.2.5 Annotations: the *datasets_annotation.conf*
 
 Besides the map information, barleymap allows to retrieve the genes, markers, etc. in the region of the obtained position.
 Those genes, markers, etc. belong to different datasets. In the case of datasets of type "gene",
