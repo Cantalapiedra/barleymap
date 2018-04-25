@@ -405,27 +405,27 @@ However, if it is desired to create the files manually,
 see [format of the dataset-map files](https://github.com/Cantalapiedra/barleymap#format-of-the-dataset-map-files)
 below for details.
 
-1. Create a row in the conf/datasets.conf file, with 8 space-separated fields.
+1. Create a row in the conf/datasets.conf file, with **8 space-separated fields**.
 
-  - Dataset name: an arbitrary name for the dataset, used by the user to reference it and for printing purposes.
+  - Name: an arbitrary name for the dataset, used by the user to reference it and for printing purposes.
   Note that you could prefix the dataset name with a ">". This annotates the dataset to be ignored by the barleymap
   tool *bmap_build_datasets*, which is explained in following sections.
-  - Dataset ID: a unique identifier for this dataset.
+  - ID: a unique identifier for this dataset.
   - Type: either "genetic_marker", "gene", "map" or "anchored". This type is generally used only to filter the results
   so that the user can request to obtain only genes, or only genetic markers, for example, in the output.
   The "map" type is used when the dataset is also a map, so that when the data for the dataset is requested,
   it is obtained from the data of the map.
-  - Filename: the raw data for the dataset (it is not required to use barleymap, but it is convenient to
-  create the dataset automatically, as explained later).
+  - Filename: the raw data for the dataset (it is not required, it is used by *bmap_build_datasets*, as explained later).
   - File type: either "fna", "bed", "gtf", or "map". The file type of the previous filename.
   - Database list: either "ANY" or a database ID to which this dataset will be associated.
   - Synonyms file: path to the file of synonyms. This file can be used to store more than one name for each
   feature in this dataset.
-  - Prefix for indexing: if all the features of the dataset are expected to start their names with the same characteres,
-  this can be used to create and retrieve data from indexes with the barleymap tool *bmap_datasets_index*, which is
-  explained in following sections.
+  - Prefix: if all the names of the loci of the dataset start with the same characters,
+  this "prefix" can be included here to make searches of loci of this dataset faster than without it.
+  Note that by default a query (a locus ID) is searched in all the datasets. However, if the prefix of the query
+  matches the prefix of one of the datasets, this query will be searched only in such dataset.
 
-The "datasets.conf.sample" file shows 4 datasets as examples:
+The *datasets.conf.sample* file shows 4 datasets as examples:
 
 ```
 #name      unique_id  type            filename        file_type  db_list  synonyms_file             records_prefix
@@ -435,16 +435,15 @@ DATASET2   dataset2   gene            dataset2.gtf    gtf        DB1,DB2  no    
 >DATASET4  dataset4   map             "maps_path"     map        DB3      no                        DAT3_
 ```
 
-The first dataset (DATASET1), with ID (dataset1), is of type genetic marker (genetic_marker),
-and its source are FASTA formatted sequences (dataset1.fasta, fna). It is associated to
-any database (ANY), it has a list of synonyms (/home/user/dataset1.syns) and there is no prefix
-which can be used for indexing.
+The first dataset ("DATASET1"), with ID "dataset1", is of type genetic marker ("genetic_marker"),
+and its source are FASTA formatted sequences ("dataset1.fasta", "fna"). It is associated to
+any database ("ANY"), it has a list of synonyms ("/home/user/dataset1.syns") and there is no prefix
+shared by all its loci.
 
-The fourth dataset (DATASET4), has the ">" symbol to mark the dataset as ignored by bmap_build_datasets
-(explained in following sections), and it is a dataset used to create a map (map).
+In contrast, the fourth dataset ("DATASET4") is used to create a map (map).
 Note that its filename is indicated as "maps_path", and thus the data for this dataset corresponds to the
-same file as the one used as map. It is associated to a single database (DB3), it has no synonyms
-and it can be indexed with the prefix (DAT3_).
+same file as the one used as map. It is associated to a single database ("DB3"), it has no synonyms
+and all its loci have the prefix "DAT3_".
 
 ##### Format of the dataset-map files
 
