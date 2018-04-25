@@ -110,11 +110,16 @@ to configure the *src/bmap.conf* and *src/server.conf* files.
 
 ### 3.2) Configuration
 
-- 3.2.1: [Global configuration: the *paths.conf* file](https://github.com/Cantalapiedra/barleymap#321-global-configuration-the-pathsconf-file)
-- 3.2.2: [Databases: the *databases.conf* file](https://github.com/Cantalapiedra/barleymap#322-databases-the-databasesconf-file)
-- 3.2.3: [Maps: the *maps.conf* file](https://github.com/Cantalapiedra/barleymap#323-maps-the-mapsconf-file)
-- 3.2.4: [Datasets: the *datasets.conf* file](https://github.com/Cantalapiedra/barleymap#324-datasets-the-datasetsconf-file)
-- 3.2.5: [Annotations: the *datasets_annotation.conf*](https://github.com/Cantalapiedra/barleymap#325-creating-and-configuring-datasets-annotations-the-datasets_annotationconf-and-the-annotation_typesconf-files)
+- 3.2.1: [Global configuration: the *paths.conf* file]
+(https://github.com/Cantalapiedra/barleymap#321-global-configuration-the-pathsconf-file)
+- 3.2.2: [Databases: the *databases.conf* file]
+(https://github.com/Cantalapiedra/barleymap#322-databases-the-databasesconf-file)
+- 3.2.3: [Maps: the *maps.conf* file]
+(https://github.com/Cantalapiedra/barleymap#323-maps-the-mapsconf-file)
+- 3.2.4: [Datasets: the *datasets.conf* file]
+(https://github.com/Cantalapiedra/barleymap#324-datasets-the-datasetsconf-file)
+- 3.2.5: [Annotations: the *datasets_annotation.conf* file]
+(https://github.com/Cantalapiedra/barleymap#325-annotations-the-datasets_annotationconf-file)
    
 To configure barleymap you will need to edit the following **configuration files**
 under the *barleymap/conf* directory:
@@ -489,55 +494,52 @@ the following tools can be used:
 - bmap_find
 - bmap_locate
 
-#### 3.2.5 Annotations: the *datasets_annotation.conf*
+#### 3.2.5 Annotations: the *datasets_annotation.conf* file
 
-Besides the map information, barleymap allows to retrieve the genes, markers, etc. in the region of the obtained position.
-Those genes, markers, etc. belong to different datasets. In the case of datasets of type "gene",
-more information about each gene can be added,
-including a description text, a class of feature, and lists of Gene Ontologies (GO),
-protein families (PFAM) and InterPro (IPR) identifiers. Note that in fact you can use those fields freely:
-the only limitation is that the header of the table will always show those names for each column
-(Class, Description, InterPro, GeneOntologies, PFAM).
+Datasets of type "gene" can be enriched with annotation data,
+including a description text, a class of feature (to be defined by the admin of the app),
+and lists of Gene Ontologies (GO), protein families (PFAM) and InterPro (IPR) identifiers.
 
-To create the annotation of a genes dataset there are several steps to follow:
-- Choose a unique identifier for your annoation ("dataset_annot_ID").
-- Create a folder "dataset_annot_ID" under the path indicated by the "annot_path" entry in the "paths.conf" file
- (e.g. barleymap/datasets_annotation/dataset_ID/).
-- Create a file for each "annot_field" which will be annotated for that dataset,
+Creating the annotation of a dataset of genes takes 4 steps:
+- Choose a unique identifier for your annotation ("dataset_annot_ID").
+- Create a folder "dataset_annot_ID" under the path indicated by the *annot_path* entry in the *paths.conf* file
+ (e.g. *barleymap/datasets_annotation/dataset_annot_ID/*).
+- Create a file for each annotation field for that dataset,
 and put it in the folder created for the dataset annotation in the previous step
-(e.g. barleymap/datasets_annotation/dataset_ID.desc.tab).
-See format of the dataset annotation files below for details.
+(e.g. *barleymap/datasets_annotation/dataset_annot_ID.desc.tab* for description texts).
+See [format of the dataset annotation files]
+(https://github.com/Cantalapiedra/barleymap#format-of-the-dataset-annotation-files)
+below for details.
 
-- Create a row in the conf/datasets_annotation.conf file, with 5 space-separated fields.
+- Create a row in the *conf/datasets_annotation.conf* file, with 5 space-separated fields.
 
-  - Dataset annotation name: an arbitrary name for the dataset annotation.
-  - Dataset annotation ID: a unique identifier for this dataset annotation.
+  - Annotation name: an arbitrary name for the dataset annotation.
+  - Annotation ID: a unique identifier for this dataset annotation.
   - Dataset ID: the ID of the dataset to which this annotation is associated.
   - Filename: the name of the file with the dataset annotation, as chosen in the previous step.
   - Type: either "txt", "class", "go", "pfam", "ipr"; depending on the type of annotation.
   Note that there is another configuration file, *annotation_types.conf*,
   which has information about those types, and it is intended to be used to create custom annotation fields.
-  However, currently that file should be left unmodified, and its implementation is pending.
+  However, currently that file should be left unmodified, as its full implementation is pending.
 
-The "datasets.conf.sample" file shows the annotation of a single dataset:
+The *datasets.conf.sample* file shows the annotation of a single dataset:
 
 ```
-# name unique_id dataset_unique_id filename type
-DT2_DESC dt2_desc dataset2 dt2.desc.tab txt
-DT2_CLASS dt2_class dataset2 dt2.class.tab class
-DT2_GO dt2_go dataset2 dt2.go.tab go
-DT2_PFAM dt2_pfam dataset2 dt2.pfam.tab	pfam
-DT2_IPR	dt2_ipr	dataset2 dt2.ipr.tab ipr
+#name      unique_id  dataset_unique_id  filename       type
+DT2_DESC   dt2_desc   dataset2           dt2.desc.tab   txt
+DT2_CLASS  dt2_class  dataset2           dt2.class.tab  class
+DT2_GO     dt2_go     dataset2           dt2.go.tab     go
+DT2_PFAM   dt2_pfam   dataset2           dt2.pfam.tab   pfam
+DT2_IPR    dt2_ipr    dataset2           dt2.ipr.tab    ipr
 ```
 
 All the 5 annotation fields have been annotated for *dataset2*. Note that you could leave some fields
-without annotation if desired. The ".tab" files have the actual annotation tables, and would be stored
-under the path indicated in the *paths.conf* file, "annot_path" field.
+without annotation if desired (for example, if a dataset lacks class data).
 
 ##### Format of the dataset annotation files
 
 A dataset annotation file contain the identifier of the gene and the annotation field,
-which will be a text (description and class) or an identifier (GO, PFAM, IPR).
+which will be either a text (description and class) or an identifier (GO, PFAM, IPR).
 For example:
 
 ```
