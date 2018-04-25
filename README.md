@@ -110,16 +110,11 @@ to configure the *src/bmap.conf* and *src/server.conf* files.
 
 ### 3.2) Configuration
 
-- 3.2.1: [Global configuration: the *paths.conf* file]
-(https://github.com/Cantalapiedra/barleymap#321-global-configuration-the-pathsconf-file)
-- 3.2.2: [Databases: the *databases.conf* file]
-(https://github.com/Cantalapiedra/barleymap#322-databases-the-databasesconf-file)
-- 3.2.3: [Maps: the *maps.conf* file]
-(https://github.com/Cantalapiedra/barleymap#323-maps-the-mapsconf-file)
-- 3.2.4: [Datasets: the *datasets.conf* file]
-(https://github.com/Cantalapiedra/barleymap#324-datasets-the-datasetsconf-file)
-- 3.2.5: [Annotations: the *datasets_annotation.conf* file]
-(https://github.com/Cantalapiedra/barleymap#325-annotations-the-datasets_annotationconf-file)
+- 3.2.1: [Global configuration: the *paths.conf* file](https://github.com/Cantalapiedra/barleymap#321-global-configuration-the-pathsconf-file)
+- 3.2.2: [Databases: the *databases.conf* file](https://github.com/Cantalapiedra/barleymap#322-databases-the-databasesconf-file)
+- 3.2.3: [Maps: the *maps.conf* file](https://github.com/Cantalapiedra/barleymap#323-maps-the-mapsconf-file)
+- 3.2.4: [Datasets: the *datasets.conf* file](https://github.com/Cantalapiedra/barleymap#324-datasets-the-datasetsconf-file)
+- 3.2.5: [Annotations: the *datasets_annotation.conf* file](https://github.com/Cantalapiedra/barleymap#325-annotations-the-datasets_annotationconf-file)
    
 To configure barleymap you will need to edit the following **configuration files**
 under the *barleymap/conf* directory:
