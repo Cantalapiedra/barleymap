@@ -549,6 +549,10 @@ Gene000090	GO:0005524
 
 ## 4) Tools and algorithms
 
+NOTE: in the web version of barleymap some of the options and parameters, which can be changed in
+the standalone version, have been fixed. Check
+[http://floresta.eead.csic.es/barleymap/help/](http://floresta.eead.csic.es/barleymap/help/).
+
 ### 4.1) Main tools
 
 The main tools which barleymap provides, both in the standalone and in the web version,
