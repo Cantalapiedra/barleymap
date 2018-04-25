@@ -680,16 +680,16 @@ Report *p* as the position of *q*.
 <sub style="font-size: 12px !important;">
 Figure. Schematic representation of the barleymap "hierarchical" algorithm.
 For the "greedy" algorithm all the query sequences are aligned to next database,
-instead of just unaligned ones. For the "exhaustive" algorithm, the "align to next database"
-should be moved to the box "Retrieve map positions" and change "unaligned" by "unmapped".
+instead of just the unaligned ones. For the "exhaustive" algorithm, the "align to next database" arrow
+should be moved to the box "Retrieve map positions" and change the tag "unaligned" to "unmapped".
 </sub>
 <p align="center">
   <img width="450" height="470" src="http://floresta.eead.csic.es/barleymap/img/barleymap_popseq.pipeline_2.png">
 </p>
 
-In addition there are three versions of the algorithm: "greedy", "hierarchical" and "exhaustive".
+In addition there are three **versions of the algorithm**: "greedy", "hierarchical" and "exhaustive".
 These versions cannot be specified as parameter of the application.
-Instead, have to be associated to each of the maps in the configuration (see Configuration of maps).
+Instead, have to be associated to each of the maps in their configuration.
 
 - In the "greedy" version, the list of unaligned queries is only updated for each database.
 Therefore, every query is searched in every database.
@@ -747,16 +747,17 @@ Instead of FASTA formatted sequences, the input in this tool are identifiers of 
 Therefore, there are some parameters not present in this tool, like the aligner choice or the alignment thresholds.
 Note that, because of this, the positions stored and returned as output by this tool
 were obtained with a specific set of parameters. This includes also the list of databases and the algorithm configured
-for a given map when the positions were obtained by alignment. Check the section Resources used in the web version
-for details on the way the datasets used in the web version were obtained.
+for a given map when the positions were obtained by alignment.
+Check [www.floresta.eead.csic.es/barleymap/](http://floresta.eead.csic.es/barleymap/)
+for details about the datasets used in the web version.
 
 #### 4.1.3) Locating features in region
 
 Locating features (markers, genes, etc.) in a region can be performed from the *Locate by position*
-button in barleymap web, or using the command *bmap_locate* in the standalone version.
+button in barleymap web, or using the command ***bmap_locate*** in the standalone version.
 
 In the standalone version, info and a full list of
-parameters can be obtained running the tool with the "-h/--help" options:
+**parameters** can be obtained running the tool with the "-h/--help" options:
 
 ```
 Usage: bmap_locate.py [OPTIONS] [IDs_FILE]
@@ -813,12 +814,12 @@ chr7	227367117
 As explained above, the main barleymap tools, including those in the web version,
 return as result map positions for the queries. The hits from the alignment step remain
 hidden for the user. However, in some cases alignment results are preferred.
-These can be obtained with the secondary tools, which are available only in the standalone version.
+These can be obtained with the secondary tools, which are available **only in the standalone version**.
 
 ***
 
-The bmap_align_to_db command allows obtaining the alignment results from FASTA formatted queries
-to one or more databases. The parameters of bmap_align_to_db can be obtained running it with "-h/--help":
+The *bmap_align_to_db* command allows obtaining the alignment results from FASTA formatted queries
+to one or more databases. The parameters of *bmap_align_to_db* can be obtained running it with "-h/--help":
 
 ```
 Usage: bmap_align_to_db.py [OPTIONS] [FASTA_FILE]
@@ -853,11 +854,11 @@ Options:
   -v, --verbose         More information printed.
 ```
 
-Most of the parameters are the same used in the bmap_align command, and have already been explained above.
-The --databases (or --databases-ids), --search and --ref-type parameters are the same as some of the
+Most of the parameters are the same used in the *bmap_align* command, and have already been explained above.
+The *--databases* (or *--databases-ids*), *--search* and *--ref-type* parameters are the same as some of the
 fields used to configure a map, and have also been explained (see Configuration of maps).
 
-The result of bmap_align_to_db is a table with 12 fields:
+The result of *bmap_align_to_db* is a table with 12 fields:
 - query_id: the name of the FASTA query.
 - subject_id: the chromosome or contig from the alignment hit.
 - identity: the percentage of identity from the alignment.
@@ -877,19 +878,19 @@ An example of the output file from bmap_align_to_db:
 
 ```
 >DB:150831_barley_pseudomolecules
-#query_id	subject_id	identity	query_coverage	score	strand	qstart	qend	sstart	send	database	algorithm
-m_10235	chr1	100.00	100.00	120.0	-	1	121	80265474	80265594	genome2.0	gmap
-m_19	chr7	100.00	100.00	196.0	-	1	197	17091119	17091315	genome2.0	gmap
-m_10	chr1	100.00	100.00	210.0	+	1	211	71173958	71174168	genome2.0	gmap
-m_1100	chr5	100.00	100.00	178.0	+	1	179	434303690	434303868	genome2.0	gmap
-m_1012	chr2	100.00	100.00	226.0	+	1	227	29125654	29125880	genome2.0	gmap
+#query_id  subject_id  identity  query_coverage  score  strand  qstart  qend  sstart     send       database   algorithm
+m_10235    chr1        100.00    100.00          120.0  -       1       121   80265474   80265594   genome2.0  gmap
+m_19       chr7        100.00    100.00          196.0  -       1       197   17091119   17091315   genome2.0  gmap
+m_10       chr1        100.00    100.00          210.0  +       1       211   71173958   71174168   genome2.0  gmap
+m_1100     chr5        100.00    100.00          178.0  +       1       179   434303690  434303868  genome2.0  gmap
+m_1012     chr2        100.00    100.00          226.0  +       1       227   29125654   29125880   genome2.0  gmap
 ```
 
 ***
 
-The bmap_align_to_map command allows obtaining the alignment results from FASTA formatted queries
+The *bmap_align_to_map* command allows obtaining the alignment results from FASTA formatted queries
 to one or more maps, i.e. to the databases which have been configured in barleymap for those maps
-(see configuration of maps). The parameters of bmap_align_to_map can be obtained running it with "-h/--help":
+(see configuration of maps). The parameters of *bmap_align_to_map* can be obtained running it with "-h/--help":
 
 ```
 Usage: bmap_align_to_map.py [OPTIONS] [FASTA_FILE]
@@ -917,22 +918,22 @@ Options:
   -v, --verbose         More information printed.
 ```
 
-Most of the parameters are the same used in the bmap_align command, and have already been explained above.
-The --search parameter would override the algorithm configured as default for the map.
+Most of the parameters are the same used in the *bmap_align* command, and have already been explained above.
+The *--search* parameter would override the algorithm configured as default for the map.
 
-The result of bmap_align_to_map is a table with the same format as that of bmap_align_to_db (see above).
+The result of *bmap_align_to_map* is a table with the same format as that of *bmap_align_to_db* (see above).
 
 Note that rows starting with ">" correspond to maps names.
 An example of the output file from bmap_align_to_map:
 
 ```
 >>Map:morex_genome
-#query_id	subject_id	identity	query_coverage	score	strand	qstart	qend	sstart	send	database	algorithm
-i_11_20855	chr1H	99.20	100.00	238.08	+	1	241	81133442	81133992	150831_barley_pseudomolecules	gmap
-i_12_10235	chr1H	100.00	100.00	120.0	-	1	121	80265474	80265594	150831_barley_pseudomolecules	gmap
-i_BK_19	chr7H	100.00	100.00	196.0	-	1	197	17091119	17091315	150831_barley_pseudomolecules	gmap
-i_BK_10	chr1H	100.00	100.00	210.0	+	1	211	71173958	71174168	150831_barley_pseudomolecules	gmap
-i_11_10030	chr1H	98.30	100.00	235.92	+	1	241	13590814	13591054	150831_barley_pseudomolecules	gmap
+#query_id   subject_id  identity  query_coverage  score   strand  qstart  qend  sstart    send      database                       algorithm
+i_11_20855  chr1H       99.20     100.00          238.08  +       1       241   81133442  81133992  150831_barley_pseudomolecules  gmap
+i_12_10235  chr1H       100.00    100.00          120.0   -       1       121   80265474  80265594  150831_barley_pseudomolecules  gmap
+i_BK_19     chr7H       100.00    100.00          196.0   -       1       197   17091119  17091315  150831_barley_pseudomolecules  gmap
+i_BK_10     chr1H       100.00    100.00          210.0   +       1       211   71173958  71174168  150831_barley_pseudomolecules  gmap
+i_11_10030  chr1H       98.30     100.00          235.92  +       1       241   13590814  13591054  150831_barley_pseudomolecules  gmap
 ```
 
 ### 4.3) Configuration tools
@@ -940,12 +941,12 @@ i_11_10030	chr1H	98.30	100.00	235.92	+	1	241	13590814	13591054	150831_barley_pse
 These are several tools which are included with barleymap, but do not perform searches in the
 barleymap configured resources. These are intended to help in the configuration of the application,
 specially when dealing with datasets. Note that these tools use the barleymap main tools from the standalone version,
-and therefore are included only in the standalone version. These tools could be used
+and therefore are included **only in the standalone version**. These tools could be used
 with the standalone version to check or create resources to be used with barleymap web version though.
 
 ***
 
-The bmap_config command returns a report including all the resources which have been configured with
+The *bmap_config* command returns a report including all the resources which have been configured with
 the app, including:
 - Paths (from paths.conf).
 - Databases (from databases.conf).
@@ -957,22 +958,23 @@ by means of the --databases-ids parameter.
 
 ***
 
-The bmap_build_datasets is a script which uses the datasets.conf file as input, and tries to generate
+The *bmap_build_datasets* is a script which uses the *datasets.conf* file as input, and tries to generate
 the files for those datasets (markers, genes, maps, etc.), to be included as resources in barleymap.
 
 Lets say that the user has a number of files from markers of genes which he wants to use as datasets in barleymap.
-The user must configure the datasets.conf file, in which the files with the data for those datasets will be referenced
-(see Configuration of datasets above). Then, the user could need to generate the files with the actual positions of those
+The user must configure the *datasets.conf* file, in which the files with the data for those datasets will be referenced.
+Then, the user could need to generate the files with the actual positions of those
 datasets to the maps, so that they can be retrieved by barleymap. Basically, we would need to perform alignments with
-FASTA sequences, reformat gtf or bed files, etc. In turn, the user can use the bmap_build_datasets, which will
-run bmap_align for datasets of type FASTA, and will reformat gtf and bed files, etc. Then the user just will need
+FASTA sequences, reformat gtf or bed files, etc. In turn, the user can use the *bmap_build_datasets*, which will
+run *bmap_align* for datasets of type FASTA, and will reformat GTF and BED files, etc. Then the user just will need
 to put those files under the appropiate directory where barleymap has been configured to read datasets.
 
 When there are datasets which the user wants to keep in the configuration file, but must not be processed
-by bmap_build_datasets, the user can "comment" those datasets in the datasets.conf file with the prefix ">".
-Note that if he uses "#" the dataset will be fully commented, even to be used as dataset by barleymap.
+by *bmap_build_datasets*, the user can "comment" those datasets in the *datasets.conf* file with the prefix ">".
+Note that if he uses "#" instead of ">" the dataset will be fully commented,
+and will not be used at all by barleymap.
 
-The parameters of bmap_build_datasets are:
+The parameters of *bmap_build_datasets* are:
 
 ```
 Usage: bmap_build_datasets
@@ -982,31 +984,31 @@ Options:
   --threads=N_THREADS   Number of threads to perform alignments (default 1).
   --dataset=DATASET_PARAM
                         A single dataset to process. By default all datasets
-                        are processed..
+                        are processed.
   -v, --verbose         More information printed.
 ```
 
-The --threads parameter will be used as input for datasets of type FASTA (to perform the alignments).
+The *--threads* parameter will be used as input for datasets of type FASTA (to perform the alignments).
 
-Also the user can run the bmap_build_datasets for a single dataset (--dataset parameter),
+Also the user can run the *bmap_build_datasets* for a single dataset (*--dataset* parameter),
 for example when a new dataset is to be added to a barleymap application for which the other datasets
 had already been created previously.
 
 ***
 
-The bmap_datasets_index is used to create an index file for the datasets.
+The *bmap_datasets_index* is used to create an index file for the datasets.
 Currently, the script can be run for only a single dataset. For example, to process
-the datasets.conf file the user would need to loop over the file externally and run
-bmap_datasets_index for each of the iteration steps with:
+the *datasets.conf* file the user would need to loop over the file externally and run
+*bmap_datasets_index* for each of the iteration steps with:
 
 ```
 bmap_datasets_index current_dataset
 ```
 
-Note that the current_dataset is the file which barleymap uses to read the dataset (i.e. the one which could
-be generated with bmap_build_datasets).
-As a result, bmap_datasets_index returns a file "current_dataset.idx", which should be placed in the same
-directory in which the current_dataset file is located and read by barleymap.
+Note that the *current_dataset* is the file which barleymap uses to read the dataset (i.e. the one which could
+be generated with *bmap_build_datasets*).
+As a result, *bmap_datasets_index* returns a file called "current_dataset.idx", which should be placed in the same
+directory where the *current_dataset* file is located and read by barleymap.
 
 Note that for large dataset files, using index files will make the retrieval of markers, genes, etc. faster,
 whereas for small dataset files is likely better to not use index files.
