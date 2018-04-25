@@ -658,19 +658,30 @@ barleymap searches all the queries in the first database, using the first aligne
 If there are queries which have not been found, it uses the next aligner in the same database.
 If all the aligners have been used in this database, try with the next database, starting with the first aligner.
 Repeat until all the queries have been found or there are no more databases and aligners to use.
-With each query for which alignment targets have been found, search the position of those targets in the map data,
-and associate that position to the query.
+With each query for which alignment targets have been found, search the map position of those targets,
+and associate those positions to the corresponding queries.
 
 In sort:
+```
 Given a list of queries *U*, a list of databases *D* from a map *m*, and a list of aligners *A*:
+
 For each *d*c*D*,
+
 for each *a*c*A*,
+
 search a target *t* in *d*, for *q*c*U*, using *a*.
+
 Update *U*.
+
 Break if *U* is empty.
+
 End of loop.
-For each *q*!c*U*, that is, each *q* associated to one or more *t*, f
-ind a position *p* in *m* for *t*, and report *p* as the position of *q*.
+
+For each *q*!c*U*, that is, each *q* associated to one or more *t*,
+find a position *p* in *m* for *t*.
+
+Report *p* as the position of *q*.
+```
 
 <sub style="font-size: 12px !important;">
 Figure. Schematic representation of the barleymap "hierarchical" algorithm.
