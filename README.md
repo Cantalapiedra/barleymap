@@ -559,8 +559,6 @@ are for **alignment** of sequences, **finding** markers, genes, etc, or **locate
 The alignment of sequences can be performed from the *Align sequences* button in barleymap web,
 or using the command *bmap_align* in the standalone version.
 
-##### 4.2.3) Alignment parameters
-
 In the standalone version, info and a full list of
 parameters can be obtained running the tool with the "-h/--help" options:
 
@@ -655,7 +653,7 @@ in the web version. In the latter, there are some fixed options, using blastn on
 In the standalone version, one or a comma-separated list of aligners can be specified, and the aligners will
 be used in that order (check the alignment algorithm below).
 
-##### 4.2.3) Alignment algorithm
+##### 4.2.1) Alignment algorithm
 
 For all the databases of a given map,
 barleymap searches all the queries in the first database, using the first aligner.
@@ -703,8 +701,6 @@ hit has been found for the query, and a map position has been associated to it.
 
 Finding markers (or other datasets features, like genes, etc.) can be performed from the *Find markers*
 button in barleymap web, or using the command *bmap_find* in the standalone version.
-
-##### 4.2.3) Find markers parameters
 
 In the standalone version, info and a full list of
 parameters can be obtained running the tool with the "-h/--help" options:
@@ -755,8 +751,6 @@ for details on the way the datasets used in the web version were obtained.
 
 Locating features (markers, genes, etc.) in a region can be performed from the *Locate by position*
 button in barleymap web, or using the command *bmap_locate* in the standalone version.
-
-##### 4.2.3) Locate features parameters
 
 In the standalone version, info and a full list of
 parameters can be obtained running the tool with the "-h/--help" options:
