@@ -554,7 +554,7 @@ Gene000090	GO:0005524
 The main tools which barleymap provides, both in the standalone and in the web version,
 are for **alignment** of sequences, **finding** markers, genes, etc, or **locate** features in a given position.
 
-#### 4.2) Alignment of sequences
+#### 4.1.1) Alignment of sequences
 
 The alignment of sequences can be performed from the *Align sequences* button in barleymap web,
 or using the command *bmap_align* in the standalone version.
@@ -653,7 +653,7 @@ in the web version. In the latter, there are some fixed options, using blastn on
 In the standalone version, one or a comma-separated list of aligners can be specified, and the aligners will
 be used in that order (check the alignment algorithm below).
 
-##### 4.2.1) Alignment algorithm
+##### 4.1.1.1) Alignment algorithm
 
 For all the databases of a given map,
 barleymap searches all the queries in the first database, using the first aligner.
@@ -697,7 +697,7 @@ hit has been found for the query, regardless of whether the query has map positi
 - In the "exhaustive" version, a query is removed from the list of unaligned queries when the query an alignment
 hit has been found for the query, and a map position has been associated to it.
 
-#### 4.3) Finding markers
+#### 4.1.2) Finding markers
 
 Finding markers (or other datasets features, like genes, etc.) can be performed from the *Find markers*
 button in barleymap web, or using the command *bmap_find* in the standalone version.
@@ -747,7 +747,7 @@ were obtained with a specific set of parameters. This includes also the list of 
 for a given map when the positions were obtained by alignment. Check the section Resources used in the web version
 for details on the way the datasets used in the web version were obtained.
 
-#### 4.4) Locating features in region
+#### 4.1.3) Locating features in region
 
 Locating features (markers, genes, etc.) in a region can be performed from the *Locate by position*
 button in barleymap web, or using the command *bmap_locate* in the standalone version.
