@@ -557,10 +557,10 @@ are for **alignment** of sequences, **finding** markers, genes, etc, or **locate
 #### 4.1.1) Alignment of sequences
 
 The alignment of sequences can be performed from the *Align sequences* button in barleymap web,
-or using the command *bmap_align* in the standalone version.
+or using the command ***bmap_align*** in the standalone version.
 
 In the standalone version, info and a full list of
-parameters can be obtained running the tool with the "-h/--help" options:
+**parameters** can be obtained running the tool with the "-h/--help" options:
 
 ```
 Usage: bmap_align.py [OPTIONS] [FASTA_FILE]
@@ -609,48 +609,46 @@ Options:
 ```
 
 The user provides one or more **FASTA formatted sequences** to be searched, which are the **queries**.
-The user will choose also one or more **maps** (--maps), from which to obtain the position of the queries.
+The user will choose also one or more **maps** (*--maps*), from which to obtain the position of the queries.
 
 *Note that the user does not choose one or more sequence databases.
 In fact, when he chooses a map, he is implicitly chosing the databases associated to that map
-in the configuration to be used as sequence references
-(check configuration of maps and the alignment algorithm below).*
+in the map configuration.*
 
-The user can choose alignment thresholds: minimum alignment identity (--thres-id)
-and minimum query coverage (--thres-cov).
-He can also choose whether to obtain also a list of unmapped sequences (-u, --show-unmapped),
+The user can choose **alignment thresholds**: minimum alignment identity (*--thres-id*)
+and minimum query coverage (*--thres-cov*).
+He can also choose whether to obtain also a list of unmapped sequences (*-u*, *--show-unmapped*),
 and whether to include or not as mapped those queries with more
-than one position as result (-k, --show-multiples), or instead report them as unmapped.
+than one position as result (*-k*, *--show-multiples*), or instead report them as unmapped.
 In the case of maps which are both genetical and physical, the user can choose whether the results
-will be sorted by cM or by bp (--sort).
+will be sorted by cM or by bp (*--sort*).
 
-The user may also choose whether to show only the resulting map, or also information about datasets, 
-including genes (-g, --genes), markers (-m, --markers) or anchored (-a, --anchored) features in the region.
+The user may also choose whether to show only the resulting map, or also **information about datasets**, 
+including genes (*-g*, *--genes*), markers (*-m*, *--markers*) or anchored (*-a*, *--anchored*) features in the region.
 Note that these data can be shown only when they are in the
-same position as each query (-o, --show-on-markers), or all data which can be found between each two queries.
+same position as each query (*-o*, *--show-on-markers*), or all data which can be found between each two queries.
 In addition, in both cases, the user can choose to extend the search of datasets up- and down-stream
-of the features positions (-e, --extend). Note that if the search is not extended (by default is 0.0) no information
-will be shown between markers, even without the "-o, --show-on-markers" option.
+of the features positions (*-e*, *--extend*). Note that if the search is not extended (by default is 0.0) no information
+will be shown between markers, even without the "*-o*, *--show-on-markers*" option.
 Also, the user can choose whether to show information about main datasets
 only (those associated to the map in the configuration file),
-or about all the datasets with information for this map (-d, --show-all-features).
+or about all the datasets with information for this map (*-d*, *--show-all-features*).
 
-There are several parameters which can be only changed in the standalone version, and which are fixed
-in the web version. The user can choose to obtain results only from those alignments with the best score (-b, --best-score),
-not only those over the alignment thresholds. This is active by default in the web version.
-
-Also, the user of the standalone version can choose the number of threads (--threads) to be used during alignment.
-Note that these number of threads is actually given as parameter to the actual aligner (blastn, GMAP, hsblastn, etc.)
+There are several parameters which can be changed in the **standalone version only**, and which are fixed
+in the web version. The user can choose to obtain results only from those alignments
+with the best score (*-b*, *--best-score*),
+among those over the alignment thresholds. This is active by default in the web version.
+Also, the user of the standalone version can choose the number of threads (*--threads*) to be used during alignment.
+Note that these number of threads is actually given as parameter to the actual aligner (BLASTN, GMAP, HS-BLASTN, etc.)
 and the actual barleymap process runs in a single core.
-
-In the standalone version, the user can also change the verbosity which will be output to stderr (-v, --verbose),
-and also whether the cM positions will be output with full decimals (-f) or formatted with 2 decimals (by default).
+In the standalone version, the user can also change the verbosity which will be output to stderr (*-v*, *--verbose*),
+and also whether the cM positions will be output with full decimals (*-f*) or formatted with 2 decimals (by default).
 Finally, in the standalone version the information about datasets can be shown as additional columns in the results table,
-or can be shown "inline" with the map results (-c, --collapse), using the same columns from the results table.
+or can be shown "inline" with the map results (*-c*, *--collapse*), using the same columns from the results table.
 
-One important parameter is the aligner chosen, which can be changed in both the standalone (--aligner) and
-in the web version. In the latter, there are some fixed options, using blastn only, gmap only, or gmap followed by blastn.
-In the standalone version, one or a comma-separated list of aligners can be specified, and the aligners will
+One important parameter is the **aligner** (or aligners), which can be changed in both the standalone (*--aligner*) and
+in the web version. In the latter, there are some fixed options, using BLASTN only, GMAP only, or GMAP followed by BLASTN.
+In the standalone version, either a single or a comma-separated list of aligners can be specified, and the aligners will
 be used in that order (check the alignment algorithm below).
 
 ##### 4.1.1.1) Alignment algorithm
@@ -700,10 +698,10 @@ hit has been found for the query, and a map position has been associated to it.
 #### 4.1.2) Finding markers
 
 Finding markers (or other datasets features, like genes, etc.) can be performed from the *Find markers*
-button in barleymap web, or using the command *bmap_find* in the standalone version.
+button in barleymap web, or using the command ***bmap_find*** in the standalone version.
 
 In the standalone version, info and a full list of
-parameters can be obtained running the tool with the "-h/--help" options:
+**parameters** can be obtained running the tool with the "-h/--help" options:
 
 ```
 Usage: bmap_find.py [OPTIONS] [IDs_FILE]
