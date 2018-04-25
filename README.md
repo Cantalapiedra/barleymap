@@ -664,7 +664,6 @@ and associate those positions to the corresponding queries.
 In sort:
 ```
 Given a list of queries *U*, a list of databases *D* from a map *m*, and a list of aligners *A*:
-
 For each *d*c*D*,
 
 for each *a*c*A*,
