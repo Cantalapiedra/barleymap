@@ -663,22 +663,17 @@ and associate those positions to the corresponding queries.
 
 In sort:
 ```
-Given a list of queries *U*, a list of databases *D* from a map *m*, and a list of aligners *A*:
-For each *d*c*D*,
-
-for each *a*c*A*,
-
-search a target *t* in *d*, for *q*c*U*, using *a*.
-
+Given a list of unmapped queries *U*, a list of databases *D* from a map *m*, and a list of aligners *A*:
+For each *d* in *D*,
+for each *a* in *A*,
+use *a* to search a target *t* in *d*, for each *q* in *U*.
+Associate *q* to *t*.
 Update *U*.
-
 Break if *U* is empty.
-
 End of loop.
 
-For each *q*!c*U*, that is, each *q* associated to one or more *t*,
-find a position *p* in *m* for *t*.
-
+For each *q* not in *U*, that is, each *q* associated to *t*:
+Find a position *p* from *m* for *t*.
 Report *p* as the position of *q*.
 ```
 
