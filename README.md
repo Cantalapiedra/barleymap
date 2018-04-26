@@ -295,8 +295,8 @@ The *maps.conf.sample* file shows 3 maps as **examples**:
 ```
 #name         id            has_cm    has_bp    default_pos_type  map_type  search_type   db_list                                 folder_name        main_datasets
 MapName       mapID         cm_false  bp_true   bp                physical  greedy        db_genome                               mapID_folder       dataset1,dataset2,dataset3
-Map2          map2          cm_true   bp_false  cm                genetic   hierarchical  db_anchored1                            map2_dir           dataset4
-PhysGenetMap  physgenetmap  cm_true   bp_true   cm                genetic   exhaustive    db_anchored1,db_anchored2,db_anchored3  physgenetmap_path  dataset3,dataset5
+Map2          map2          cm_true   bp_false  cm                anchored  hierarchical  db_anchored1                            map2_dir           dataset4
+PhysGenetMap  physgenetmap  cm_true   bp_true   cm                anchored  exhaustive    db_anchored1,db_anchored2,db_anchored3  physgenetmap_path  dataset3,dataset5
 ```
 
 The first map, called "MapName", with ID "mapID", and stored in the folder *mapID_folder*,
@@ -306,12 +306,12 @@ Having a single database makes irrelevant the "Search type" field
 (which has been set to "greedy", arbitrarily).
 The map has 3 datasets associated as main datasets.
 
-The second map ("Map2") is a genetic map ("cm_true", "bp_false", "cm", "genetic")
+The second map ("Map2") is a genetic map ("cm_true", "bp_false", "cm", "anchored")
 with a single database of sequences associated to it (*db_anchored1*).
 Again, the "Search type" will be irrelevant
 having only one database (and thus has been configured to "hierarchical", arbitrarily).
 
-The third map ("PhysGenetMap") is a genetical and physical map ("cm_true", "bp_true", "cm", "genetic"),
+The third map ("PhysGenetMap") is a genetical and physical map ("cm_true", "bp_true", "cm", "anchored"),
 with 3 databases associated to it (*db_anchored1*, *db_anchored2* and *db_anchored3*).
 Here, the "Search type" algorithm was set to "exhaustive", to keep searching each query in the next database,
 until a map position has been found for the it.
