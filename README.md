@@ -319,7 +319,7 @@ until a map position has been found for the it.
 ##### Format of the map-database files
 
 A map-database file contains the map position of the sequences of a database.
-For example, a file called *map2.contigs_database" could have:
+For example, a file called *map2.contigs_database* could have:
 
 ```
 >Map2
