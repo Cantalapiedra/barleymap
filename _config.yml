@@ -1,3 +1,13 @@
 theme: jekyll-theme-leap-day
 exclude:
   - .gitignore
+  - LICENSE
+  - app_aux
+  - bin
+  - conf
+  - datasets
+  - datasets_annotation
+  - maps
+  - src
+  - tmp_files
+  
