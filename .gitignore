@@ -24,11 +24,12 @@ maps/*
 tmp_files/*
 !tmp_files/.gitkeep
 
-tests/Z_README
-tests/*out
-tests/*err
-tests/old/
-tests/old/*
+tests/*
+#tests/Z_README
+#tests/*out
+#tests/*err
+#tests/old/
+#tests/old/*
 
 ipk_fpc_wgs/*
 dist.sh
