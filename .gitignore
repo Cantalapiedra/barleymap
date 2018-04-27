@@ -38,3 +38,5 @@ tmp_borrar/*
 
 src/barleymapcore/.git/
 src/barleymapcore/.gitignore/
+
+_config.yml
