@@ -115,6 +115,7 @@ class DatasetsRetriever(object):
             # Check if map and dataset do share databases
             dataset_config = self._datasets_config.get_dataset_config(dataset)
             if not self.common_dbs(dataset_config, map_config):
+                #sys.stderr.write("\t dataset SKIPPED: "+dataset+"\n")
                 continue
             
             dataset_prefixes = dataset_config.get_prefixes()
@@ -139,7 +140,8 @@ class DatasetsRetriever(object):
                                                                                 query.startswith(tuple(dataset_prefixes))])
             
             # If there are not queries with those prefixes (given that there are prefixes), continue
-            if len(temp_query_dict) <= 0: continue
+            if len(temp_query_dict) <= 0:
+                continue
             
             #sys.stderr.write(str(temp_query_dict)+"\n")
             
@@ -159,6 +161,8 @@ class DatasetsRetriever(object):
                 
                 synonyms_path = dataset_config.get_synonyms()
                 dataset_synonyms = self.load_synonyms(synonyms_path)
+                
+                sys.stderr.write("\t\t synonyms: "+synonyms_path+"\n")
                 
                 if self._verbose: sys.stderr.write("\t\t creating test set\n")
                 
