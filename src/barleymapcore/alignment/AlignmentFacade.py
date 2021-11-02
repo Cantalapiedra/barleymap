@@ -10,8 +10,8 @@ import os, sys
 
 from barleymapcore.db.DatabasesConfig import REF_TYPE_STD
 
-from AlignmentEngines import AlignmentEnginesFactory
-from AlignmentResult import AlignmentResults, AlignmentResult
+from barleymapcore.alignment.AlignmentEngines import AlignmentEnginesFactory
+from barleymapcore.alignment.AlignmentResult import AlignmentResults, AlignmentResult
 
 class AlignmentFacade():
     

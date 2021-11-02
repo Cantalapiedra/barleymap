@@ -10,7 +10,7 @@ from subprocess import Popen, PIPE
 
 from barleymapcore.utils.alignment_utils import load_fasta_lengths
 from barleymapcore.m2p_exception import m2pException
-from AlignmentResult import *
+from barleymapcore.alignment.AlignmentResult import *
 
 #from Aligners import SELECTION_BEST_SCORE, SELECTION_NONE
 

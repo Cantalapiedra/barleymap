@@ -8,7 +8,7 @@
 import sys, re, os
 from subprocess import Popen, PIPE
 
-from AlignmentResult import *
+from barleymapcore.alignment.AlignmentResult import *
 from barleymapcore.m2p_exception import m2pException
 
 #from Aligners import SELECTION_BEST_SCORE, SELECTION_NONE
