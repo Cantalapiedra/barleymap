@@ -11,7 +11,7 @@
 ## The databases used as references must have been previously configured.
 ###########################
 
-import sys, os, traceback
+import sys, os, re, traceback
 from optparse import OptionParser
 
 from barleymapcore.db.ConfigBase import ConfigBase
@@ -88,7 +88,15 @@ try:
     
     ### INPUT FILE
     query_fasta_path = arguments[0] # THIS IS MANDATORY
-    
+   
+    fastafile = open(query_fasta_path)
+    for line in fastafile:
+        badheader = re.search(r"^>\S+\s+\S+", line)
+        if badheader:
+            fastafile.close()
+            optParser.exit(0, "Bad FASTA header: please make sure there is only one word, no spaces\n")
+    fastafile.close()
+ 
     sys.stderr.write("Command: "+" ".join(sys.argv)+"\n")
     
     ########## ARGUMENT DEFAULTS
