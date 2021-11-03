@@ -190,6 +190,7 @@ except Exception as e:
     #traceback.print_exc(file=sys.stderr)
     sys.stderr.write("\nThere was an error.\n")
     sys.stderr.write(str(e)+"\n")
+    print(traceback.format_exc())
     sys.stderr.write('If you can not solve it please contact compbio@eead.csic.es ('+\
                                    'Computational and structural biology group at EEAD-CSIC).\n')
 finally:
