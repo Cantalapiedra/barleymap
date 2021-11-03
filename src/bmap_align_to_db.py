@@ -51,7 +51,7 @@ def _print_parameters(fasta_path, dbs, aligner_list, \
 try:
     
     ## Argument parsing
-    __usage = "usage: bmap_align_to_db.py [OPTIONS] [FASTA_FILE]\n\n"+\
+    __usage = "usage: bmap_align_to_db.py [OPTIONS] [FASTA_FILE with 1-word header]\n\n"+\
               "typical: bmap_align_to_db.py --databases=MorexGenome queries.fasta"
     
     optParser = OptionParser(__usage)

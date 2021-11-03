@@ -68,7 +68,7 @@ def _print_parameters(fasta_path, genetic_map_name, aligner_list,
 try:
     
     ## Usage
-    __usage = "usage: bmap_align.py [OPTIONS] [FASTA_FILE]\n\n"+\
+    __usage = "usage: bmap_align.py [OPTIONS] [FASTA_FILE with 1-word header]\n\n"+\
               "typical: bmap_align.py --maps=map queries.fasta"
     optParser = OptionParser(__usage)
     
