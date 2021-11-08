@@ -7,8 +7,8 @@
 
 from barleymapcore.m2p_exception import m2pException
 from barleymapcore.db.MapsConfig import MapsConfig
-from Aligners import *
-from AlignmentResult import AlignmentResults
+from barleymapcore.alignment.Aligners import *
+from barleymapcore.alignment.AlignmentResult import AlignmentResults
 
 ALIGNMENT_TYPE_GREEDY = "greedy"
 ALIGNMENT_TYPE_HIERARCHICAL = "hierarchical"

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
 # check_config.py is part of Barleymap.
@@ -269,13 +269,13 @@ except m2pException as e:
     sys.stderr.write("\nbarleymap reports an error:\n")
     sys.stderr.write(str(e)+"\n")
     sys.stderr.write('If you can not solve it please contact compbio@eead.csic.es ('+\
-                        'laboratory of computational biology at EEAD).\n')
+                        'Computational and structural biology group at EEAD-CSIC).\n')
     
 except Exception as e:
     print e
     sys.stderr.write("\nERROR\n")
     sys.stderr.write('An error was detected. If you can not solve it please contact compbio@eead.csic.es ('+\
-                                   'laboratory of computational biology at EEAD).\n')
+                                   'Computational and structural biology group at EEAD-CSIC).\n')
 
 sys.stderr.write("End.\n")
 

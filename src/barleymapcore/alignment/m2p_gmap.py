@@ -8,7 +8,7 @@
 import sys, re, os
 from subprocess import Popen, PIPE
 
-from AlignmentResult import *
+from barleymapcore.alignment.AlignmentResult import *
 from barleymapcore.m2p_exception import m2pException
 
 #from Aligners import SELECTION_BEST_SCORE, SELECTION_NONE
@@ -238,11 +238,8 @@ def __filter_gmap_results(results, threshold_id, threshold_cov, db_name, verbose
         
         query_id = line_data[0][1:]
         subject_id = line_data[9].split(":")[0] # Because GMAP adding subject positions after subject name separated by ":" in compress output mode
-        align_ident = float(line_data[6])
+        align_ident = float(line_data[6]) 
         query_cov = float(line_data[5])
-        
-        strand = line_data[10]
-        
         strand = line_data[10]
         s_pos = re.search(strand_exp, line_data[9])
         

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
 # bmap_locate.py is part of Barleymap.
@@ -282,7 +282,7 @@ except Exception as e:
     sys.stderr.write("\nThere was an error.\n")
     sys.stderr.write(str(e)+"\n")
     sys.stderr.write('If you can not solve it please contact compbio@eead.csic.es ('+\
-                                   'laboratory of computational biology at EEAD).\n')
+                                   'Computational and structural biology group at EEAD-CSIC).\n')
 finally:
     pass
 

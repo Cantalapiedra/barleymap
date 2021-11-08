@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
 # bmap_align_to_db.py is part of Barleymap.
@@ -12,7 +12,7 @@
 ## as references must have been previously configured.
 ###########################
 
-import sys, os, traceback
+import sys, os, re, traceback
 from optparse import OptionParser
 
 from barleymapcore.db.ConfigBase import ConfigBase
@@ -51,7 +51,7 @@ def _print_parameters(fasta_path, dbs, aligner_list, \
 try:
     
     ## Argument parsing
-    __usage = "usage: bmap_align_to_db.py [OPTIONS] [FASTA_FILE]\n\n"+\
+    __usage = "usage: bmap_align_to_db.py [OPTIONS] [FASTA_FILE with 1-word header]\n\n"+\
               "typical: bmap_align_to_db.py --databases=MorexGenome queries.fasta"
     
     optParser = OptionParser(__usage)
@@ -97,7 +97,15 @@ try:
     
     ### INPUT FILE
     query_fasta_path = arguments[0] # THIS IS MANDATORY
-    
+   
+    fastafile = open(query_fasta_path)
+    for line in fastafile:
+        badheader = re.search(r"^>\S+\s+\S+", line)
+        if badheader:
+            fastafile.close()
+            optParser.exit(0, "Bad FASTA header: please make sure there is only one word, no spaces\n")
+    fastafile.close()
+ 
     sys.stderr.write("Command: "+" ".join(sys.argv)+"\n")
     
     ########## ARGUMENT DEFAULTS
@@ -190,8 +198,9 @@ except Exception as e:
     #traceback.print_exc(file=sys.stderr)
     sys.stderr.write("\nThere was an error.\n")
     sys.stderr.write(str(e)+"\n")
+    print(traceback.format_exc())
     sys.stderr.write('If you can not solve it please contact compbio@eead.csic.es ('+\
-                                   'laboratory of computational biology at EEAD).\n')
+                                   'Computational and structural biology group at EEAD-CSIC).\n')
 finally:
     pass
 
