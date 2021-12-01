@@ -190,7 +190,9 @@ class MappingsParser(object):
         current_interval_pos = 0
         current_interval = map_intervals[current_interval_pos]
         
-        # Find all the hits for this map
+        # Find all the hits for this map within intervals of interest
+        # Note: hits/map features are pre-computed & sorted along chroms, chroms are in chrom_dict order
+        # Note: intervals are pre-sorted as well
         for hit in open(data_path, 'r'):
             if hit.startswith(">") or hit.startswith("#"): continue
             hit_data = hit.strip().split("\t")
@@ -201,6 +203,14 @@ class MappingsParser(object):
             mapping_result = MappingResult.init_from_data(hit_data, map_name, chrom_dict, map_is_physical, map_has_cm_pos, map_has_bp_pos)
             
             chrom_name = mapping_result.get_chrom_name()
+            
+            # move to next interval to match chrom (only if previous mappings exist)
+            # Note: needed when last mapping matched exactly the last gene of a chrom
+            while len(mapping_results_list) > 0 and \
+                current_interval_pos < len(map_intervals)-1 and \
+                int(chrom_dict[chrom_name]) > int(chrom_dict[current_interval.get_chrom()]):
+                current_interval_pos += 1
+                current_interval = map_intervals[current_interval_pos]
             
             if chrom_name != current_interval.get_chrom(): continue
             
