@@ -5,7 +5,7 @@ Barleymap is designed, created and maintained at the Laboratory
 of Computational Biology at Estacion Experimental de Aula Dei (EEAD/CSIC, 
 http://www.eead.csic.es/compbio) in Zaragoza.
 
-The code has been written by Carlos P Cantalapiedra and we kindly ask
+The code has been written by Carlos P Cantalapiedra and colleagues, we kindly ask
 you to report errors or bugs in the program to the authors 
 ( cpcantalapiedra@gmail.com )
 and to acknowledge the use of the program in scientific publications:
@@ -14,7 +14,8 @@ Cantalapiedra CP, Boudiar R, Casas AM, Igartua E and Contreras-Moreira B. (2014)
 BARLEYMAP: physical and genetic mapping of nucleotide sequences
 and annotation of surrounding loci in barley. Mol Breed. (accepted).
 
-This software is copyright 2013-2014, Carlos P Cantalapiedra.
+This software is copyright 2013-2014, Carlos P Cantalapiedra,
+and copyright 2024, Bruno Contreras Moreira and Najla Ksouri.
 
 Barleymap is made freely available for academic research and shall not 
 be used for any tasks related to military purposes. Commercial users 
