@@ -147,13 +147,25 @@ try:
     # INPUT FILE
     query_fasta_path = arguments[0] # THIS IS MANDATORY
 
+    totalprot = 0
+
     fastafile = open(query_fasta_path)
     for line in fastafile:
-        badheader = re.search(r"^>\S+\s+\S+", line)
-        if badheader:
-            fastafile.close()
-            optParser.exit(0, "Bad FASTA header: please make sure there is only one word, no spaces\n")
+
+        if line.startswith('>'):
+            badheader = re.search(r"^>\S+\s+\S+", line)
+            if badheader:
+                fastafile.close()
+                optParser.exit(0, "Bad FASTA header: please make sure there is only one word, no spaces\n")
+        else:
+            isprot = re.search(r"^[defhiklmnpqrsvwy]+", line, re.IGNORECASE)
+            if isprot:
+                totalprot = totalprot + 1
+
     fastafile.close()
+
+    if totalprot == 0:
+        optParser.exit(0, "Bad sequence: please make sure input file contains aminoacid sequences\n")
 
     
     # Verbose
@@ -309,15 +321,15 @@ try:
     ########### Create maps
     ###########
     for map_id in maps_ids:
-        sys.stderr.write("bmap_align: Map "+map_id+"\n")
+        sys.stderr.write("bmap_align_prot: Map "+map_id+"\n")
         
         map_config = maps_config.get_map_config(map_id)
         databases_ids = map_config.get_db_list()
-        
+                 
         sort_by = map_config.check_sort_param(map_config, sort_param, DEFAULT_SORT_PARAM)
-        
+       
         mapMarkers = MapMarkers(maps_path, map_config, alignment_facade, verbose_param)
-        
+         
         mapMarkers.perform_mappings(query_fasta_path, databases_ids, databases_config, aligner_list,
                                     threshold_id, threshold_cov, n_threads,
                                     best_score, sort_by, multiple_param, tmp_files_dir)
