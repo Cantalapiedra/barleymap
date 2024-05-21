@@ -107,6 +107,9 @@ def __filter_miniprot_results(results, threshold_id, threshold_cov, db_name, ver
             match = re.search(ident_regex, line)
             if match:
                 align_ident = 100*float(match.group(1))
+                
+                if align_ident < threshold_id:
+                    continue
 
                 matchr = re.search(rank_regex, line)
                 if matchr:
