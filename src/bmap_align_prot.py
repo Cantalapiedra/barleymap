@@ -51,7 +51,7 @@ def _print_parameters(fasta_path, genetic_map_name, aligner_list,
     sys.stderr.write("\tAligner: "+",".join(aligner_list)+"\n")
     sys.stderr.write("\tThresholds --> %id="+str(threshold_id)+" : %query_cov="+str(threshold_cov)+"\n")
     sys.stderr.write("\tThreads: "+str(n_threads)+"\n")
-    sys.stderr.write("\tBest score filtering: "+str("yes" if best_score else "no")+"\n")
+#    sys.stderr.write("\tBest score filtering: "+str("yes" if best_score else "no")+"\n")
     sys.stderr.write("\tSort: "+sort_param+"\n")
     sys.stderr.write("\tShow multiples: "+str("yes" if multiple_param else "no")+"\n")
     sys.stderr.write("\tShow anchored features: "+str("yes" if show_anchored else "no")+"\n")
@@ -68,7 +68,7 @@ def _print_parameters(fasta_path, genetic_map_name, aligner_list,
 try:
     
     ## Usage
-    __usage = "usage: bmap_align_prot.py [OPTIONS] [FASTA_FILE with 1-word header]\n\n"+\
+    __usage = "usage: bmap_align_prot.py [OPTIONS] [protein FASTA_FILE with 1-word header]\n\n"+\
               "typical: bmap_align_prot.py --maps=map queries.faa"
     optParser = OptionParser(__usage)
     
@@ -78,7 +78,7 @@ try:
     ## Parameters related with alignment
     optParser.add_option('--aligner', action='store', dest='aligner', type='string',
                      help='Alignment software to use (default "'+",".join(DEFAULT_ALIGNER_LIST)+'"). '+\
-                     'Only "miniprot" supported.')
+                     'Supported aligners: miniprot')
     
     optParser.add_option('--thres-id', action='store', dest='thres_id', type='string',
                          help='Minimum identity for valid alignments. '+\
@@ -94,8 +94,8 @@ try:
     ## Parameters in common with bmap_find
     optParser.add_option('--maps', action='store', dest='maps_param', type='string', help='Comma delimited list of Maps to show.')
     
-    optParser.add_option('-b', '--best-score', action='store_true', dest='best_score',
-                         help='Will return only best score hits.')
+    #optParser.add_option('-b', '--best-score', action='store_true', dest='best_score',
+    #                     help='Will return only best score hits.')
     
     optParser.add_option('--sort', action='store', dest='sort_param', type='string', \
                          help='Sort results by centimorgan (cm) or basepairs (bp) '+\
@@ -198,7 +198,7 @@ try:
     else: n_threads = DEFAULT_N_THREADS
     
     ## Show only alignments from database with best scores
-    best_score = options.best_score if options.best_score else False
+    best_score = True 
     
     ## Sort
     if options.sort_param and options.sort_param == "bp":
