@@ -88,14 +88,15 @@ def __filter_miniprot_results(results, threshold_id, threshold_cov, db_name, ver
 
         line_data = line.split("\t")
  
-        # parse only PAF summary and mRNA features from GFF results
+        # parse only PAF summary and mRNA features from GFF results,
+        # coords in PAF are 0-based
         if line_data[0] == '##PAF':
             #sys.stderr.write("Line "+str(line)+"\n")
           
             query_id = line_data[1]
-            query_len = line_data[2]
-            qstart_pos = line_data[3] 
-            qend_pos = line_data[4]
+            query_len = int(line_data[2])
+            qstart_pos = int(line_data[3])+1 
+            qend_pos = int(line_data[4])
             strand = line_data[5]
             subject_id = line_data[6]
             local_position = line_data[8]
@@ -118,8 +119,8 @@ def __filter_miniprot_results(results, threshold_id, threshold_cov, db_name, ver
                     # For a given DB, keep always the best score
                     if rank == 1:
  
-                        align_score = (int(qend_pos) - int(qstart_pos) + 1) * (align_ident / 100)
-                        query_cov = (int(qend_pos) - int(qstart_pos) +1) / int(query_len)
+                        align_score = (qend_pos - qstart_pos + 1) * (align_ident / 100)
+                        query_cov = (qend_pos - qstart_pos + 1) / query_len
 
                         result_tuple = AlignmentResult()
                         result_tuple.create_from_attributes(query_id, subject_id,
