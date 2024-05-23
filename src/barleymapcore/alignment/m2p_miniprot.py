@@ -95,12 +95,12 @@ def __filter_miniprot_results(results, threshold_id, threshold_cov, db_name, ver
           
             query_id = line_data[1]
             query_len = int(line_data[2])
-            qstart_pos = int(line_data[3])+1 
+            qstart_pos = int(line_data[3])
             qend_pos = int(line_data[4])
             strand = line_data[5]
             subject_id = line_data[6]
-            local_position = line_data[8]
-            end_position = line_data[9]
+            local_position = int(line_data[8]) + 1 # PAF is 0-based
+            end_position = int(line_data[9])
  
         elif len(line_data) > 8 and line_data[2] == 'mRNA':
             #sys.stderr.write("Line "+str(line)+"\n")
@@ -119,9 +119,9 @@ def __filter_miniprot_results(results, threshold_id, threshold_cov, db_name, ver
                     # For a given DB, keep always the best score
                     if rank == 1:
  
-                        align_score = (qend_pos - qstart_pos + 1) * (align_ident / 100)
-                        query_cov = (qend_pos - qstart_pos + 1) / query_len
-
+                        align_score = (qend_pos - qstart_pos) * (align_ident / 100)
+                        query_cov = (qend_pos - qstart_pos) / query_len
+                        
                         result_tuple = AlignmentResult()
                         result_tuple.create_from_attributes(query_id, subject_id,
                                                             align_ident, query_cov, align_score,
