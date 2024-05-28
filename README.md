@@ -5,6 +5,7 @@
  - 2: [Prerequisites](https://github.com/Cantalapiedra/barleymap#2-prerequisites)
  - 3: [Installation and configuration](https://github.com/Cantalapiedra/barleymap#3-installation-and-configuration)
  - 4: [Tools and algorithms](https://github.com/Cantalapiedra/barleymap#4-tools-and-algorithms)
+ - 5: [Citation](https://github.com/Cantalapiedra/barleymap#citation)
  
 ## 1) Barleymap overview
 
@@ -36,7 +37,7 @@ to a specific map, so that it can be queried without repeating the alignment ste
 Barleymap has 3 different groups of **tools**, which are further explained in following sections:
 - Main tools:
   - bmap_align ("Align sequences" in the web version).
-  - bmap_align_prot ("Protein sequences" in the web version).
+  - bmap_align_prot ("Align proteins" in the web version).
   - bmap_find ("Find markers" in the web version).
   - bmap_locate ("Locate by position" in the web version).
 - Secondary tools (only in the standalone version):
@@ -1027,3 +1028,8 @@ README is part of Barleymap.
 Copyright (C)  2013-2014  Carlos P Cantalapiedra.
 Copyright (C) 2024 Bruno Contreras Moreira and Najla Ksouri
 (terms of use can be found within the distributed LICENSE file).
+
+
+## 5) Citation
+
+Cantalapiedra, C.P., Boudiar, R., Casas, A.M. et al. BARLEYMAP: physical and genetic mapping of nucleotide sequences and annotation of surrounding loci in barley. Mol Breeding 35, 13 (2015). https://doi.org/10.1007/s11032-015-0253-1
