@@ -5,7 +5,7 @@
  - 2: [Prerequisites](https://github.com/Cantalapiedra/barleymap#2-prerequisites)
  - 3: [Installation and configuration](https://github.com/Cantalapiedra/barleymap#3-installation-and-configuration)
  - 4: [Tools and algorithms](https://github.com/Cantalapiedra/barleymap#4-tools-and-algorithms)
- - 5: [Citation](https://github.com/Cantalapiedra/barleymap#citation)
+ - 5: [Citation](https://github.com/Cantalapiedra/barleymap#5-citation)
  
 ## 1) Barleymap overview
 
