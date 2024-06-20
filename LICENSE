@@ -2,28 +2,36 @@
 This LICENSE is part of Barleymap
  
 Barleymap is designed, created and maintained at the Laboratory 
-of Computational Biology at Estacion Experimental de Aula Dei (EEAD/CSIC, 
-http://www.eead.csic.es/compbio) in Zaragoza.
+of Computational and Structural Biology at Estacion Experimental 
+de Aula Dei (EEAD-CSIC, https://eead.csic.es/compbio) in Zaragoza.
 
-The code has been written by Carlos P Cantalapiedra and we kindly ask
-you to report errors or bugs in the program to the authors 
-( cpcantalapiedra@gmail.com )
+The code has been written mostly by Carlos P Cantalapiedra; we kindly ask
+you to report errors or bugs in the program to the authors ( compbio@eead.csic.es )
 and to acknowledge the use of the program in scientific publications:
 
-Cantalapiedra CP, Boudiar R, Casas AM, Igartua E and Contreras-Moreira B. (2014)
+Cantalapiedra CP, Boudiar R, Casas AM, Igartua E and Contreras-Moreira B. (2015)
 BARLEYMAP: physical and genetic mapping of nucleotide sequences
-and annotation of surrounding loci in barley. Mol Breed. (accepted).
+and annotation of surrounding loci in barley. Mol Breed. 35, 13 
+https://doi.org/10.1007/s11032-015-0253-1
 
-This software is copyright 2013-2014, Carlos P Cantalapiedra.
+and
+
+Ksouri N, Moreno MA, Contreras-Moreira B, Gogorcena Y (2024) 
+Mapping the genomic landscape of peach and almond with PrunusMap. 
+https://www.biorxiv.org/content/10.1101/2024.03.26.586732v1
+
+This software is copyright 2013-2014, Carlos P Cantalapiedra, and 
+copyright (C) 2024 Bruno Contreras Moreira and Najla Ksouri.
 
 Barleymap is made freely available for academic research and shall not 
 be used for any tasks related to military purposes. Commercial users 
 interested in Barleymap should contact the authors.
 
-This package includes SplitBlast, a multi-threaded wrapper for Blast,
-by Bruno Contreras-Moreira ( bcontreras@eead.csic.es ).
+This package includes script bmap_align_prot, plus SplitBlast, 
+a multi-threaded wrapper for Blast, written 
+by Bruno Contreras-Moreira and Najla Ksouri.
 
-This package encourages to use either or both BLAST and GMAP, which
+This package encourages to use BLAST, GMAP and MINIPROT which
 are distributed separatedly and have their own licenses.
 
 This package is free software: you can redistribute it and/or modify
