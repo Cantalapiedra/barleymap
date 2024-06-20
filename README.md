@@ -696,7 +696,7 @@ should be moved to the box "Retrieve map positions" and change the tag "unaligne
 Several types of input can be queried (1): identifiers (query IDs), genomic positions or FASTA (query sequences). The alignment modes (2) support genomic, transcript and protein sequences. For nucleotides, BLASTN is used for genomic sequences and GMAP for transcripts/cDNAs; the "auto" uses both to maximize the alignment rate. For amino acid sequences, MINIPROT is used to align proteins to genomes considering splicing and frameshifts. Genomic positions enter the pipeline at the mapping module (3), where targets are associated with the queries, and after filtering (4), enriched with surrounding genes and markers. Finally, gene annotation such as protein domains might also be appended to the results. 
 </sub>
 <p align="center">
-  <img width="450" height="470" src="https://github.com/Cantalapiedra/barleymap/flow.png">
+  <img width="450" height="470" src="https://github.com/Cantalapiedra/barleymap/blob/master/flow.png">
 </p>
 
 In addition there are three **versions of the algorithm**: "greedy", "hierarchical" and "exhaustive".
