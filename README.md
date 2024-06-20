@@ -5,6 +5,7 @@
  - 2: [Prerequisites](https://github.com/Cantalapiedra/barleymap#2-prerequisites)
  - 3: [Installation and configuration](https://github.com/Cantalapiedra/barleymap#3-installation-and-configuration)
  - 4: [Tools and algorithms](https://github.com/Cantalapiedra/barleymap#4-tools-and-algorithms)
+ - 5: [Citation](https://github.com/Cantalapiedra/barleymap#5-citation)
  
 ## 1) Barleymap overview
 
@@ -33,9 +34,10 @@ Note that a map can store positions of sequences from one or more databases.
 - Datasets: tables which store the map position of loci often used as queries (markers, genes, etc.)
 to a specific map, so that it can be queried without repeating the alignment step.
 
-Barleymap has 3 different groups of **tools**, which are further explained in following sections:
+Barleymap has 4 different groups of **tools**, which are further explained in following sections:
 - Main tools:
   - bmap_align ("Align sequences" in the web version).
+  - bmap_align_prot ("Align proteins" in the web version).
   - bmap_find ("Find markers" in the web version).
   - bmap_locate ("Locate by position" in the web version).
 - Secondary tools (only in the standalone version):
@@ -56,6 +58,7 @@ The following builds have been tested:
 - Blast: ncbi-blast-2.2.27+
 - GMAP: gmap-2013-11-27 and gmap-2013-08-31
 - HS-blastn: hs-blastn-0.0.5+
+- miniprot: miniprot-0.13
 
 Other versions of the previous aligners could also work with barleymap,
 as long as the aligner parameters or its output format remain as in the versions above.
@@ -160,13 +163,16 @@ blastn_dbs_path PATH_TO_BLAST_DATABASES
 gmap_app_path PATH_TO_GMAP/bin/gmap
 gmap_dbs_path PATH_TO_GMAP_DATABASES
 gmapl_app_path PATH_TO_GMAP/bin/gmapl
+# miniprot
+miniprot_app_path PATH_TO_MINIPROT/miniprot
+miniprot_dbs_path PATH_TO_MINIPROT_DATABASES
 # HS-Blastn
 hsblastn_app_path PATH_TO_HSBLASTN/hs-blastn-src/hs-blastn
 hsblastn_dbs_path PATH_TO_HSBLASTN_DATABASES
 
 ########### Other
 citation Cantalapiedra_CP,_Boudiar_R,_Casas_AM,_Igartua_E,_Contreras-Moreira_B._BARLEYMAP:_physical_and_genetic_mapping_of_nucleotide_sequences_and_annotation_of_surrounding_loci_in_barley._Mol_Breeding_(2015)_35:13_DOI_10.1007/s11032-015-0253-1
-stdalone_app http://eead.csic.es/compbio/soft/barleymap/
+stdalone_app https://github.com/Cantalapiedra/barleymap
 ```
 
 First, you will need to edit the *app_path* field to point
@@ -188,11 +194,11 @@ or aligners which will be used by the current barleymap instance will need to be
 For each aligner to be used, barleymap needs:
 
 - The **absolute path to the binary** file of the aligner.
-You will need to change the values of *blastn_app_path*, *gmap_app_path*, *gmapl_app_path*,
+You will need to change the values of *blastn_app_path*, *gmap_app_path*, *gmapl_app_path*, *miniprot_app_path*
 and *hsblastn_app_path* fields.
 
 - The **absolute path to the sequence databases** (genome, sequence-enriched map, or any other sequence reference).
-You will need to change the values of *blastn_dbs_path*, *gmap_dbs_path*, and *hsblastn_dbs_path*.
+You will need to change the values of *blastn_dbs_path*, *gmap_dbs_path*, *miniprot_dbs_path* and *hsblastn_dbs_path*.
 
 Note that although both the standalone and the web versions need their own configuration files,
 the actual resources (databases, datasets and maps) can be shared by both applications by configuring
@@ -661,11 +667,12 @@ For all the databases of a given map,
 barleymap searches all the queries in the first database, using the first aligner.
 If there are queries which have not been found, it uses the next aligner in the same database.
 If all the aligners have been used in this database, try with the next database, starting with the first aligner.
+Note that for protein sequences the only supported aligner is 'miniprot'.
 Repeat until all the queries have been found or there are no more databases and aligners to use.
 With each query for which alignment targets have been found, search the map position of those targets,
 and associate those positions to the corresponding queries.
 
-In sort:
+In short:
 ```
 Given a list of unmapped queries *U*, a list of databases *D* from a map *m*, and a list of aligners *A*:
 For each *d* in *D*,
@@ -1020,4 +1027,10 @@ whereas for small dataset files is likely better to not use index files.
 
 README is part of Barleymap.
 Copyright (C)  2013-2014  Carlos P Cantalapiedra.
+Copyright (C) 2024 Bruno Contreras Moreira and Najla Ksouri
 (terms of use can be found within the distributed LICENSE file).
+
+
+## 5) Citation
+
+Cantalapiedra, C.P., Boudiar, R., Casas, A.M. et al. BARLEYMAP: physical and genetic mapping of nucleotide sequences and annotation of surrounding loci in barley. Mol Breeding 35, 13 (2015). https://doi.org/10.1007/s11032-015-0253-1
