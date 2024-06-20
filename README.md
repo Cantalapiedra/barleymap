@@ -551,7 +551,7 @@ Gene000090	GO:0005524
 
 NOTE: in the web version of barleymap some of the options and parameters, which can be changed in
 the standalone version, have been fixed. Check
-[http://floresta.eead.csic.es/barleymap/help/](http://floresta.eead.csic.es/barleymap/help/).
+[https://barleymap.eead.csic.es/barleymap/help](https://barleymap.eead.csic.es/barleymap/help).
 
 ### 4.1) Main tools
 
@@ -682,13 +682,14 @@ Report *p* as the position of *q*.
 ```
 
 <sub style="font-size: 12px !important;">
-Figure. Schematic representation of the barleymap "hierarchical" algorithm.
+Figure. Schematic representation of the standalone Barleymap "hierarchical" algorithm.
 For the "greedy" algorithm all the query sequences are aligned to next database,
 instead of just the unaligned ones. For the "exhaustive" algorithm, the "align to next database" arrow
 should be moved to the box "Retrieve map positions" and change the tag "unaligned" to "unmapped".
+Several types of input can be queried (1): identifiers (query IDs), genomic positions or FASTA (query sequences). The alignment modes (2) support genomic, transcript and protein sequences. For nucleotides, BLASTN is used for genomic sequences and GMAP for transcripts/cDNAs; the "auto" uses both to maximize the alignment rate. For amino acid sequences, MINIPROT is used to align proteins to genomes considering splicing and frameshifts. Genomic positions enter the pipeline at the mapping module (3), where targets are associated with the queries, and after filtering (4), enriched with surrounding genes and markers. Finally, gene annotation such as protein domains might also be appended to the results. 
 </sub>
 <p align="center">
-  <img width="450" height="470" src="http://floresta.eead.csic.es/barleymap/img/barleymap_popseq.pipeline_2.png">
+  <img width="450" height="470" src="https://github.com/Cantalapiedra/barleymap/flow.png">
 </p>
 
 In addition there are three **versions of the algorithm**: "greedy", "hierarchical" and "exhaustive".
