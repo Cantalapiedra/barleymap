@@ -1034,3 +1034,5 @@ Copyright (C) 2024 Bruno Contreras Moreira and Najla Ksouri
 ## 5) Citation
 
 Cantalapiedra, C.P., Boudiar, R., Casas, A.M. et al. BARLEYMAP: physical and genetic mapping of nucleotide sequences and annotation of surrounding loci in barley. Mol Breeding 35, 13 (2015). https://doi.org/10.1007/s11032-015-0253-1
+
+Ksouri N, Moreno MA, Contreras-Moreira B, Gogorcena Y (2024) Mapping the genomic landscape of peach and almond with PrunusMap. https://www.biorxiv.org/content/10.1101/2024.03.26.586732v1
