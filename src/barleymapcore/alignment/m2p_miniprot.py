@@ -85,7 +85,7 @@ def __filter_miniprot_results(results, threshold_id, threshold_cov, db_name, ver
         # https://lh3.github.io/miniprot/miniprot.html#9
         # ##PAF A0A4Y1QZC6_PRUDU 281 3 281 - NC_047651.1 26138581 13209470 13214284 834 834 0 AS:i:1141 ...
         # NC_047651.1 miniprot mRNA 13209468 13214284 1401 - . ID=MP000010;Rank=1;Identity=1.0000;Positive=1.0000;Target=A0A4Y1QZC6_PRUDU 4 281
-
+	
         line_data = line.split("\t")
  
         # parse only PAF summary and mRNA features from GFF results,
@@ -99,11 +99,16 @@ def __filter_miniprot_results(results, threshold_id, threshold_cov, db_name, ver
             qend_pos = int(line_data[4])
             strand = line_data[5]
             subject_id = line_data[6]
-            local_position = int(line_data[8]) + 1 # PAF is 0-based
-            end_position = int(line_data[9])
+
+            # read genome coords from GFF instead as these seem to include stop codon
+            #local_position = int(line_data[8]) + 1 # PAF is 0-based
+            #end_position = int(line_data[9])
  
         elif len(line_data) > 8 and line_data[2] == 'mRNA':
             #sys.stderr.write("Line "+str(line)+"\n")
+
+            local_position = int(line_data[3])
+            end_position = int(line_data[4])
 
             match = re.search(ident_regex, line)
             if match:
