@@ -9,7 +9,7 @@
 import sys, re, os
 from subprocess import Popen, PIPE
 
-from barleymapcore.alignment.AlignmentResult import *
+from barleymapcore.alignment.GraphAlignmentResult import *
 from barleymapcore.m2p_exception import m2pException
 
 #from Aligners import SELECTION_BEST_SCORE, SELECTION_NONE
@@ -23,7 +23,7 @@ def __align2graph(align2graph_app_path, n_threads, threshold_id, threshold_cov, 
     
     ###### Check that DB is available for this aligner
     dbpath = align2graph_dbs_path + "/" + db_name + "/" + db_name 
-    dbpathfile = dbpath + ".yaml"
+    dbpathfile = dbpath + ".bmap.yaml"
     sys.stderr.write("Checking database: "+dbpathfile+" DB exists for "+ALIGNER+".\n")
     
     if not (os.path.exists(dbpathfile) and os.path.isfile(dbpathfile)):
@@ -34,11 +34,15 @@ def __align2graph(align2graph_app_path, n_threads, threshold_id, threshold_cov, 
 
     # build actual align2graph call 
     align2graph_cmd = "".join([align2graph_app_path, \
-                   " ",dbpathfile,
+                   " --cor ", str(n_threads), \
+                   " --minident ", str(threshold_id), \
+                   " --mincover ", str(threshold_cov), \
+                   " ",dbpathfile, \
                    " ",query_fasta_path,
-                   " -t ", str(n_threads), \
-                   " --gff --outc=", str(align2graph_thres_cov)])
+                   ])
     
+    print(align2graph_cmd)
+
     if verbose: sys.stderr.write("m2p_align2graph: Thresholds: ID="+str(align2graph_thres_id)+"; COV="+str(align2graph_thres_cov)+"\n")
     
     if verbose: sys.stderr.write("m2p_align2graph: Executing '"+align2graph_cmd+"'\n")
@@ -70,70 +74,41 @@ def __align2graph(align2graph_app_path, n_threads, threshold_id, threshold_cov, 
 
 
 def __filter_align2graph_results(results, threshold_id, threshold_cov, db_name, verbose = False):
+    
+    # currently no filtering is done, ie leaving out alignments with no ref coords,
+    # but this would be the place to do it
 
     filtered_results = []
     
     filter_dict = {}
-   
-    rank_regex = re.compile("Rank=(\d+);") 
-    ident_regex = re.compile("Identity=([^;]+)")
     
     algorithm = "align2graph"
     
     for line in results:
-    
-        # https://lh3.github.io/align2graph/align2graph.html#9
-        # ##PAF A0A4Y1QZC6_PRUDU 281 3 281 - NC_047651.1 26138581 13209470 13214284 834 834 0 AS:i:1141 ...
-        # NC_047651.1 align2graph mRNA 13209468 13214284 1401 - . ID=MP000010;Rank=1;Identity=1.0000;Positive=1.0000;Target=A0A4Y1QZC6_PRUDU 4 281
-	
-        line_data = line.split("\t")
- 
-        # parse only PAF summary and mRNA features from GFF results,
-        # coords in PAF are 0-based
-        if line_data[0] == '##PAF':
-            #sys.stderr.write("Line "+str(line)+"\n")
-          
-            query_id = line_data[1]
-            query_len = int(line_data[2])
-            qstart_pos = int(line_data[3])
-            qend_pos = int(line_data[4])
-            strand = line_data[5]
-            subject_id = line_data[6]
+   
+        if not line.startswith("#"):
+            #query ref_chr ref_start ref_end ref_strand 
+            #genome chr start end strand ident cover multmaps graph_ranges
+            # examples:
+            #1420.2 . . . . MorexV3 chr1H 4920748 4921827 + 100.0 99.7 No .
+            #1430.4 chr1H 134 356 + MorexV3 chr1H 094 827 + 100.0 99.5 No .
 
-            # read genome coords from GFF instead as these seem to include stop codon
-            #local_position = int(line_data[8]) + 1 # PAF is 0-based
-            #end_position = int(line_data[9])
- 
-        elif len(line_data) > 8 and line_data[2] == 'mRNA':
-            #sys.stderr.write("Line "+str(line)+"\n")
+            [ query_id, ref_id, ref_start, ref_end, ref_strand, 
+                subj_name,subj_id,subj_start,subj_end,subj_strand,
+                subj_ident, subj_cover, subj_multmaps,
+                graph_ranges ] = line.split("\t")
 
-            local_position = int(line_data[3])
-            end_position = int(line_data[4])
+            subj_score = (int(subj_end) - int(subj_start)) * (float(subj_ident) / 100)
 
-            match = re.search(ident_regex, line)
-            if match:
-                align_ident = 100*float(match.group(1))
-                
-                if align_ident < threshold_id:
-                    continue
+            result_tuple = GraphAlignmentResult()
 
-                matchr = re.search(rank_regex, line)
-                if matchr:
-                    rank = int(matchr.group(1))
-
-                    # For a given DB, keep always the best score
-                    if rank == 1:
- 
-                        align_score = (qend_pos - qstart_pos) * (align_ident / 100)
-                        query_cov = (qend_pos - qstart_pos) / query_len
+            result_tuple.create_from_attributes(
+                query_id, ref_id, ref_start, ref_end, ref_strand, 
+                subj_name, subj_id, subj_start, subj_end, subj_strand,
+                subj_ident, subj_cover, subj_score, subj_multmaps,
+                graph_ranges , db_name, algorithm)
                         
-                        result_tuple = AlignmentResult()
-                        result_tuple.create_from_attributes(query_id, subject_id,
-                                                            align_ident, query_cov, align_score,
-                                                            strand, qstart_pos, qend_pos, local_position, 
-                                                            end_position, db_name, algorithm)
-                        
-                        filtered_results.append(result_tuple)
+            filtered_results.append(result_tuple)
     
     return filtered_results
 
