@@ -59,7 +59,7 @@ class GraphMappingResult(object):
         self._empty = empty
     
     def clone(self):
-        new_mapping_result = MappingResult(self.get_marker_id(),
+        new_mapping_result = GraphMappingResult(self.get_marker_id(),
                                            self.get_chrom_name(),
                                            self.get_chrom_order(),
                                            self.get_cm_pos(),
