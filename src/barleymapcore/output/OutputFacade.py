@@ -507,7 +507,7 @@ class OutputPrinter(object):
     def output_base_pos(self, pos, map_as_physical, map_has_cm_pos, map_has_bp_pos, multiple_param):
         
         current_row = []
-        
+
         ## Marker ID
         current_row.append(str(pos.get_marker_id())) #[MapFields.MARKER_NAME_POS]))
         
@@ -550,9 +550,10 @@ class OutputPrinter(object):
                 else: current_row.append("No")
                 
             ## Other alignments
-            if pos.has_other_alignments(): current_row.append("Yes")
+            if pos.get_graph_ranges(): current_row.append(pos.get_graph_ranges())
+            elif pos.has_other_alignments(): current_row.append("Yes")
             else: current_row.append("No")
-        
+
         return current_row
     
 ## A printer to show MappingResults to the left
