@@ -170,7 +170,7 @@ class SearchEngineGreedy(SearchEngineAlignments):
         
         mapper = Mappers.get_alignments_mapper(map_as_physical, map_reader, self._verbose)
         
-        mapping_results = mapper.create_map(aligned, unaligned, map_config, sort_param, multiple_param)
+        mapping_results = mapper.create_map(aligned, unaligned, map_config, sort_param, multiple_param, is_graph)
         
         sys.stderr.write("SearchEngineGreedy: mapped "+str(len(mapping_results.get_mapped()))+"\n")
         
