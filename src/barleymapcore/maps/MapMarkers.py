@@ -82,7 +82,8 @@ class MapMarkers(object):
     
     def perform_mappings(self, query_fasta_path, databases_ids, databases_config, aligner_list,
                                 threshold_id, threshold_cov, n_threads,
-                                best_score_param, sort_param, multiple_param, tmp_files_dir, is_graph = False):
+                                best_score_param, sort_param, multiple_param, tmp_files_dir, 
+                                is_graph = False):
         
         search_type = self._map_config.get_search_type()
         
