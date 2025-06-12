@@ -158,7 +158,7 @@ try:
                 fastafile.close()
                 optParser.exit(0, "Bad FASTA header: please make sure there is only one word, no spaces\n")
         else:
-            isprot = re.search(r"[defhiklmpqrsvwy]+", line, re.IGNORECASE)
+            isprot = re.search(r"[defhilpqv]+", line, re.IGNORECASE)
             if isprot:
                 totalprot = totalprot + 1
 
@@ -329,7 +329,8 @@ try:
         
         mapMarkers.perform_mappings(query_fasta_path, graphs_ids, graphs_config, aligner_list,
                                     threshold_id, threshold_cov, n_threads,
-                                    best_score, sort_by, multiple_param, tmp_files_dir)
+                                    best_score, sort_by, multiple_param, tmp_files_dir, 
+                                    is_graph = True)
         
         if show_all:
             datasets_enrichment = datasets_ids
@@ -337,9 +338,11 @@ try:
             datasets_enrichment = map_config.get_main_datasets()
         
         mapMarkers.enrichment(annotator, show_markers, show_genes, show_anchored, show_how,
-                              datasets_facade, datasets_enrichment, extend_window, collapsed_view, constrain_fine_mapping = False)
+                              datasets_facade, datasets_enrichment, extend_window, collapsed_view, 
+                              constrain_fine_mapping = False)
+
         mapping_results = mapMarkers.get_mapping_results()
-        
+
         ############################################################ OUTPUT
         if show_markers:
             outputPrinter.print_map_with_markers(mapping_results.get_map_with_markers(), map_config, multiple_param)
