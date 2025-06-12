@@ -37,6 +37,7 @@ def __align2graph(align2graph_app_path, n_threads, threshold_id, threshold_cov, 
                    " --cor ", str(n_threads), \
                    " --minident ", str(threshold_id), \
                    " --mincover ", str(threshold_cov), \
+                   " --add_ranges", \
                    " ",dbpathfile, \
                    " ",query_fasta_path,
                    ])
@@ -75,9 +76,6 @@ def __align2graph(align2graph_app_path, n_threads, threshold_id, threshold_cov, 
 
 def __filter_align2graph_results(results, threshold_id, threshold_cov, db_name, verbose = False):
     
-    # currently no filtering is done, ie leaving out alignments with no ref coords,
-    # but this would be the place to do it
-
     filtered_results = []
     
     filter_dict = {}
@@ -87,6 +85,7 @@ def __filter_align2graph_results(results, threshold_id, threshold_cov, db_name, 
     for line in results:
    
         if not line.startswith("#"):
+
             #query ref_chr ref_start ref_end ref_strand 
             #genome chr start end strand ident cover multmaps graph_ranges
             # examples:
@@ -97,6 +96,10 @@ def __filter_align2graph_results(results, threshold_id, threshold_cov, db_name, 
                 subj_name,subj_id,subj_start,subj_end,subj_strand,
                 subj_ident, subj_cover, subj_multmaps,
                 graph_ranges ] = line.split("\t")
+
+            if(ref_id == "."):
+                # this is a query with no reference coords, so we skip it
+                continue
 
             subj_score = (int(subj_end) - int(subj_start)) * (float(subj_ident) / 100)
 
