@@ -256,9 +256,9 @@ class PhysicalMapper(Mapper):
             local_position = alignment.get_local_position()
             end_position = alignment.get_end_position()
             strand = alignment.get_strand()
-            has_multiple_pos = alignment.get_subj_multmaps
             
             if is_graph:
+                has_multiple_pos = alignment.get_subj_multmaps
                 graph_ranges = alignment.get_graph_ranges()
                 
                 new_pos = {"chr":contig_id, "cm_pos":-1, "cm_end_pos":-1,
