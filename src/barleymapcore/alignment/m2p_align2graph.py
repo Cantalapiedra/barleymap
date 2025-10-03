@@ -34,11 +34,11 @@ def __align2graph(align2graph_app_path, n_threads, threshold_id, threshold_cov, 
 
     # build actual align2graph call 
     align2graph_cmd = "".join([align2graph_app_path, \
+                   " --graph_yaml ", dbpathfile, \ 
                    " --cor ", str(n_threads), \
                    " --minident ", str(threshold_id), \
                    " --mincover ", str(threshold_cov), \
-                   " --add_ranges", \
-                   " ",dbpathfile, \
+                   " --add_ranges ", \
                    " ",query_fasta_path,
                    ])
     
