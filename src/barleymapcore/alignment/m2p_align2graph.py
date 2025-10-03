@@ -22,7 +22,7 @@ def __align2graph(align2graph_app_path, n_threads, threshold_id, threshold_cov, 
     results = []
     
     ###### Check that DB is available for this aligner
-    dbpath = align2graph_dbs_path + "/" + db_name + "/" + db_name 
+    dbpath = align2graph_dbs_path + "/" + db_name   
     dbpathfile = dbpath + ".bmap.yaml"
     sys.stderr.write("Checking database: "+dbpathfile+" DB exists for "+ALIGNER+".\n")
     
@@ -34,7 +34,7 @@ def __align2graph(align2graph_app_path, n_threads, threshold_id, threshold_cov, 
 
     # build actual align2graph call 
     align2graph_cmd = "".join([align2graph_app_path, \
-                   " --graph_yaml ", dbpathfile, \ 
+                   " --graph_yaml ", dbpathfile, \
                    " --cor ", str(n_threads), \
                    " --minident ", str(threshold_id), \
                    " --mincover ", str(threshold_cov), \
