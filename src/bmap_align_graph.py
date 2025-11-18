@@ -261,7 +261,7 @@ try:
 
     if len(graphs_ids)<=0 or len(graphs_names)<=0:
         raise Exception("No valid graphs were found. Please, check your --maps parameter or your conf/graphs.conf file.")
-    
+
     ## Maps
     maps_conf_file = __app_path+MAPS_CONF
     maps_config = MapsConfig(maps_conf_file)
