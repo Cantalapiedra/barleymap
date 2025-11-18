@@ -3,11 +3,13 @@
 
 # Mappers.py is part of Barleymap.
 # Copyright (C)  2013-2014  Carlos P Cantalapiedra.
+# Copyright (C) 2025 Bruno Contreras Moreira and Joan Sarria
 # (terms of use can be found within the distributed LICENSE file).
 
 import sys
 
 from barleymapcore.maps.MappingResults import MappingResult, MappingResults
+from barleymapcore.maps.GraphMappingResults import GraphMappingResult
 
 from barleymapcore.db.MapsConfig import MapsConfig
 
@@ -129,9 +131,20 @@ class Mapper(object):
                 
                 chrom_order = chrom_dict[chr_pos] # Numeric value of chromsome (for sorting purposes)
                 
-                mapping_result = MappingResult(marker_id, chr_pos, chrom_order,
-                                               pos["cm_pos"], pos["cm_end_pos"], pos["bp_pos"], pos["bp_end_pos"], pos["strand"],
-                                       num_marker_pos > 1, num_contig_no_pos > 0, map_name)
+                # graph-alignment map position are treated differently, 
+                # as they have associated graph ranges
+                if "graph_ranges" in pos:
+                    mapping_result = GraphMappingResult(marker_id, chr_pos, chrom_order,
+                                                   pos["cm_pos"], pos["cm_end_pos"], 
+                                                   pos["bp_pos"], pos["bp_end_pos"], pos["strand"],
+                                                   pos["multmaps"], pos["graph_ranges"], map_name)
+
+                else:
+                    mapping_result = MappingResult(marker_id, chr_pos, chrom_order,
+                                               pos["cm_pos"], pos["cm_end_pos"], 
+                                               pos["bp_pos"], pos["bp_end_pos"], pos["strand"],
+                                               num_marker_pos > 1, num_contig_no_pos > 0, map_name)
+
                 positions_list.append(mapping_result)
         
         return positions_list
@@ -188,11 +201,12 @@ class DatasetMapper(Mapper):
 class PhysicalMapper(Mapper):
     ## Obtain a finished map of markers from alignments to physical map sequences (genome)
     # def create_physical_map
-    def create_map(self, alignment_results, unaligned_markers, map_config, sort_param, multiple_param):
+    def create_map(self, alignment_results, unaligned_markers, map_config, sort_param, multiple_param, 
+                    is_graph = False):
         
         # Re-format positions of aligned markers to map positions
         #
-        markers_positions = self._reformatPositions(alignment_results)
+        markers_positions = self._reformatPositions(alignment_results, is_graph)
         
         ### Create a list of positions from the dictionary of positions of markers (markers_positions)
         # (creates the structure of each position (marker_id, chr, cM, ...))
@@ -218,7 +232,7 @@ class PhysicalMapper(Mapper):
         return finished_map
     
     # Translates positions of alignments to map format
-    def _reformatPositions(self, alignment_results):
+    def _reformatPositions(self, alignment_results, is_graph = False):
         
         markers_positions = {}
         # marker_id --> {"positions":[], "hits_no_position":[]}
@@ -243,9 +257,17 @@ class PhysicalMapper(Mapper):
             end_position = alignment.get_end_position()
             strand = alignment.get_strand()
             
-            new_pos = {"chr":contig_id, "cm_pos":-1, "cm_end_pos":-1,
+            if is_graph:
+                has_multiple_pos = alignment.get_subj_multmaps
+                graph_ranges = alignment.get_graph_ranges()
+                
+                new_pos = {"chr":contig_id, "cm_pos":-1, "cm_end_pos":-1,
+                       "bp_pos":local_position, "bp_end_pos":end_position, "strand":strand, 
+                       "multmaps":has_multiple_pos, "graph_ranges":graph_ranges}
+            else:
+                new_pos = {"chr":contig_id, "cm_pos":-1, "cm_end_pos":-1,
                        "bp_pos":local_position, "bp_end_pos":end_position, "strand":strand}
-            
+
             if not self._existPosition(marker_pos, new_pos):
                 marker_pos.append(new_pos)
         

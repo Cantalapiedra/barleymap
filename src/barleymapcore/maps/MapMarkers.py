@@ -3,6 +3,7 @@
 
 # MapMarkers.py is part of Barleymap.
 # Copyright (C)  2013-2014  Carlos P Cantalapiedra.
+# Copyright (C) 2025 Bruno Contreras Moreira and Joan Sarria
 # (terms of use can be found within the distributed LICENSE file).
 
 import sys
@@ -81,7 +82,8 @@ class MapMarkers(object):
     
     def perform_mappings(self, query_fasta_path, databases_ids, databases_config, aligner_list,
                                 threshold_id, threshold_cov, n_threads,
-                                best_score_param, sort_param, multiple_param, tmp_files_dir):
+                                best_score_param, sort_param, multiple_param, tmp_files_dir, 
+                                is_graph = False):
         
         search_type = self._map_config.get_search_type()
         
@@ -90,7 +92,7 @@ class MapMarkers(object):
                                                                threshold_id, threshold_cov, n_threads, self._verbose)
         
         mapping_results = search_engine.create_map(query_fasta_path, databases_ids, self._map_config, self._facade,
-                                                   sort_param, multiple_param, tmp_files_dir)
+                                                   sort_param, multiple_param, tmp_files_dir, is_graph)
         
         sys.stderr.write("MapMarkers: Map "+self._map_config.get_name()+" created.\n")
         sys.stderr.write("\n")

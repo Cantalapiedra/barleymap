@@ -38,6 +38,9 @@ blastn_dbs_path PATH_TO_BLAST_DATABASES
 gmap_app_path PATH_TO_GMAP/bin/gmap
 gmap_dbs_path PATH_TO_GMAP_DATABASES
 gmapl_app_path PATH_TO_GMAP/bin/gmapl
+# align2graph
+align2graph_app_path PATH_TO/align2graph.py
+align2graph_dbs_path PATH_TO_ALIGN2GRAPH_DATABASES
 # HS-Blastn
 hsblastn_app_path PATH_TO_HSBLASTN/hs-blastn-src/hs-blastn
 hsblastn_dbs_path PATH_TO_HSBLASTN_DATABASES

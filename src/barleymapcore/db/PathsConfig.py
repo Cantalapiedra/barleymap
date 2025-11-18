@@ -3,7 +3,7 @@
 
 # PathsConfig.py is part of Barleymap.
 # Copyright (C)  2016  Carlos P Cantalapiedra.
-# Copyright (C) 2024 Bruno Contreras Moreira and Najla Ksouri
+# Copyright (C) 2025 Bruno Contreras Moreira and Joan Sarria
 # (terms of use can be found within the distributed LICENSE file).
 
 from barleymapcore.utils.data_utils import read_paths
@@ -18,6 +18,7 @@ class PathsConfig(object):
     _DATASETS_PATH = "datasets_path"
     _MAPS_PATH = "maps_path"
     _ANNOTATION_PATH = "annot_path"
+    _GRAPHS_PATH = "graphs_path"
     
     # Aux apps
     _GENMAP_PATH = "genmap_path"
@@ -31,6 +32,8 @@ class PathsConfig(object):
     _HSBLASTN_DBS_PATH = "hsblastn_dbs_path"
     _MINIPROT_APP_PATH = "miniprot_app_path"
     _MINIPROT_DBS_PATH = "miniprot_dbs_path"
+    _ALIGN2GRAPH_APP_PATH = "align2graph_app_path"
+    _ALIGN2GRAPH_DBS_PATH = "align2graph_dbs_path" 
     
     # Aux dirs
     _TMP_FILES_PATH = "tmp_files_path"
@@ -55,6 +58,8 @@ class PathsConfig(object):
     _hsblastn_dbs_path = ""
     _miniprot_app_path = ""
     _miniprot_dbs_path = ""
+    _align2graph_app_path = ""
+    _align2graph_dbs_path = ""
     _citation = ""
     _stdalone_app = ""
     
@@ -81,6 +86,8 @@ class PathsConfig(object):
         self._hsblastn_dbs_path = self._config_path_dict[self._HSBLASTN_DBS_PATH]
         self._miniprot_app_path = self._config_path_dict[self._MINIPROT_APP_PATH]
         self._miniprot_dbs_path = self._config_path_dict[self._MINIPROT_DBS_PATH]
+        self._align2graph_app_path = self._config_path_dict[self._ALIGN2GRAPH_APP_PATH]
+        self._align2graph_dbs_path = self._config_path_dict[self._ALIGN2GRAPH_DBS_PATH]
         self._citation = self._config_path_dict[self._CITATION]
         self._stdalone_app = self._config_path_dict[self._STDALONE_APP]
         
@@ -103,6 +110,8 @@ class PathsConfig(object):
                              self._HSBLASTN_DBS_PATH:self._hsblastn_dbs_path,
                              self._MINIPROT_APP_PATH:self._miniprot_app_path,
                              self._MINIPROT_DBS_PATH:self._miniprot_dbs_path,
+                             self._ALIGN2GRAPH_APP_PATH:self._align2graph_app_path,
+                             self._ALIGN2GRAPH_DBS_PATH:self._align2graph_dbs_path, 
                              self._CITATION:self._citation,
                              self._STDALONE_APP:self._stdalone_app}
         
@@ -129,6 +138,8 @@ class PathsConfig(object):
         paths_config._hsblastn_dbs_path = config_path_dict[paths_config._HSBLASTN_DBS_PATH]
         paths_config._miniprot_app_path = config_path_dict[paths_config._MINIPROT_APP_PATH]
         paths_config._miniprot_dbs_path = config_path_dict[paths_config._MINIPROT_DBS_PATH]
+        paths_config._align2graph_app_path = config_path_dict[paths_config._ALIGN2GRAPH_APP_PATH]
+        paths_config._align2graph_dbs_path = config_path_dict[paths_config._ALIGN2GRAPH_DBS_PATH]
         paths_config._citation = config_path_dict[paths_config._CITATION]
         paths_config._stdalone_app = config_path_dict[paths_config._STDALONE_APP]
         
@@ -184,6 +195,12 @@ class PathsConfig(object):
 
     def get_miniprot_dbs_path(self):
         return self._miniprot_dbs_path
+
+    def get_align2graph_app_path(self):
+        return self._align2graph_app_path
+
+    def get_align2graph_dbs_path(self):
+        return self._align2graph_dbs_path
 
     # Other
     def get_citation(self):

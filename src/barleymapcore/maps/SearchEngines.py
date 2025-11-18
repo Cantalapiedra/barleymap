@@ -71,7 +71,8 @@ class SearchEngine(object):
         self._maps_path = maps_path
         self._verbose = verbose
     
-    def create_map(self, query_path, query_sets_ids, map_config, facade, sort_param, multiple_param, tmp_files_dir = None):
+    def create_map(self, query_path, query_sets_ids, map_config, facade, sort_param, multiple_param, 
+                    tmp_files_dir = None, is_graph = False):
         raise m2pException("To be implemented in child classes.")
 
 # An engine to search for specific positions
@@ -144,12 +145,14 @@ class SearchEngineAlignments(SearchEngine):
         self._n_threads = n_threads
         self._alignment_type = alignment_type
     
-    def create_map(self, query_path, query_sets_ids, map_config, facade, sort_param, multiple_param, tmp_files_dir = None):
+    def create_map(self, query_path, query_sets_ids, map_config, facade, sort_param, multiple_param, 
+                    tmp_files_dir = None, is_graph = False):
         raise m2pException("To be implemented in child classes.")
 
 class SearchEngineGreedy(SearchEngineAlignments):
     
-    def create_map(self, query_path, query_sets_ids, map_config, facade, sort_param, multiple_param, tmp_files_dir = None):
+    def create_map(self, query_path, query_sets_ids, map_config, facade, sort_param, multiple_param, 
+                    tmp_files_dir = None, is_graph = False):
         
         sys.stderr.write("SearchEngineGreedy: creating map: "+map_config.get_name()+"\n")
         
@@ -167,7 +170,7 @@ class SearchEngineGreedy(SearchEngineAlignments):
         
         mapper = Mappers.get_alignments_mapper(map_as_physical, map_reader, self._verbose)
         
-        mapping_results = mapper.create_map(aligned, unaligned, map_config, sort_param, multiple_param)
+        mapping_results = mapper.create_map(aligned, unaligned, map_config, sort_param, multiple_param, is_graph)
         
         sys.stderr.write("SearchEngineGreedy: mapped "+str(len(mapping_results.get_mapped()))+"\n")
         
@@ -176,7 +179,7 @@ class SearchEngineGreedy(SearchEngineAlignments):
 class SearchEngineExhaustive(SearchEngineAlignments):
     
     def create_map(self, query_path, query_sets_ids, map_config, facade, sort_param, multiple_param, tmp_files_dir = None):
-        
+
         sys.stderr.write("SearchEngineGreedy: creating map: "+map_config.get_name()+"\n")
         
         map_as_physical = map_config.as_physical()
