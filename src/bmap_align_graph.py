@@ -254,10 +254,10 @@ try:
     graphs_config = GraphsConfig(graphs_conf_file, verbose_param)
     if options.maps_param:
         graphs_names = options.maps_param
-        graphs_ids = graphs_config.get_databases_ids(graphs_names.strip().split(","))
+        graphs_ids = graphs_config.get_graphs_ids(graphs_names.strip().split(","))
     else:
-        graphs_ids = graphs_config.get_databases().keys()
-        graphs_names = ",".join(graphs_config.get_databases_names(graphs_ids))
+        graphs_ids = graphs_config.get_graphs().keys()
+        graphs_names = ",".join(graphs_config.get_graphs_names(graphs_ids))
 
     if len(graphs_ids)<=0 or len(graphs_names)<=0:
         raise Exception("No valid graphs were found. Please, check your --maps parameter or your conf/graphs.conf file.")
@@ -320,14 +320,14 @@ try:
         sys.stderr.write("bmap_align_graph: Graph "+graph_id+"\n")
        
         # get map matching this graph ie the reference used to build PHG graph
-        map_id = graphs_config.get_database_map(graph_id)
+        map_id = graphs_config.get_graph_map(graph_id)
         map_config = maps_config.get_map_config(map_id)
                  
         sort_by = map_config.check_sort_param(map_config, sort_param, DEFAULT_SORT_PARAM)
        
         mapMarkers = MapMarkers(maps_path, map_config, alignment_facade, verbose_param)
         
-        mapMarkers.perform_mappings(query_fasta_path, graphs_ids, graphs_config, aligner_list,
+        mapMarkers.perform_mappings(query_fasta_path, [graph_id], graphs_config, aligner_list,
                                     threshold_id, threshold_cov, n_threads,
                                     best_score, sort_by, multiple_param, tmp_files_dir, 
                                     is_graph = True)
