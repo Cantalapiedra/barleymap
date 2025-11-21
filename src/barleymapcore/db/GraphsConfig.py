@@ -38,22 +38,22 @@ class GraphsConfig(object):
             self._config_dict[ref_id] = {REF_NAME:ref_name, REF_MAP:ref_map}
         
     
-    def get_databases(self):
+    def get_graphs(self):
         return self._config_dict
     
-    def get_database(self, database_id):
+    def get_graph(self, database_id):
         if self.database_exists(database_id):
             return self._config_dict[database_id]
         else:
             return None
     
-    def get_database_name(self, database_id):
+    def get_graph_name(self, database_id):
         if self.database_exists(database_id):
             return self._config_dict[database_id][REF_NAME]
         else:
             return database_id
     
-    def get_database_map(self, database_id):
+    def get_graph_map(self, database_id):
         if self.database_exists(database_id):
             return self._config_dict[database_id][REF_MAP]
         else:
@@ -66,7 +66,7 @@ class GraphsConfig(object):
         else:
             return None    
 
-    def get_databases_ids(self, databases_names = None):
+    def get_graphs_ids(self, databases_names = None):
         databases_ids = []
         
         if databases_names:
@@ -86,7 +86,7 @@ class GraphsConfig(object):
         
         return databases_ids
     
-    def get_databases_names(self, databases_ids):
+    def get_graphs_names(self, databases_ids):
         databases_names = []
         
         for database in databases_ids:
@@ -100,7 +100,8 @@ class GraphsConfig(object):
                 databases_names.append(database)
         
         return databases_names
-    
+   
+    # compatibility
     def database_exists(self, database):
         return database in self._config_dict
 
