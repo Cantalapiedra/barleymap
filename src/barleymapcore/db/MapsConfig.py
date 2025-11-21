@@ -215,7 +215,7 @@ class MapsConfig(object):
                 map_config = self.get_map_config(map_id)
                 maps_names.append(map_config.get_name())
             else:
-                sys.stderr.write("WARNING: MapsConfig: map ID "+database+" not found in config.\n")
+                sys.stderr.write("WARNING: MapsConfig: map ID "+map_id+" not found in config.\n")
                 maps_names.append(map_id)
         
         return maps_names
