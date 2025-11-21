@@ -267,7 +267,7 @@ class Align2GraphAligner(BaseAligner):
 
         fasta_headers = alignment_utils.get_fasta_headers(fasta_path)
 
-        sys.stderr.write("Align2GraphAligner: DB --> "+str(db)+"\n")
+        sys.stderr.write("Align2GraphAligner: DB ----> "+str(db)+"\n")
         sys.stderr.write("Align2GraphAligner: to align "+str(len(fasta_headers))+"\n")
 
         app_path = self._app_path
