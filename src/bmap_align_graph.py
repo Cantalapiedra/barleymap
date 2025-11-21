@@ -67,7 +67,7 @@ def _print_parameters(fasta_path, genetic_map_name, aligner_list,
 ############ BARLEYMAP_ALIGN_SEQS
 try:
     
-    ## Usage
+    #i# Usage
     __usage = "usage: bmap_align_graph.py [OPTIONS] [protein FASTA_FILE with 1-word header]\n\n"+\
               "typical: bmap_align_graph.py --maps=map queries.faa"
     optParser = OptionParser(__usage)
