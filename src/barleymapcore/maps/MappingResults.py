@@ -4,6 +4,7 @@
 # MappingResults.py is part of Barleymap.
 # Copyright (C)  2013-2014  Carlos P Cantalapiedra.
 # Copyright (C)  2017  Carlos P Cantalapiedra.
+# Copyright (C) 2025 Bruno Contreras Moreira and Joan Sarria
 # (terms of use can be found within the distributed LICENSE file).
 
 from MapsBase import MapTypes
@@ -20,7 +21,7 @@ class MappingResult(object):
     _bp_end_pos = "-1"
     _strand = "-"
     _multiple_pos = False
-    _other_alignments = False
+    _other_alignments = "No"
     _map_name = ""
     _feature = None
     
@@ -49,7 +50,7 @@ class MappingResult(object):
     # including creating an empty mapping result which has features associated
     @staticmethod
     def get_empty():
-        mapping_result = MappingResult("-", "-", "-", "-", "-", "-", "-", "-", False, False, "")
+        mapping_result = MappingResult("-", "-", "-", "-", "-", "-", "-", "-", False, "No", "")
         mapping_result.set_empty(True)
         return mapping_result
     
@@ -69,7 +70,7 @@ class MappingResult(object):
                                            self.get_bp_end_pos(),
                                            self.get_strand(),
                                            self.has_multiple_pos(),
-                                           self.has_other_alignments(),
+                                           self.get_other_alignments(),
                                            self.get_map_name(),
                                            self.is_empty())
         
@@ -118,7 +119,7 @@ class MappingResult(object):
                 raise m2pException("Map configuration is wrong: has not cm nor bp positions.")  
         
         has_multiple_pos = True if mapping_data[pos_shift] == "Yes" or mapping_data[pos_shift] == True else False
-        has_other_alignments = True if mapping_data[pos_shift + 1] == "Yes" or mapping_data[pos_shift + 1] == True else False
+        has_other_alignments = "Yes" if mapping_data[pos_shift + 1] == "Yes" or mapping_data[pos_shift + 1] == True else "No"
         empty = False # a mapping result with data is not empty by definition
         
         return MappingResult(marker_id, chrom_name, chrom_order,
@@ -165,7 +166,7 @@ class MappingResult(object):
     def has_multiple_pos(self):
         return self._multiple_pos
     
-    def has_other_alignments(self):
+    def get_other_alignments(self):
         return self._other_alignments
     
     def get_map_name(self):

@@ -9,8 +9,6 @@
 import sys
 
 from barleymapcore.maps.MappingResults import MappingResult, MappingResults
-from barleymapcore.maps.GraphMappingResults import GraphMappingResult
-
 from barleymapcore.db.MapsConfig import MapsConfig
 
 NUM_FIELDS = 7
@@ -129,21 +127,14 @@ class Mapper(object):
                 # If the chromosome is not in the genome, skip this alignment result
                 if not chr_pos in chrom_dict: continue
                 
-                chrom_order = chrom_dict[chr_pos] # Numeric value of chromsome (for sorting purposes)
+                chrom_order = chrom_dict[chr_pos] # Numeric value of chrom (for sorting purposes)
                 
-                # graph-alignment map position are treated differently, 
-                # as they have associated graph ranges
-                if "graph_ranges" in pos:
-                    mapping_result = GraphMappingResult(marker_id, chr_pos, chrom_order,
-                                                   pos["cm_pos"], pos["cm_end_pos"], 
-                                                   pos["bp_pos"], pos["bp_end_pos"], pos["strand"],
-                                                   pos["multmaps"], pos["graph_ranges"], map_name)
-
-                else:
-                    mapping_result = MappingResult(marker_id, chr_pos, chrom_order,
+                # graph-alignment map position are treated just the same,
+                # with associated graph ranges as other_alignments
+                mapping_result = MappingResult(marker_id, chr_pos, chrom_order,
                                                pos["cm_pos"], pos["cm_end_pos"], 
                                                pos["bp_pos"], pos["bp_end_pos"], pos["strand"],
-                                               num_marker_pos > 1, num_contig_no_pos > 0, map_name)
+                                               num_marker_pos > 1, pos["other_alignments"], map_name)
 
                 positions_list.append(mapping_result)
         
@@ -263,7 +254,7 @@ class PhysicalMapper(Mapper):
                 
                 new_pos = {"chr":contig_id, "cm_pos":-1, "cm_end_pos":-1,
                        "bp_pos":local_position, "bp_end_pos":end_position, "strand":strand, 
-                       "multmaps":has_multiple_pos, "graph_ranges":graph_ranges}
+                       "multmaps":has_multiple_pos, "other_alignments":graph_ranges}
             else:
                 new_pos = {"chr":contig_id, "cm_pos":-1, "cm_end_pos":-1,
                        "bp_pos":local_position, "bp_end_pos":end_position, "strand":strand}

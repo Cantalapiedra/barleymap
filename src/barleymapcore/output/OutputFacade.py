@@ -550,14 +550,7 @@ class OutputPrinter(object):
                 else: current_row.append("No")
                 
             ## Other alignments
-            try:
-                # GraphMappingResult
-                if pos.get_graph_ranges(): current_row.append(pos.get_graph_ranges())
-            except AttributeError:
-                # This is for compatibility with previous scripts of Barleymap,
-                # which use MappingResult objects, where get_graph_ranges() was not implemented
-                if pos.has_other_alignments(): current_row.append("Yes")
-                else: current_row.append("No")
+            current_row.append(pos.get_other_alignments())
 
         return current_row
     
