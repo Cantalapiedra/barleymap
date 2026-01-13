@@ -130,11 +130,13 @@ class Mapper(object):
                 chrom_order = chrom_dict[chr_pos] # Numeric value of chrom (for sorting purposes)
                 
                 # graph-alignment map position are treated just the same,
-                # with associated graph ranges as other_alignments
+                # with associated graph ranges as string other_alignments;
+                # note that other_alignments might not be defined
+                other_alns = pos.get("other_alignments", "")
                 mapping_result = MappingResult(marker_id, chr_pos, chrom_order,
                                                pos["cm_pos"], pos["cm_end_pos"], 
                                                pos["bp_pos"], pos["bp_end_pos"], pos["strand"],
-                                               num_marker_pos > 1, pos["other_alignments"], map_name)
+                                               num_marker_pos > 1, other_alns, map_name)
 
                 positions_list.append(mapping_result)
         
